@@ -840,26 +840,64 @@ async function cleanup(ctx) {
 // ================================================================
 
 async function callCloudFunction(name, data) {
-  // 在微信开发者工具中:
-  // return (await wx.cloud.callFunction({ name, data })).result
-  // 在 CodeBuddy Code 中由 DeferExecuteTool 代理
-  throw new Error('请在对应环境中实现 callCloudFunction')
+  // 在微信开发者工具中调用云函数
+  try {
+    const res = await wx.cloud.callFunction({
+      name,
+      data
+    })
+    return res.result
+  } catch (e) {
+    console.error('callCloudFunction error:', e)
+    return { success: false, message: e.message }
+  }
 }
 
 async function dbInsert(collection, doc) {
-  throw new Error('请在对应环境中实现 dbInsert')
+  try {
+    const res = await wx.cloud.database().collection(collection).add({
+      data: doc
+    })
+    return { _id: res._id, ...res }
+  } catch (e) {
+    console.error('dbInsert error:', e)
+    throw e
+  }
 }
 
 async function dbQuery(collection, query) {
-  throw new Error('请在对应环境中实现 dbQuery')
+  try {
+    const res = await wx.cloud.database().collection(collection).where(query).get()
+    return res.data
+  } catch (e) {
+    console.error('dbQuery error:', e)
+    return []
+  }
 }
 
 async function dbUpdate(collection, id, update) {
-  throw new Error('请在对应环境中实现 dbUpdate')
+  try {
+    // 注意：云开发 update 只支持 data 对象，不支持 $set 等操作符
+    // 此处假定 update 已经是 { data: ... } 结构
+    const data = update.$set || update
+    const res = await wx.cloud.database().collection(collection).doc(id).update({
+      data
+    })
+    return { stats: { updated: res.stats.updated } }
+  } catch (e) {
+    console.error('dbUpdate error:', e)
+    throw e
+  }
 }
 
 async function dbDelete(collection, id) {
-  throw new Error('请在对应环境中实现 dbDelete')
+  try {
+    const res = await wx.cloud.database().collection(collection).doc(id).remove()
+    return { stats: { removed: res.stats.removed } }
+  } catch (e) {
+    console.error('dbDelete error:', e)
+    throw e
+  }
 }
 
 // ========== 导出 ==========
