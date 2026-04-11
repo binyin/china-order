@@ -1,0 +1,80 @@
+<!--pages/admin/menu.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="header-title">菜单管理</view>
+  </view>
+
+  <!-- Tab -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === 'publish' ? 'active' : ''}}" bindtap="switchTab" data-tab="publish">今日菜单</view>
+    <view class="tab-item {{activeTab === 'history' ? 'active' : ''}}" bindtap="switchTab" data-tab="history">历史复用</view>
+  </view>
+
+  <!-- 今日菜单 Tab -->
+  <view wx:if="{{activeTab === 'publish'}}">
+
+    <!-- 区域1：今日已发布产品（置顶） -->
+    <view class="section-header">
+      <view class="section-title">今日售卖 <text class="section-count">{{todayMenu.length}} 种</text></view>
+    </view>
+
+    <view wx:if="{{todayMenu.length === 0}}" class="empty-inline">暂未发布任何产品</view>
+    <view class="today-list">
+      <view class="today-item" wx:for="{{todayMenu}}" wx:key="_id">
+        <view class="today-info">
+          <view class="today-name">{{item.name}}</view>
+          <view class="today-meta">¥{{item.price}}/{{item.unit}} · 库存
+            <input class="stock-inline" type="number" value="{{item.stock}}"
+                   bindinput="onMenuStockInput" data-id="{{item._id}}"
+                   bindblur="saveMenuStock" data-id="{{item._id}}" />
+          </view>
+        </view>
+        <view class="today-ordered">已预{{item.ordered||0}}</view>
+        <view class="btn-remove" bindtap="removeFromMenu" data-id="{{item._id}}" data-name="{{item.name}}">取消上架</view>
+      </view>
+    </view>
+
+    <!-- 区域2：产品池（未上架产品） -->
+    <view class="section-header" style="margin-top:16rpx">
+      <view class="section-title">产品池 <text class="section-count hint">点击添加到今日</text></view>
+    </view>
+
+    <view wx:if="{{unlistedProducts.length === 0}}" class="empty-inline">所有产品已上架</view>
+    <view class="unlisted-list">
+      <view class="unlisted-item" wx:for="{{unlistedProducts}}" wx:key="_id" bindtap="addToMenu" data-index="{{index}}">
+        <view class="unlisted-info">
+          <view class="unlisted-name">{{item.name}}</view>
+          <view class="unlisted-price">¥{{item.price}}/{{item.unit}}</view>
+        </view>
+        <view class="stock-wrap" catchtap>
+          <text class="stock-label">库存</text>
+          <input class="stock-input" type="number" value="{{item.initStock}}"
+                 bindinput="onInitStockInput" data-index="{{index}}"
+                 catchtap placeholder="50" />
+        </view>
+        <view class="btn-add">+ 添加</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 历史复用 Tab -->
+  <view wx:if="{{activeTab === 'history'}}">
+    <view class="tip-bar">点击可将历史菜单一键发布为今日菜单</view>
+
+    <view wx:if="{{historyDates.length === 0}}" class="empty-tip">暂无历史记录</view>
+
+    <view class="history-list">
+      <view class="history-day card" wx:for="{{historyDates}}" wx:key="date">
+        <view class="history-header">
+          <view class="history-date">{{item.date}}</view>
+          <button class="btn-reuse" bindtap="reuseMenu" data-date="{{item.date}}">一键发布</button>
+        </view>
+        <view class="history-items">
+          <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="history-tag">
+            {{prod.name}} ¥{{prod.price}}
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

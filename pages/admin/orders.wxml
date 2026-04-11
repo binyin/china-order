@@ -1,0 +1,166 @@
+<!--pages/admin/orders.wxml-->
+<view class="container">
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar">
+    <view class="nav-item {{activeTab === 'verify' ? 'active' : ''}}" bindtap="switchTab" data-tab="verify">预定核销</view>
+    <view class="nav-item {{activeTab === 'history' ? 'active' : ''}}" bindtap="switchTab" data-tab="history">历史订单</view>
+    <view class="nav-more" bindtap="showMenu">≡</view>
+  </view>
+
+  <!-- 快捷导航 -->
+  <view class="quick-nav">
+    <view class="quick-btn" bindtap="goProducts">产品池</view>
+    <view class="quick-btn" bindtap="goMenu">发布菜单</view>
+    <view class="new-order-tip" wx:if="{{newOrderFlag}}">新订单!</view>
+  </view>
+
+  <!-- ==================== 预定核销 ==================== -->
+  <view wx:if="{{activeTab === 'verify'}}">
+
+    <!-- 区域1：动态看板 -->
+    <view class="dashboard">
+      <view class="dashboard-title">今日看板</view>
+
+      <!-- 营收汇总 -->
+      <view class="revenue-row">
+        <view class="revenue-item">
+          <view class="revenue-num">¥{{totalRevenue}}</view>
+          <view class="revenue-label">预计总营收</view>
+        </view>
+        <view class="revenue-divider"></view>
+        <view class="revenue-item">
+          <view class="revenue-num actual">¥{{actualRevenue}}</view>
+          <view class="revenue-label">实收金额</view>
+        </view>
+      </view>
+
+      <!-- 各品类统计（可展开） -->
+      <view class="stats-list">
+        <view class="stats-row stats-header-row">
+          <text class="stats-name">品类</text>
+          <text class="stats-num">总预定</text>
+          <text class="stats-num">待取</text>
+        </view>
+        <view wx:for="{{menuStats}}" wx:key="name" class="stat-group">
+          <view class="stats-row stat-main" bindtap="toggleStatExpand" data-index="{{index}}">
+            <text class="stats-name">{{item.name}}</text>
+            <text class="stats-num big">{{item.total}}</text>
+            <text class="stats-num pending-highlight">{{item.pending}}</text>
+            <text class="expand-arrow {{item.expanded ? 'expanded' : ''}}">▶</text>
+          </view>
+          <!-- 展开预定人列表 -->
+          <view wx:if="{{item.expanded && item.customers.length > 0}}" class="customer-detail-list">
+            <view class="customer-detail-row" wx:for="{{item.customers}}" wx:for-item="c" wx:key="orderId">
+              <text class="cd-name">{{c.name}}</text>
+              <text class="cd-num">×{{c.num}}</text>
+              <text wx:if="{{c.time}}" class="cd-time">{{c.time}}</text>
+            </view>
+          </view>
+          <view wx:if="{{item.expanded && item.customers.length === 0}}" class="customer-detail-empty">
+            暂无预定
+          </view>
+        </view>
+        <view wx:if="{{menuStats.length === 0}}" class="stats-empty">暂无数据</view>
+      </view>
+    </view>
+
+    <!-- 区域2：客户清单 -->
+    <view class="customer-section">
+      <view class="section-title">待处理 ({{pendingOrders.length}})</view>
+
+      <view wx:if="{{pendingOrders.length === 0}}" class="empty-inline">暂无待处理订单</view>
+      <view class="customer-list">
+        <view class="customer-card"
+              wx:for="{{pendingOrders}}" wx:key="_id">
+          <view class="customer-header">
+            <view class="customer-name">
+              <text wx:if="{{item.create_time_str}}" class="order-time-badge">{{item.create_time_str}}</text>
+              {{item.customer_name}}
+            </view>
+          </view>
+          <view class="customer-items">
+            <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="customer-item-tag">{{prod.name}}×{{prod.num}}</text>
+          </view>
+          <view class="customer-footer">
+            <view class="customer-price">¥{{item.total_price}}</view>
+            <view class="customer-actions">
+              <button class="btn-verify" bindtap="verifyOrder" data-id="{{item._id}}">取走</button>
+              <button class="btn-cancel-order" bindtap="cancelOrder" data-id="{{item._id}}">取消</button>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 已处理区域 -->
+      <view wx:if="{{historyOrders.length > 0}}" class="history-section">
+        <view class="section-title grey">已处理 ({{historyOrders.length}})</view>
+        <view class="customer-list">
+          <view class="customer-card handled {{item.status === 'cancelled' ? 'cancelled' : ''}}"
+                wx:for="{{historyOrders}}" wx:key="_id">
+            <view class="customer-header">
+              <view class="customer-name dimmed">
+                <text wx:if="{{item.create_time_str}}" class="order-time-badge grey-badge">{{item.create_time_str}}</text>
+                {{item.customer_name}}
+              </view>
+              <text class="tag-{{item.status}}">{{statusText[item.status]}}</text>
+            </view>
+            <view class="customer-items dimmed">
+              <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="customer-item-tag">{{prod.name}}×{{prod.num}}</text>
+            </view>
+            <view class="customer-footer">
+              <view class="customer-price dimmed">¥{{item.total_price}}</view>
+              <view class="customer-actions">
+                <button class="btn-undo" bindtap="undoAction" data-id="{{item._id}}" data-status="{{item.status}}">撤销</button>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 历史订单 ==================== -->
+  <view wx:if="{{activeTab === 'history'}}">
+    <!-- 1层：每日经营概况 -->
+    <view wx:if="{{!showDetail}}">
+      <view wx:if="{{dailyList.length === 0}}" class="empty-tip">暂无历史记录</view>
+      <view class="daily-list">
+        <view class="daily-card card" wx:for="{{dailyList}}" wx:key="date" bindtap="openDetail" data-index="{{index}}">
+          <view class="daily-header">
+            <view class="daily-date">{{item.date}}</view>
+            <view class="daily-revenue">¥{{item.totalRevenue}}</view>
+          </view>
+          <view class="daily-products">{{item.productNames}}</view>
+          <view class="daily-stats">
+            <text class="stat-badge pending">{{item.pendingCount}} 待取</text>
+            <text class="stat-badge completed">{{item.completedCount}} 已取</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 2层：订单详情 -->
+    <view wx:if="{{showDetail}}">
+      <view class="detail-header">
+        <view class="detail-back" bindtap="backToList">← 返回</view>
+        <view class="detail-date">{{detailDate}}</view>
+      </view>
+      <view wx:if="{{detailOrders.length === 0}}" class="empty-tip">该日无订单</view>
+      <view class="order-list">
+        <view class="order-card card {{item.status === 'cancelled' ? 'cancelled' : ''}}"
+              wx:for="{{detailOrders}}" wx:key="_id">
+          <view class="order-header">
+            <text class="order-name">{{item.customer_name}}</text>
+            <text class="tag-{{item.status}}">{{statusText[item.status]}}</text>
+          </view>
+          <view class="order-items">
+            <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="order-item-tag">{{prod.name}}×{{prod.num}}</text>
+          </view>
+          <view class="order-footer">
+            <view class="order-price">¥{{item.total_price}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

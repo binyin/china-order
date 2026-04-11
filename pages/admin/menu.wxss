@@ -1,0 +1,216 @@
+/* pages/admin/menu.wxss */
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 40rpx;
+}
+.header {
+  background: #fff;
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.header-title {
+  font-size: 40rpx;
+  font-weight: bold;
+}
+
+/* Tab */
+.tab-bar {
+  display: flex;
+  background: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.tab-item {
+  flex: 1;
+  text-align: center;
+  font-size: 30rpx;
+  color: #888;
+  padding: 24rpx 0;
+  position: relative;
+}
+.tab-item.active {
+  color: #ff6b35;
+  font-weight: bold;
+}
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 25%; right: 25%;
+  height: 4rpx;
+  background: #ff6b35;
+  border-radius: 2rpx;
+}
+
+.tip-bar {
+  background: #fff8f5;
+  color: #e67e22;
+  font-size: 24rpx;
+  padding: 14rpx 32rpx;
+  border-bottom: 1rpx solid #fde8d8;
+}
+
+/* 区块标题 */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 32rpx 8rpx;
+  background: #f5f5f5;
+}
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #555;
+}
+.section-count {
+  font-size: 24rpx;
+  color: #ff6b35;
+  margin-left: 8rpx;
+}
+.section-count.hint {
+  color: #aaa;
+  font-weight: normal;
+}
+.empty-inline {
+  text-align: center;
+  color: #bbb;
+  font-size: 26rpx;
+  padding: 24rpx 0;
+}
+
+/* 今日售卖列表 */
+.today-list { padding: 4rpx 0; }
+.today-item {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  margin: 8rpx 24rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 12rpx;
+  border-left: 6rpx solid #ff6b35;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.today-info { flex: 1; }
+.today-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #222;
+}
+.today-meta {
+  font-size: 24rpx;
+  color: #888;
+  margin-top: 6rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+.stock-inline {
+  display: inline-block;
+  width: 80rpx;
+  background: #f5f5f5;
+  border-radius: 6rpx;
+  padding: 4rpx 8rpx;
+  font-size: 24rpx;
+  text-align: center;
+}
+.today-ordered {
+  font-size: 24rpx;
+  color: #e67e22;
+  margin: 0 16rpx;
+  white-space: nowrap;
+}
+.btn-remove {
+  background: #fff;
+  color: #e74c3c;
+  border: 1rpx solid #e74c3c;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  white-space: nowrap;
+}
+
+/* 未上架产品列表 */
+.unlisted-list { padding: 4rpx 0; }
+.unlisted-item {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  margin: 8rpx 24rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+}
+.unlisted-info { flex: 1; }
+.unlisted-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #222;
+}
+.unlisted-price {
+  font-size: 24rpx;
+  color: #ff6b35;
+  margin-top: 4rpx;
+}
+.stock-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  margin: 0 16rpx;
+}
+.stock-label {
+  font-size: 24rpx;
+  color: #aaa;
+}
+.stock-input {
+  width: 80rpx;
+  background: #f5f5f5;
+  border-radius: 8rpx;
+  padding: 8rpx 12rpx;
+  font-size: 28rpx;
+  text-align: center;
+}
+.btn-add {
+  background: #ff6b35;
+  color: #fff;
+  border-radius: 8rpx;
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  white-space: nowrap;
+}
+
+/* 历史菜单 */
+.history-list { padding: 8rpx 0 40rpx; }
+.history-day.card {
+  margin: 12rpx 24rpx;
+  padding: 24rpx;
+}
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+.history-date {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #222;
+}
+.btn-reuse {
+  background: #fff3ed;
+  color: #ff6b35;
+  border: 1rpx solid #ff6b35;
+  border-radius: 10rpx;
+  font-size: 26rpx;
+  padding: 8rpx 24rpx;
+  line-height: 1.4;
+}
+.history-items { line-height: 2; }
+.history-tag {
+  display: inline-block;
+  background: #f5f5f5;
+  color: #555;
+  font-size: 24rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 16rpx;
+  margin: 4rpx 6rpx 4rpx 0;
+}

@@ -1,0 +1,9 @@
+{
+  "name": "publishMenu",
+  "version": "1.0.0",
+  "description": "发布今日菜单（清旧写新）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

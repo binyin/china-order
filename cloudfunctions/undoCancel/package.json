@@ -1,0 +1,9 @@
+{
+  "name": "undoCancel",
+  "version": "1.0.0",
+  "description": "撤销取消订单，恢复状态和库存",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

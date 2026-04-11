@@ -1,0 +1,48 @@
+<!--pages/admin/products.wxml-->
+<view class="container">
+  <!-- 顶部 -->
+  <view class="header">
+    <view class="header-title">产品池</view>
+    <view class="header-add" bindtap="showAddModal">+ 新增</view>
+  </view>
+
+  <view wx:if="{{products.length === 0}}" class="empty-tip">暂无产品，点击右上角新增</view>
+
+  <scroll-view scroll-y style="height: calc(100vh - 120rpx)">
+    <view class="product-list">
+      <view class="product-item card" wx:for="{{products}}" wx:key="_id">
+        <view class="product-info">
+          <view class="product-name">{{item.name}}</view>
+          <view class="product-meta">¥{{item.price}} / {{item.unit}}</view>
+        </view>
+        <view class="product-actions">
+          <view class="action-btn edit" bindtap="showEditModal" data-index="{{index}}">编辑</view>
+          <view class="action-btn delete" bindtap="deleteProduct" data-id="{{item._id}}" data-name="{{item.name}}">删除</view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+</view>
+
+<!-- 新增/编辑弹窗 -->
+<view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal">
+  <view class="modal-box" catchtap>
+    <view class="modal-title">{{editId ? '编辑产品' : '新增产品'}}</view>
+    <view class="form-item">
+      <view class="form-label">产品名称</view>
+      <input class="form-input" placeholder="如：老面馒头" value="{{form.name}}" bindinput="onFormInput" data-field="name" />
+    </view>
+    <view class="form-item">
+      <view class="form-label">价格（元）</view>
+      <input class="form-input" type="digit" placeholder="如：1.5" value="{{form.price}}" bindinput="onFormInput" data-field="price" />
+    </view>
+    <view class="form-item">
+      <view class="form-label">单位</view>
+      <input class="form-input" placeholder="如：个、袋、份" value="{{form.unit}}" bindinput="onFormInput" data-field="unit" />
+    </view>
+    <view class="modal-actions">
+      <button class="btn-secondary" bindtap="closeModal">取消</button>
+      <button class="btn-primary" bindtap="saveProduct" loading="{{saving}}">保存</button>
+    </view>
+  </view>
+</view>
