@@ -10,7 +10,6 @@ Page({
     submittedOrders: [],
     showModal: false,
     customerName: '',
-    avatarUrl: '',
     orderSummary: [],
     submitting: false,
     hasProfile: false,
@@ -22,12 +21,11 @@ Page({
   },
 
   onLoad() {
-    // 读取缓存的昵称和头像
+    // 读取缓存的昵称
     const cached = wx.getStorageSync('userProfile') || {}
     if (cached.nickname) {
       this.setData({
         customerName: cached.nickname,
-        avatarUrl: cached.avatarUrl || '',
         hasProfile: true
       })
     }
@@ -119,14 +117,7 @@ Page({
     this.setData({ showModal: false })
   },
 
-  // 微信头像选择（open-type="chooseAvatar"）
-  onChooseAvatar(e) {
-    const { avatarUrl } = e.detail
-    this.setData({ avatarUrl })
-    // 缓存头像（临时路径不持久化，只缓存本地路径用于本次会话）
-  },
-
-  // type="nickname" 输入框变化
+  // 名字输入框变化
   onNameInput(e) {
     this.setData({ customerName: e.detail.value })
   },
@@ -134,17 +125,24 @@ Page({
   confirmOrder() {
     const name = this.data.customerName.trim()
     if (!name) {
-      wx.showToast({ title: '请输入或选择您的姓名', icon: 'none' })
+      wx.showToast({ title: '请输入您的姓名', icon: 'none' })
       return
     }
 
-    // 缓存昵称和头像，标记已有身份
-    wx.setStorageSync('userProfile', { nickname: name, avatarUrl: this.data.avatarUrl })
+    // 缓存昵称，标记已有身份
+    wx.setStorageSync('userProfile', { nickname: name })
     this.setData({ hasProfile: true })
 
     const items = this.data.menuList
       .filter(i => i.qty > 0)
       .map(i => ({ product_id: i._id, name: i.name, num: i.qty }))
+
+    // 添加日志
+    console.group('[User:Index] 提交订单')
+    console.log('用户:', name)
+    console.log('商品数量:', items.length)
+    console.log('总价:', this.data.totalPrice)
+    console.groupEnd()
 
     this.setData({ submitting: true })
 
@@ -176,6 +174,11 @@ Page({
 
   cancelOrder(e) {
     const id = e.currentTarget.dataset.id
+    // 添加日志
+    console.group('[User:Index] 取消订单')
+    console.log('订单ID:', id)
+    console.groupEnd()
+    
     wx.cloud.callFunction({
       name: 'cancelOrder',
       data: { orderId: id }
@@ -205,7 +208,7 @@ Page({
       wx.showToast({ title: '请输入姓名', icon: 'none' })
       return
     }
-    wx.setStorageSync('userProfile', { nickname: name, avatarUrl: this.data.avatarUrl })
+    wx.setStorageSync('userProfile', { nickname: name })
     this.setData({ hasProfile: true, showModal: false })
     wx.showToast({ title: '已保存', icon: 'success' })
   },

@@ -151,6 +151,12 @@ Page({
   // 核销订单 - 无二次确认
   verifyOrder(e) {
     const id = e.currentTarget.dataset.id
+    // 添加日志
+    console.group('[Admin:Orders] 核销订单')
+    console.log('订单ID:', id)
+    console.log('状态: pending → completed')
+    console.groupEnd()
+    
     updateOrderStatus(id, 'completed').then(() => {
       wx.vibrateShort()
       wx.showToast({ title: '已取走', icon: 'success' })
@@ -163,6 +169,12 @@ Page({
   // 取消订单 - 无二次确认，恢复库存
   cancelOrder(e) {
     const id = e.currentTarget.dataset.id
+    // 添加日志
+    console.group('[Admin:Orders] 取消订单')
+    console.log('订单ID:', id)
+    console.log('状态: pending → cancelled')
+    console.groupEnd()
+    
     wx.cloud.callFunction({
       name: 'cancelOrder',
       data: { orderId: id }
@@ -183,6 +195,13 @@ Page({
   undoAction(e) {
     const id = e.currentTarget.dataset.id
     const status = e.currentTarget.dataset.status
+    // 添加日志
+    console.group('[Admin:Orders] 撤销操作')
+    console.log('订单ID:', id)
+    console.log('原状态:', status)
+    console.log('新状态: pending')
+    console.groupEnd()
+    
     // 已取走撤销：completed→pending，不需要恢复库存（库存本来就没动）
     // 已取消撤销：cancelled→pending，需要恢复库存
     if (status === 'cancelled') {

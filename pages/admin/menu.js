@@ -76,7 +76,12 @@ Page({
       stock: Number(product.initStock) || 50
     }
 
-    console.log(`[Admin:Menu] 正在上架: ${postData.name} (库存:${postData.stock})`);
+    // 优化日志格式
+    console.group('[Admin:Menu] 上架产品')
+    console.log('产品:', product.name)
+    console.log('价格:', product.price)
+    console.log('库存:', product.initStock || 50)
+    console.groupEnd()
 
     this.setData({ loading: true })
     addMenuItem(postData).then((res) => {
@@ -93,7 +98,12 @@ Page({
   removeFromMenu(e) {
     const id = e.currentTarget.dataset.id
     const item = this.data.todayMenu.find(m => m._id === id)
-    console.log(`[Admin:Menu] 正在下架: ${item ? item.name : id}`);
+    
+    // 优化日志格式
+    console.group('[Admin:Menu] 下架产品')
+    console.log('产品ID:', id)
+    console.log('产品名:', item?.name || '未知')
+    console.groupEnd()
     
     this.setData({ loading: true })
     removeMenuItem(id).then(() => {
@@ -170,7 +180,11 @@ Page({
       success: res => {
         if (!res.confirm) return
 
-        console.log(`[Admin:Menu] 开始复用历史菜单: ${date}`);
+        // 优化日志格式
+        console.group('[Admin:Menu] 复用历史菜单')
+        console.log('历史日期:', date)
+        console.log('产品数量:', dayData.items.length)
+        console.groupEnd()
         const allProducts = [...this.data.todayMenu, ...this.data.unlistedProducts]
         const items = dayData.items.map(h => {
           const found = allProducts.find(p => p.product_id === h.product_id || p._id === h.product_id)
