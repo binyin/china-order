@@ -26,19 +26,19 @@
 
 <!-- 新增/编辑弹窗 -->
 <view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal">
-  <view class="modal-box" catchtap>
+  <view class="modal-box" catchtap style="padding: 60rpx 40rpx; margin: 200rpx 50rpx 0; background-color: #fff; border-radius: 20rpx;">
     <view class="modal-title">{{editId ? '编辑产品' : '新增产品'}}</view>
     <view class="form-item">
       <view class="form-label">产品名称</view>
-      <input class="form-input" placeholder="如：老面馒头" value="{{form.name}}" bindinput="onFormInput" data-field="name" />
+      <input class="form-input" placeholder="如：老面馒头" value="{{form.name}}" bindinput="onFormInput" data-field="name" style="margin: 20rpx 0; padding: 20rpx; border: 1rpx solid #ddd; border-radius: 10rpx; height: 80rpx; width: 100%; box-sizing: border-box;" />
     </view>
     <view class="form-item">
       <view class="form-label">价格（元）</view>
-      <input class="form-input" type="digit" placeholder="如：1.5" value="{{form.price}}" bindinput="onFormInput" data-field="price" />
+      <input class="form-input" type="digit" placeholder="如：1.5" value="{{form.price}}" bindinput="onFormInput" data-field="price" style="margin: 20rpx 0; padding: 20rpx; border: 1rpx solid #ddd; border-radius: 10rpx; height: 80rpx; width: 100%; box-sizing: border-box;" />
     </view>
     <view class="form-item">
       <view class="form-label">单位</view>
-      <input class="form-input" placeholder="如：个、袋、份" value="{{form.unit}}" bindinput="onFormInput" data-field="unit" />
+      <input class="form-input" placeholder="如：个、袋、份" value="{{form.unit}}" bindinput="onFormInput" data-field="unit" style="margin: 20rpx 0; padding: 20rpx; border: 1rpx solid #ddd; border-radius: 10rpx; height: 80rpx; width: 100%; box-sizing: border-box;" />
     </view>
     <view class="modal-actions">
       <button class="btn-secondary" bindtap="closeModal">取消</button>
