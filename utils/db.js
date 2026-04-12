@@ -3,12 +3,37 @@ const db = wx.cloud.database()
 const _ = db.command
 
 /**
- * 获取今日菜单（active_menu）
+ * 获取今日菜单（active_menu） - 只返回最新发布的菜单
  */
-function getTodayMenu() {
+async function getTodayMenu() {
   const today = getDateStr()
+  
+  // 获取最新发布时间
+  let latestPublishTime = 0
+  try {
+    const menuRes = await db.collection('active_menu')
+      .where({ date: today })
+      .orderBy('publish_time', 'desc')
+      .limit(1)
+      .get()
+    
+    if (menuRes.data.length > 0) {
+      latestPublishTime = menuRes.data[0].publish_time || 0
+    }
+  } catch (e) {
+    console.warn('获取最新菜单时间失败', e)
+  }
+  
+  // 如果没有发布菜单，返回空数组
+  if (latestPublishTime === 0) {
+    return { data: [] }
+  }
+  
   return db.collection('active_menu')
-    .where({ date: today })
+    .where({ 
+      date: today,
+      publish_time: latestPublishTime 
+    })
     .orderBy('name', 'asc')
     .get()
 }
