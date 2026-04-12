@@ -14,6 +14,7 @@ Page({
     submitting: false,
     hasProfile: false,
     needAuth: false,  // 新增：是否需要授权
+    loadingOrders: false, // 添加：控制订单加载状态
     statusText: {
       pending: '待取货',
       completed: '已完成',
@@ -85,6 +86,10 @@ Page({
   },
 
   loadMyOrders() {
+    // 添加防抖，避免频繁调用
+    if (this.loadingOrders) return
+    this.loadingOrders = true
+    
     getMyOrders().then(res => {
       const today = new Date()
       const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
@@ -93,7 +98,10 @@ Page({
         o.date === todayStr && o.status !== 'cancelled'
       )
       this.setData({ submittedOrders: todayOrders })
-    }).catch(() => {})
+      this.loadingOrders = false
+    }).catch(() => {
+      this.loadingOrders = false
+    })
   },
 
   submitOrder() {
@@ -168,24 +176,41 @@ Page({
 
   cancelOrder(e) {
     const id = e.currentTarget.dataset.id
+    
     // 添加日志
     console.group('[User:Index] 取消订单')
     console.log('订单ID:', id)
     console.groupEnd()
     
+    // 使用动画效果移除订单
+    this.createOrderExitAnimation(id)
+    
+    // 显示加载中
+    wx.showLoading({ title: '处理中', mask: true })
+    
     wx.cloud.callFunction({
       name: 'cancelOrder',
       data: { orderId: id }
     }).then(res => {
+      wx.hideLoading()
       if (res.result.success) {
         wx.vibrateShort()
-        wx.showToast({ title: '已取消', icon: 'success' })
-        this.loadMenu()
-        this.loadMyOrders()
+        wx.showToast({ 
+          title: '已取消', 
+          icon: 'success',
+          duration: 1500
+        })
+        // 只更新库存，不重新加载整个菜单
+        this.updateMenuStock(id)
       } else {
+        // 恢复订单数据
+        this.loadMyOrders()
         wx.showToast({ title: res.result.message || '取消失败', icon: 'none' })
       }
     }).catch(() => {
+      wx.hideLoading()
+      // 恢复订单数据
+      this.loadMyOrders()
       wx.showToast({ title: '取消失败', icon: 'error' })
     })
   },
@@ -198,6 +223,22 @@ Page({
     console.log('订单ID:', orderid, '产品ID:', productid)
     console.groupEnd()
     
+    // 先更新本地UI，避免闪烁
+    const orders = this.data.submittedOrders.map(order => {
+      if (order._id === orderid) {
+        const updatedItems = order.items.map(item => {
+          if (item.product_id === productid) {
+            return { ...item, item_status: 'cancelling' } // 临时状态
+          }
+          return item
+        })
+        return { ...order, items: updatedItems }
+      }
+      return order
+    })
+    
+    this.setData({ submittedOrders: orders })
+    
     wx.cloud.callFunction({
       name: 'cancelOrderItem',
       data: { 
@@ -206,15 +247,105 @@ Page({
       }
     }).then(res => {
       if (res.result.success) {
-        wx.showToast({ title: '产品取消成功', icon: 'success' })
-        this.loadMyOrders()
-        this.loadMenu()
+        wx.showToast({ 
+          title: '产品取消成功', 
+          icon: 'success',
+          duration: 1500
+        })
+        
+        // 更新本地数据，移除取消的产品或更新状态
+        const updatedOrders = this.data.submittedOrders.map(order => {
+          if (order._id === orderid) {
+            const items = order.items
+              .map(item => {
+                if (item.product_id === productid) {
+                  return { ...item, item_status: 'cancelled' }
+                }
+                return item
+              })
+              .filter(item => item.item_status !== 'cancelled') // 移除以取消的
+        
+            // 如果所有产品都取消了，则移除整个订单
+            if (items.length === 0) {
+              return null
+            }
+            return { ...order, items }
+          }
+          return order
+        }).filter(order => order !== null) // 过滤掉空的订单
+      
+        this.setData({ submittedOrders: updatedOrders })
+      
+        // 更新菜单库存
+        this.updateMenuStock(orderid)
       } else {
+        // 恢复原始状态
+        this.loadMyOrders()
         wx.showToast({ title: res.result.message || '取消失败', icon: 'none' })
       }
     }).catch(() => {
+      // 恢复原始状态
+      this.loadMyOrders()
       wx.showToast({ title: '网络错误，请重试', icon: 'error' })
     })
+  },
+
+  // 更新菜单库存（局部更新，避免整个页面重新加载）
+  updateMenuStock(orderId) {
+    // 这里可以调用一个专门的云函数来获取订单详情并更新库存
+    // 但为了简化，我们可以选择性地重新加载菜单数据
+    const { menuList } = this.data
+    
+    // 模拟更新：重新获取今日菜单，但使用更平滑的方式
+    getTodayMenu().then(res => {
+      const todayMenu = res.data
+      const updatedMenuList = menuList.map(menuItem => {
+        const todayItem = todayMenu.find(item => item._id === menuItem._id)
+        if (todayItem) {
+          return {
+            ...menuItem,
+            ordered: todayItem.ordered,
+            stock: todayItem.stock
+          }
+        }
+        return menuItem
+      })
+      
+      // 使用动画效果更新数据
+      this.setData({
+        menuList: updatedMenuList
+      })
+    }).catch(() => {
+      // 如果获取失败，可以延迟一小段时间后重新加载
+      setTimeout(() => {
+        this.loadMenu()
+      }, 500)
+    })
+  },
+
+  // 创建订单消失动画
+  createOrderExitAnimation(orderId) {
+    const animation = wx.createAnimation({
+      duration: 300,
+      timingFunction: 'ease-out'
+    })
+    
+    animation.opacity(0).height(0).step()
+    
+    const orders = this.data.submittedOrders.map(order => {
+      if (order._id === orderId) {
+        return { ...order, animationData: animation.export() }
+      }
+      return order
+    })
+    
+    this.setData({ submittedOrders: orders })
+    
+    // 300ms后移除该订单
+    setTimeout(() => {
+      const filteredOrders = orders.filter(o => o._id !== orderId)
+      this.setData({ submittedOrders: filteredOrders })
+    }, 300)
   },
 
   // 检查授权状态
