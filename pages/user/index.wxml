@@ -1,5 +1,22 @@
 <!--pages/user/index.wxml-->
-<view class="container">
+<!-- 授权提示区域 -->
+<view wx:if="{{needAuth}}" class="auth-container">
+  <view class="auth-content">
+    <view class="auth-icon">🔐</view>
+    <view class="auth-title">需要授权</view>
+    <view class="auth-desc">请授权获取您的微信信息以使用预定功能</view>
+    <button 
+      class="auth-button" 
+      open-type="getUserInfo" 
+      bindgetuserinfo="onAuthSuccess"
+    >
+      授权登录
+    </button>
+  </view>
+</view>
+
+<!-- 原有页面内容，只在未授权时不显示 -->
+<view wx:elif="{{!loading}}">
   <!-- 顶部导航 -->
   <view class="header">
     <view class="header-title">今日预定</view>
