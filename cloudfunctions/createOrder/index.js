@@ -16,6 +16,22 @@ exports.main = async (event, context) => {
   const now = new Date()
 
   try {
+    // 获取最新菜单发布时间
+    let latestPublishTime = 0
+    try {
+      const menuTimeRes = await db.collection('active_menu')
+        .where({ date: today })
+        .orderBy('publish_time', 'desc')
+        .limit(1)
+        .get()
+      
+      if (menuTimeRes.data.length > 0) {
+        latestPublishTime = menuTimeRes.data[0].publish_time || 0
+      }
+    } catch (e) {
+      console.warn('获取最新菜单时间失败，使用默认值0', e)
+    }
+
     // 1. 逐项检查库存并原子扣减
     for (const item of items) {
       // product_id 实际是 active_menu 的文档 _id
@@ -59,6 +75,7 @@ exports.main = async (event, context) => {
       total_price: total_price,
       status: 'pending',
       date: today,
+      menu_publish_time: latestPublishTime,  // 新增：记录菜单发布时间
       create_time: now.getTime(),
       create_time_str: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
     }
