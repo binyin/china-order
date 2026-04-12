@@ -5,8 +5,8 @@ const { getAllProducts, getTodayMenu, addMenuItem, removeMenuItem, updateMenuSto
 Page({
   data: {
     activeTab: 'publish',
-    todayMenu: [],        // 今日已上架产品
-    unlistedProducts: [], // 产品池中未上架的产品（带 initStock）
+    todayMenu: [],        
+    unlistedProducts: [], 
     historyDates: [],
     loading: false
   },
@@ -38,58 +38,89 @@ Page({
         getTodayMenu(),
         getAllProducts()
       ])
-
+      
       const todayMenu = menuRes.data || []
-      const todayIds = new Set(todayMenu.map(m => m.product_id))
+      const allProducts = prodRes.data || []
 
-      const unlistedProducts = prodRes.data
+      // --- 优化日志：折叠显示 ---
+      console.group('[Admin:Menu] 数据刷新');
+      console.log('今日上架数量:', todayMenu.length);
+      console.log('产品池总数:', allProducts.length);
+      console.debug('详情数据:', { todayMenu, allProducts });
+      console.groupEnd();
+
+      const todayIds = new Set(todayMenu.map(m => m.product_id))
+      const unlistedProducts = allProducts
         .filter(p => !todayIds.has(p._id))
         .map(p => ({ ...p, product_id: p._id, initStock: 50 }))
 
       this.setData({ todayMenu, unlistedProducts, loading: false })
-    } catch {
+    } catch (err) {
+      console.error('[Admin:Menu] 初始化加载失败:', err);
       this.setData({ loading: false })
       wx.showToast({ title: '加载失败', icon: 'error' })
     }
   },
 
-  // 添加产品到今日菜单
+  // 添加产品到今日菜单 (上架)
   addToMenu(e) {
     const index = e.currentTarget.dataset.index
     const product = this.data.unlistedProducts[index]
-
-    this.setData({ loading: true })
-    addMenuItem({
+    
+    const postData = {
       product_id: product._id,
       name: product.name,
-      price: product.price,
+      price: Number(product.price),
       unit: product.unit || '个',
       image_url: product.image_url || '',
-      stock: product.initStock || 50
-    }).then(() => {
+      stock: Number(product.initStock) || 50
+    }
+
+    console.log(`[Admin:Menu] 正在上架: ${postData.name} (库存:${postData.stock})`);
+
+    this.setData({ loading: true })
+    addMenuItem(postData).then((res) => {
       wx.showToast({ title: '已添加', icon: 'success' })
       this.loadPublishData()
-    }).catch(() => {
+    }).catch((err) => {
+      console.error(`[Admin:Menu] 上架失败 [${postData.name}]:`, err);
       this.setData({ loading: false })
       wx.showToast({ title: '添加失败', icon: 'error' })
     })
   },
 
-  // 从今日菜单取消上架 - 无二次确认
+  // 从今日菜单取消上架
   removeFromMenu(e) {
     const id = e.currentTarget.dataset.id
+    const item = this.data.todayMenu.find(m => m._id === id)
+    console.log(`[Admin:Menu] 正在下架: ${item ? item.name : id}`);
+    
     this.setData({ loading: true })
     removeMenuItem(id).then(() => {
       wx.vibrateShort()
       wx.showToast({ title: '已取消', icon: 'success' })
       this.loadPublishData()
-    }).catch(() => {
+    }).catch((err) => {
+      console.error('[Admin:Menu] 下架失败:', err);
       this.setData({ loading: false })
       wx.showToast({ title: '操作失败', icon: 'error' })
     })
   },
 
-  // 今日菜单库存输入
+  // 今日菜单库存保存 (失焦触发)
+  saveMenuStock(e) {
+    const id = e.currentTarget.dataset.id
+    const item = this.data.todayMenu.find(m => m._id === id)
+    if (!item) return
+    
+    updateMenuStock(id, item.stock).then(() => {
+      console.log(`[Admin:Menu] 库存更新成功: ${item.name} -> ${item.stock}`);
+      wx.showToast({ title: '库存已更新', icon: 'success' })
+    }).catch(err => {
+      console.error('[Admin:Menu] 库存更新失败:', err);
+    })
+  },
+
   onMenuStockInput(e) {
     const id = e.currentTarget.dataset.id
     const val = parseInt(e.detail.value) || 0
@@ -99,17 +130,6 @@ Page({
     this.setData({ todayMenu })
   },
 
-  // 今日菜单库存保存（失焦时）
-  saveMenuStock(e) {
-    const id = e.currentTarget.dataset.id
-    const item = this.data.todayMenu.find(m => m._id === id)
-    if (!item) return
-    updateMenuStock(id, item.stock).then(() => {
-      wx.showToast({ title: '库存已更新', icon: 'success' })
-    })
-  },
-
-  // 产品池库存输入
   onInitStockInput(e) {
     const index = e.currentTarget.dataset.index
     const val = parseInt(e.detail.value) || 0
@@ -133,6 +153,9 @@ Page({
       })
       const historyDates = Object.values(dateMap).sort((a, b) => b.date.localeCompare(a.date))
       this.setData({ historyDates })
+      console.log('[Admin:Menu] 历史记录加载完成，条数:', historyDates.length);
+    }).catch(err => {
+      console.error('[Admin:Menu] 历史加载失败:', err);
     })
   },
 
@@ -141,28 +164,19 @@ Page({
     const dayData = this.data.historyDates.find(d => d.date === date)
     if (!dayData) return
 
-    console.log('reuseMenu date:', date, 'dayData:', dayData)
-
     wx.showModal({
       title: '再次发布',
-      content: `将 ${date} 的菜单发布为今日菜单？（已有今日菜单将被覆盖）`,
+      content: `将 ${date} 的菜单发布为今日菜单？`,
       success: res => {
         if (!res.confirm) return
 
-        // 从产品池匹配出完整信息
+        console.log(`[Admin:Menu] 开始复用历史菜单: ${date}`);
         const allProducts = [...this.data.todayMenu, ...this.data.unlistedProducts]
-        console.log('allProducts:', allProducts)
         const items = dayData.items.map(h => {
-          console.log('历史项:', h)
-          // 优先通过 product_id 匹配
           const found = allProducts.find(p => p.product_id === h.product_id || p._id === h.product_id)
-          if (found) {
-            console.log('通过product_id匹配成功:', found)
-          } else {
-            // 如果 product_id 匹配不上，再尝试 name 匹配
+          if (!found) {
             const foundByName = allProducts.find(p => p.name === h.name)
             if (foundByName) {
-              console.log('通过name匹配成功:', foundByName)
               return {
                 product_id: foundByName.product_id || foundByName._id,
                 name: foundByName.name,
@@ -171,10 +185,8 @@ Page({
                 image_url: foundByName.image_url || '',
                 stock: 50
               }
-            } else {
-              console.warn('未匹配到产品:', h)
-              return null
             }
+            return null
           }
           return {
             product_id: found.product_id || found._id,
@@ -186,9 +198,10 @@ Page({
           }
         }).filter(Boolean)
 
-        console.log('生成的items:', items)
         if (items.length === 0) {
-          wx.showToast({ title: '产品信息不匹配', icon: 'none' }); return
+          console.warn('[Admin:Menu] 复用匹配失败: 无有效产品项');
+          wx.showToast({ title: '产品信息不匹配', icon: 'none' }); 
+          return
         }
 
         wx.showLoading({ title: '发布中...' })
@@ -198,16 +211,17 @@ Page({
         }).then(result => {
           wx.hideLoading()
           const r = result.result
-          console.log('云函数返回:', r)
           if (r.success) {
+            console.log(`[Admin:Menu] 历史复用发布成功: ${r.data.count} 种`);
             wx.showToast({ title: `已发布 ${r.data.count} 种`, icon: 'success' })
             this.loadPublishData()
           } else {
+            console.error('[Admin:Menu] 复用发布失败说明:', r.message);
             wx.showModal({ title: '发布失败', content: r.message, showCancel: false })
           }
         }).catch(err => {
           wx.hideLoading()
-          console.error('云函数调用失败:', err)
+          console.error('[Admin:Menu] 复用发布网络错误:', err)
           wx.showToast({ title: '网络错误', icon: 'error' })
         })
       }
