@@ -44,7 +44,7 @@ Page({
 
       const unlistedProducts = prodRes.data
         .filter(p => !todayIds.has(p._id))
-        .map(p => ({ ...p, initStock: 50 }))
+        .map(p => ({ ...p, product_id: p._id, initStock: 50 }))
 
       this.setData({ todayMenu, unlistedProducts, loading: false })
     } catch {
@@ -125,7 +125,11 @@ Page({
         if (!dateMap[item.date]) {
           dateMap[item.date] = { date: item.date, items: [] }
         }
-        dateMap[item.date].items.push({ name: item.name, price: item.price })
+        dateMap[item.date].items.push({ 
+          product_id: item.product_id, 
+          name: item.name, 
+          price: item.price 
+        })
       })
       const historyDates = Object.values(dateMap).sort((a, b) => b.date.localeCompare(a.date))
       this.setData({ historyDates })
@@ -137,6 +141,8 @@ Page({
     const dayData = this.data.historyDates.find(d => d.date === date)
     if (!dayData) return
 
+    console.log('reuseMenu date:', date, 'dayData:', dayData)
+
     wx.showModal({
       title: '再次发布',
       content: `将 ${date} 的菜单发布为今日菜单？（已有今日菜单将被覆盖）`,
@@ -145,18 +151,42 @@ Page({
 
         // 从产品池匹配出完整信息
         const allProducts = [...this.data.todayMenu, ...this.data.unlistedProducts]
+        console.log('allProducts:', allProducts)
         const items = dayData.items.map(h => {
-          const found = allProducts.find(p => p.name === h.name)
-          return found ? {
+          console.log('历史项:', h)
+          // 优先通过 product_id 匹配
+          const found = allProducts.find(p => p.product_id === h.product_id || p._id === h.product_id)
+          if (found) {
+            console.log('通过product_id匹配成功:', found)
+          } else {
+            // 如果 product_id 匹配不上，再尝试 name 匹配
+            const foundByName = allProducts.find(p => p.name === h.name)
+            if (foundByName) {
+              console.log('通过name匹配成功:', foundByName)
+              return {
+                product_id: foundByName.product_id || foundByName._id,
+                name: foundByName.name,
+                price: foundByName.price,
+                unit: foundByName.unit || '个',
+                image_url: foundByName.image_url || '',
+                stock: 50
+              }
+            } else {
+              console.warn('未匹配到产品:', h)
+              return null
+            }
+          }
+          return {
             product_id: found.product_id || found._id,
             name: found.name,
             price: found.price,
             unit: found.unit || '个',
             image_url: found.image_url || '',
             stock: 50
-          } : null
+          }
         }).filter(Boolean)
 
+        console.log('生成的items:', items)
         if (items.length === 0) {
           wx.showToast({ title: '产品信息不匹配', icon: 'none' }); return
         }
@@ -168,14 +198,16 @@ Page({
         }).then(result => {
           wx.hideLoading()
           const r = result.result
+          console.log('云函数返回:', r)
           if (r.success) {
             wx.showToast({ title: `已发布 ${r.data.count} 种`, icon: 'success' })
             this.loadPublishData()
           } else {
             wx.showModal({ title: '发布失败', content: r.message, showCancel: false })
           }
-        }).catch(() => {
+        }).catch(err => {
           wx.hideLoading()
+          console.error('云函数调用失败:', err)
           wx.showToast({ title: '网络错误', icon: 'error' })
         })
       }
