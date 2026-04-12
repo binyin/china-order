@@ -212,72 +212,96 @@ async function getOrdersByDate(date) {
 
 /**
  * 获取最近 N 天的订单（只返回关联最新菜单的订单）
+ * 进一步优化：使用云函数批量处理，减少客户端数据库查询压力
  */
 async function getRecentOrders(days) {
+  try {
+    // 调用云函数来处理复杂的查询逻辑
+    const result = await wx.cloud.callFunction({
+      name: 'getRecentOrders',
+      data: { days: days || 30 }
+    })
+    
+    if (result.result && result.result.success) {
+      return { data: result.result.data || [] }
+    }
+    return { data: [] }
+  } catch (error) {
+    console.error('调用getRecentOrders云函数失败，使用降级方案:', error)
+    // 降级方案：使用原逻辑但限制查询天数
+    return await getRecentOrdersFallback(Math.min(days || 30, 7))
+  }
+}
+
+/**
+ * 降级方案：客户端查询，但限制为最近7天以减少性能影响
+ */
+async function getRecentOrdersFallback(days) {
   const d = new Date()
-  d.setDate(d.getDate() - (days || 30))
+  d.setDate(d.getDate() - (days || 7))
   const startDate = getDateStr(d)
   
-  // 由于跨日期查询，无法在数据库层面过滤menu_publish_time
-  // 先获取所有订单，然后在内存中过滤
-  const countRes = await db.collection('orders')
+  // 获取有订单的日期列表
+  const dateRes = await db.collection('orders')
     .where({ date: _.gte(startDate) })
-    .count()
+    .field({ date: true })
+    .orderBy('date', 'desc')
+    .get()
   
-  const total = countRes.total
-  if (total === 0) return { data: [] }
+  // 提取不重复的日期
+  const dateSet = new Set()
+  dateRes.data.forEach(order => dateSet.add(order.date))
+  const dates = Array.from(dateSet)
   
-  const batchTimes = Math.ceil(total / 20)
-  const tasks = []
-  for (let i = 0; i < batchTimes; i++) {
-    tasks.push(db.collection('orders')
-      .where({ date: _.gte(startDate) })
-      .orderBy('date', 'desc')
-      .skip(i * 20)
-      .limit(20)
-      .get())
+  if (dates.length === 0) {
+    return { data: [] }
   }
   
-  const results = await Promise.all(tasks)
-  const allOrders = results.reduce((acc, res) => acc.concat(res.data), [])
-  
-  // 按日期分组，获取每个日期的最新菜单时间
-  const dateGroups = {}
-  allOrders.forEach(order => {
-    if (!dateGroups[order.date]) {
-      dateGroups[order.date] = []
-    }
-    dateGroups[order.date].push(order)
-  })
-  
-  // 获取每个日期的最新菜单时间
-  const datePromises = Object.keys(dateGroups).map(date => 
+  // 为每个日期获取最新菜单时间
+  const dateTimePromises = dates.map(date => 
     db.collection('active_menu')
       .where({ date: date })
       .orderBy('publish_time', 'desc')
       .limit(1)
       .get()
+      .then(res => ({
+        date,
+        latestTime: res.data.length > 0 ? (res.data[0].publish_time || 0) : 0
+      }))
+      .catch(() => ({
+        date,
+        latestTime: 0
+      }))
   )
   
-  const menuTimesRes = await Promise.all(datePromises)
-  const latestTimes = {}
+  const dateTimeResults = await Promise.all(dateTimePromises)
+  const dateTimeMap = {}
+  dateTimeResults.forEach(result => {
+    dateTimeMap[result.date] = result.latestTime
+  })
   
-  menuTimesRes.forEach((res, index) => {
-    const date = Object.keys(dateGroups)[index]
-    if (res.data.length > 0) {
-      latestTimes[date] = res.data[0].publish_time || 0
-    } else {
-      latestTimes[date] = 0
+  // 构建查询条件
+  const orderPromises = dates.map(date => {
+    const latestTime = dateTimeMap[date]
+    if (latestTime === 0) {
+      return Promise.resolve([])
     }
+    
+    return db.collection('orders')
+      .where({
+        date: date,
+        menu_publish_time: latestTime
+      })
+      .orderBy('create_time', 'desc')
+      .get()
+      .then(res => res.data)
+      .catch(() => [])
   })
   
-  // 过滤订单，只保留关联最新菜单的
-  const filteredOrders = allOrders.filter(order => {
-    const latestTime = latestTimes[order.date] || 0
-    return order.menu_publish_time === latestTime
-  })
+  const orderResults = await Promise.all(orderPromises)
+  const allOrders = orderResults.reduce((acc, orders) => acc.concat(orders), [])
   
-  return { data: filteredOrders }
+  return { data: allOrders }
 }
 
 /**
