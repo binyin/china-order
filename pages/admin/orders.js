@@ -239,22 +239,52 @@ Page({
 
     const db = wx.cloud.database()
     const today = getDateStr()
-    const watcher = db.collection('orders')
-      .where({ date: today })
-      .watch({
-        onChange: snapshot => {
-          if (snapshot.type === 'init') return
-          if (snapshot.type === 'replace' || snapshot.type === 'update') {
-            this.setData({ newOrderFlag: true })
+    
+    // 先同步获取最新发布时间，然后创建监听
+    this.getLatestPublishTimeAsync(today).then(latestPublishTime => {
+      console.log('[Admin:Orders] 开始监听，最新发布时间:', latestPublishTime)
+      
+      let query = { date: today }
+      if (latestPublishTime > 0) {
+        query.menu_publish_time = latestPublishTime
+      }
+      
+      const watcher = db.collection('orders')
+        .where(query)
+        .watch({
+          onChange: snapshot => {
+            if (snapshot.type === 'init') return
+            if (snapshot.type === 'replace' || snapshot.type === 'update') {
+              this.setData({ newOrderFlag: true })
+            }
+            this.loadVerifyData()
+          },
+          onError: err => {
+            console.error('订单监听错误', err)
           }
-          this.loadVerifyData()
-        },
-        onError: err => {
-          console.error('订单监听错误', err)
-        }
-      })
+        })
 
-    this.setData({ orderWatcher: watcher })
+      this.setData({ orderWatcher: watcher })
+    }).catch(err => {
+      console.error('获取发布时间失败，使用默认监听', err)
+      // 降级：监听所有今日订单
+      const watcher = db.collection('orders')
+        .where({ date: today })
+        .watch({
+          onChange: snapshot => {
+            if (snapshot.type === 'init') return
+            if (snapshot.type === 'replace' || snapshot.type === 'update') {
+              this.setData({ newOrderFlag: true })
+            }
+            this.loadVerifyData()
+          },
+          onError: err => {
+            console.error('订单监听错误', err)
+          }
+        })
+      
+      this.setData({ orderWatcher: watcher })
+    })
   },
 
   stopWatch() {
@@ -314,6 +344,26 @@ Page({
 
   backToList() {
     this.setData({ showDetail: false })
+  },
+
+  // 获取最新菜单发布时间
+  async getLatestPublishTimeAsync(date) {
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'getLatestMenuTime',
+        data: { date: date }
+      })
+      
+      if (res.result.success) {
+        return res.result.latest_publish_time || 0
+      } else {
+        console.error('获取最新菜单时间失败:', res.result.message)
+        return 0
+      }
+    } catch (err) {
+      console.error('调用获取最新菜单时间失败', err)
+      return 0
+    }
   },
 
   // ========== 导航 ==========

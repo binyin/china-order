@@ -79,7 +79,9 @@ async function runE2ETests() {
     await testAdminLogin()
     await testProductCRUD(ctx)
     await testMenuPublish(ctx)
+    await testMenuPublishFilter(ctx)  // 新增：菜单发布过滤测试
     await testCreateOrder(ctx)
+    await testTodayBoardFilter(ctx)   // 新增：今日看板过滤测试
     await testCancelOrder(ctx)
     await testUndoCancel(ctx)
     await testVerifyOrder(ctx)
@@ -318,6 +320,58 @@ async function testMenuPublish(ctx) {
 }
 
 // ================================================================
+// 3.1 菜单发布过滤 - 最新发布菜单逻辑
+// ================================================================
+async function testMenuPublishFilter(ctx) {
+  section('3.1 菜单发布过滤 - 最新发布菜单逻辑')
+  
+  const today = getDateStr()
+  
+  // 测试1：首次发布菜单
+  const firstPublishTime = Date.now()
+  const addMenuRes1 = await dbInsert('active_menu', {
+    product_id: 'test_filter_product_1',
+    name: '测试过滤馒头',
+    price: 2.0,
+    unit: '个',
+    stock: 50,
+    date: today,
+    publish_time: firstPublishTime
+  })
+  assert(addMenuRes1._id, '首次发布菜单 - 返回ID')
+  ctx.menuItemId1 = addMenuRes1._id
+  
+  // 测试2：第二次发布菜单（应该只显示这个）
+  const secondPublishTime = firstPublishTime + 1000
+  const addMenuRes2 = await dbInsert('active_menu', {
+    product_id: 'test_filter_product_2',
+    name: '测试过滤花卷',
+    price: 3.0,
+    unit: '个',
+    stock: 40,
+    date: today,
+    publish_time: secondPublishTime
+  })
+  assert(addMenuRes2._id, '第二次发布菜单 - 返回ID')
+  ctx.menuItemId2 = addMenuRes2._id
+  
+  // 测试3：创建订单（关联第二次发布）
+  const orderRes = await callCloudFunction('createOrder', {
+    items: [{ product_id: ctx.menuItemId2, name: '测试过滤花卷', num: 2 }],
+    total_price: 6.0,
+    customer_name: '过滤测试用户'
+  })
+  assert(orderRes.success === true, '创建订单 - 成功')
+  ctx.filterOrderId = orderRes.data.orderId
+  
+  // 验证订单关联了正确的发布时间
+  const orderDoc = await dbGetById('orders', ctx.filterOrderId)
+  assert(orderDoc.menu_publish_time === secondPublishTime, '订单关联最新发布时间')
+  
+  log('✓ 菜单发布过滤逻辑测试完成')
+}
+
+// ================================================================
 // 4. createOrder - 用户预定
 // ================================================================
 async function testCreateOrder(ctx) {
@@ -395,6 +449,79 @@ async function testCreateOrder(ctx) {
     if (menuCheck[0]) {
       await dbUpdate('active_menu', ctx.menuItemId, { $set: { ordered: 3 } })
     }
+  }
+}
+
+// ================================================================
+// 4.1 今日看板过滤 - 只显示最新发布菜单订单
+// ================================================================
+async function testTodayBoardFilter(ctx) {
+  section('4.1 今日看板过滤 - 只显示最新发布菜单订单')
+  
+  const today = getDateStr()
+  
+  // 测试1：创建历史发布菜单（较早时间）
+  const oldPublishTime = Date.now() - 5000
+  const oldMenuRes = await dbInsert('active_menu', {
+    product_id: 'test_old_product',
+    name: '旧菜单馒头',
+    price: 1.0,
+    unit: '个',
+    stock: 30,
+    date: today,
+    publish_time: oldPublishTime
+  })
+  
+  // 测试2：创建旧菜单订单（应该不显示在今日看板）
+  const oldOrderRes = await callCloudFunction('createOrder', {
+    items: [{ product_id: oldMenuRes._id, name: '旧菜单馒头', num: 1 }],
+    total_price: 1.0,
+    customer_name: '旧菜单用户'
+  })
+  assert(oldOrderRes.success === true, '旧菜单创建订单 - 成功')
+  ctx.oldOrderId = oldOrderRes.data.orderId
+  
+  // 测试3：创建最新发布菜单
+  const newPublishTime = Date.now()
+  const newMenuRes = await dbInsert('active_menu', {
+    product_id: 'test_new_product',
+    name: '新菜单花卷',
+    price: 2.0,
+    unit: '个',
+    stock: 50,
+    date: today,
+    publish_time: newPublishTime
+  })
+  
+  // 测试4：创建新菜单订单（应该显示在今日看板）
+  const newOrderRes = await callCloudFunction('createOrder', {
+    items: [{ product_id: newMenuRes._id, name: '新菜单花卷', num: 3 }],
+    total_price: 6.0,
+    customer_name: '新菜单用户'
+  })
+  assert(newOrderRes.success === true, '新菜单创建订单 - 成功')
+  ctx.newOrderId = newOrderRes.data.orderId
+  
+  // 测试5：模拟今日看板查询（应该只返回新订单）
+  const todayOrders = await getTodayOrdersForTest(today)
+  assert(todayOrders.length >= 1, '今日看板至少有一个订单')
+  
+  const newOrderInResult = todayOrders.find(o => o._id === ctx.newOrderId)
+  const oldOrderInResult = todayOrders.find(o => o._id === ctx.oldOrderId)
+  assert(newOrderInResult, '今日看板显示最新发布菜单的订单')
+  assert(!oldOrderInResult, '今日看板不显示旧菜单的订单')
+  
+  log('✓ 今日看板过滤逻辑测试完成')
+}
+
+// 测试专用的获取今日订单函数
+async function getTodayOrdersForTest(date) {
+  try {
+    const res = await callCloudFunction('getTodayOrders', { date: date })
+    return res.data || []
+  } catch (e) {
+    console.error('测试获取今日订单失败', e)
+    return []
   }
 }
 
@@ -829,6 +956,30 @@ async function cleanup(ctx) {
       await dbDelete('orders', ctx.orderId)
       log('  已清理订单')
     }
+    // 新增：清理菜单发布过滤测试数据
+    if (ctx.menuItemId1) {
+      await dbDelete('active_menu', ctx.menuItemId1)
+      log('  已清理过滤测试菜单1')
+    }
+    if (ctx.menuItemId2) {
+      await dbDelete('active_menu', ctx.menuItemId2)
+      log('  已清理过滤测试菜单2')
+    }
+    if (ctx.filterOrderId) {
+      await dbDelete('orders', ctx.filterOrderId)
+      log('  已清理过滤测试订单')
+    }
+    
+    // 新增：清理今日看板过滤测试数据
+    if (ctx.oldOrderId) {
+      await dbDelete('orders', ctx.oldOrderId)
+      log('  已清理旧菜单订单')
+    }
+    if (ctx.newOrderId) {
+      await dbDelete('orders', ctx.newOrderId)
+      log('  已清理新菜单订单')
+    }
+    
   } catch (e) {
     log(`  清理异常: ${e.message}`)
   }
@@ -897,6 +1048,16 @@ async function dbDelete(collection, id) {
   } catch (e) {
     console.error('dbDelete error:', e)
     throw e
+  }
+}
+
+async function dbGetById(collection, id) {
+  try {
+    const res = await wx.cloud.database().collection(collection).doc(id).get()
+    return res.data
+  } catch (e) {
+    console.error('dbGetById error:', e)
+    return null
   }
 }
 

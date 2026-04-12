@@ -112,9 +112,13 @@ async function getTodayOrders() {
   }
   
   // 构建查询条件：今日订单，且菜单发布时间等于最新发布时间
-  let query = { date: today }
+  // 如果 latestPublishTime = 0，则表示没有发布菜单，不应该查询到订单
+  const query = { date: today }
   if (latestPublishTime > 0) {
     query.menu_publish_time = latestPublishTime
+  } else {
+    // 如果没有发布菜单，不应该查询到订单
+    query.menu_publish_time = 0
   }
   
   const countRes = await db.collection('orders').where(query).count()
