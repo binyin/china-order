@@ -52,7 +52,9 @@ exports.main = async (event, context) => {
       customer_id: OPENID,
       items: items.map(i => ({
         name: i.name,
-        num: i.num
+        num: i.num,
+        product_id: i.product_id,  // 添加产品ID
+        item_status: 'pending'      // 添加产品状态字段
       })),
       total_price: total_price,
       status: 'pending',

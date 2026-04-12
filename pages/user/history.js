@@ -27,9 +27,11 @@ Page({
     this.setData({ loading: true })
     getMyOrders().then(res => {
       const orders = res.data || []
+      // 过滤掉已取消的订单
+      const validOrders = orders.filter(o => o.status !== 'cancelled')
       // 按日期聚合
       const dateMap = {}
-      orders.forEach(o => {
+      validOrders.forEach(o => {
         if (!dateMap[o.date]) {
           dateMap[o.date] = {
             date: o.date,

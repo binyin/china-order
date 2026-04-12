@@ -22,7 +22,14 @@ exports.main = async (event, context) => {
 
     // 2. 更新订单状态
     await db.collection('orders').doc(orderId).update({
-      data: { status: 'cancelled' }
+      data: { 
+        status: 'cancelled',
+        // 同时更新所有产品项状态
+        items: order.items.map(item => ({
+          ...item,
+          item_status: 'cancelled'
+        }))
+      }
     })
 
     // 3. 恢复库存（ordered 减少对应数量）
