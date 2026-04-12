@@ -7,46 +7,84 @@
   align-items: center;
   justify-content: center;
   padding: 0 40rpx;
+  /* 确保整个容器不会横向溢出 */
+  box-sizing: border-box; 
 }
+
 .logo-area {
   text-align: center;
   margin-bottom: 60rpx;
 }
+
 .logo-icon {
   font-size: 100rpx;
   margin-bottom: 16rpx;
 }
+
 .logo-title {
   font-size: 48rpx;
   font-weight: bold;
   color: #222;
 }
+
 .logo-sub {
   font-size: 26rpx;
   color: #aaa;
   margin-top: 8rpx;
 }
+
 .form-card {
   width: 100%;
   padding: 40rpx 32rpx;
   border-radius: 20rpx;
+  /* --- 重点修改部分 --- */
+  background: #ffffff;      /* 必须加背景色，否则输入框看起来是浮空的 */
+  box-sizing: border-box;   /* 确保padding不撑大卡片 */
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05); /* 增加一点阴影提升质感 */
 }
+
 .form-item {
   margin-bottom: 28rpx;
 }
+
 .form-label {
   font-size: 28rpx;
   color: #888;
   margin-bottom: 10rpx;
 }
+
+/* 修改后的输入框样式 */
 .form-input {
-  background: #f5f5f5;
+  background: #f9f9f9;
   border-radius: 12rpx;
-  padding: 22rpx 24rpx;
-  font-size: 34rpx;
+  
+  /* 1. 增加左右内边距，取消上下内边距（依靠高度居中） */
+  padding: 0 24rpx; 
+  
+  font-size: 30rpx;
+  color: #333;
   width: 100%;
   box-sizing: border-box;
+  
+  /* 2. 关键：显式设置高度，并让行高等于高度实现垂直居中 */
+  height: 100rpx;      /* 增加高度让它看起来更大气 */
+  min-height: 100rpx;  /* 确保最小高度一致 */
+  line-height: 100rpx; 
+  
+  /* 3. 这里的 margin-bottom 是为了撑开与下一个元素的间距 */
+  margin-top: 10rpx;
 }
+
+/* 4. 专门针对提示语（Placeholder）的样式 */
+.placeholder-style {
+  color: #bbbbbb;
+  font-size: 28rpx;
+  /* 微信原生 input 在某些机型上 placeholder 偏上，
+     设置高度一致能极大缓解此问题 */
+  height: 100rpx;
+  line-height: 100rpx;
+}
+
 .btn-login {
   background: #ff6b35;
   color: #fff;
@@ -55,7 +93,13 @@
   font-size: 36rpx;
   font-weight: bold;
   padding: 24rpx 0;
-  width: 100%;
+  width: 100% !important;   /* 微信原生button有时需要!important强制覆盖默认宽度 */
   margin-top: 16rpx;
   line-height: 1.4;
+}
+
+/* 按钮点击后的效果 */
+.btn-login-hover {
+  opacity: 0.8;
+  transform: scale(0.98);
 }
