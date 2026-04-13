@@ -1,5 +1,8 @@
 // pages/user/index.js
 const { getTodayMenu, getMyOrders } = require('../../utils/db')
+const logger = require('../../utils/logger')
+
+const TAG = 'user:index'
 
 Page({
   data: {
@@ -23,21 +26,31 @@ Page({
   },
 
   onLoad() {
+    const systemInfo = wx.getSystemInfoSync()
+    logger.info(TAG + ':onLoad', { 
+      time: new Date().toISOString(),
+      system: systemInfo,
+      version: wx.envVersion
+    })
     this.checkAuthStatus()
   },
 
   onShow() {
+    logger.info(TAG + ':onShow', { time: new Date().toISOString() })
     this.checkAuthStatus()
   },
 
   loadMenu() {
+    logger.info(TAG + ':loadMenu', { start: true })
     this.setData({ loading: true })
     getTodayMenu().then(res => {
       const list = res.data.map(item => ({ ...item, qty: 0 }))
       this.setData({ menuList: list, loading: false })
+      logger.info(TAG + ':loadMenu', { success: true, count: list.length })
       this.calcTotal()
-    }).catch(() => {
+    }).catch((err) => {
       this.setData({ loading: false })
+      logger.error(TAG + ':loadMenu', { error: err.message || String(err) })
       wx.showToast({ title: '加载失败', icon: 'error' })
     })
   },
@@ -48,11 +61,13 @@ Page({
     const item = list[index]
     const remaining = item.stock - (item.ordered || 0)
     if (item.qty >= remaining) {
+      logger.warn(TAG + ':increase', { item: item.name, reason: '已售罄', remaining })
       wx.showToast({ title: `最多预定 ${remaining} 件`, icon: 'none' })
       return
     }
     list[index].qty = (item.qty || 0) + 1
     this.setData({ menuList: list })
+    logger.info(TAG + ':increase', { item: item.name, qty: list[index].qty })
     this.calcTotal()
   },
 
@@ -62,6 +77,7 @@ Page({
     if (list[index].qty > 0) {
       list[index].qty -= 1
       this.setData({ menuList: list })
+      logger.info(TAG + ':decrease', { item: list[index].name, qty: list[index].qty })
       this.calcTotal()
     }
   },
@@ -80,27 +96,29 @@ Page({
   },
 
   cancelAllItems() {
+    logger.info(TAG + ':cancelAllItems', { action: 'clear' })
     const list = this.data.menuList.map(item => ({ ...item, qty: 0 }))
     this.setData({ menuList: list })
     this.calcTotal()
   },
 
   loadMyOrders() {
-    // 添加防抖，避免频繁调用
     if (this.loadingOrders) return
     this.loadingOrders = true
+    logger.info(TAG + ':loadMyOrders', { start: true })
     
     getMyOrders().then(res => {
       const today = new Date()
       const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-      // 修改：过滤掉状态为'cancelled'的订单，并且只显示当天的订单
       const todayOrders = (res.data || []).filter(o => 
         o.date === todayStr && o.status !== 'cancelled'
       )
       this.setData({ submittedOrders: todayOrders })
       this.loadingOrders = false
-    }).catch(() => {
+      logger.info(TAG + ':loadMyOrders', { success: true, count: todayOrders.length })
+    }).catch((err) => {
       this.loadingOrders = false
+      logger.error(TAG + ':loadMyOrders', { error: err.message || String(err) })
     })
   },
 
@@ -127,11 +145,11 @@ Page({
   confirmOrder() {
     const name = this.data.customerName.trim()
     if (!name) {
+      logger.warn(TAG + ':confirmOrder', { reason: '未输入姓名' })
       wx.showToast({ title: '请输入您的姓名', icon: 'none' })
       return
     }
 
-    // 缓存昵称，标记已有身份
     wx.setStorageSync('userProfile', { nickname: name })
     this.setData({ hasProfile: true })
 
@@ -139,12 +157,7 @@ Page({
       .filter(i => i.qty > 0)
       .map(i => ({ product_id: i._id, name: i.name, num: i.qty }))
 
-    // 添加日志
-    console.group('[User:Index] 提交订单')
-    console.log('用户:', name)
-    console.log('商品数量:', items.length)
-    console.log('总价:', this.data.totalPrice)
-    console.groupEnd()
+    logger.info(TAG + ':confirmOrder', { customer: name, itemCount: items.length, totalPrice: this.data.totalPrice })
 
     this.setData({ submitting: true })
 
@@ -161,15 +174,18 @@ Page({
       if (result.success) {
         const menuList = this.data.menuList.map(i => ({ ...i, qty: 0 }))
         this.setData({ menuList, showModal: false })
+        logger.info(TAG + ':confirmOrder', { success: true, orderId: result.orderId })
         this.calcTotal()
         wx.showToast({ title: '预定成功！', icon: 'success' })
         this.loadMenu()
         this.loadMyOrders()
       } else {
+        logger.warn(TAG + ':confirmOrder', { success: false, message: result.message })
         wx.showModal({ title: '提交失败', content: result.message, showCancel: false })
       }
-    }).catch(() => {
+    }).catch((err) => {
       this.setData({ submitting: false })
+      logger.error(TAG + ':confirmOrder', { error: err.message || String(err) })
       wx.showToast({ title: '网络错误，请重试', icon: 'error' })
     })
   },
@@ -177,15 +193,9 @@ Page({
   cancelOrder(e) {
     const id = e.currentTarget.dataset.id
     
-    // 添加日志
-    console.group('[User:Index] 取消订单')
-    console.log('订单ID:', id)
-    console.groupEnd()
-    
-    // 使用动画效果移除订单
+    logger.info(TAG + ':cancelOrder', { orderId: id })
     this.createOrderExitAnimation(id)
     
-    // 显示加载中
     wx.showLoading({ title: '处理中', mask: true })
     
     wx.cloud.callFunction({
@@ -195,40 +205,36 @@ Page({
       wx.hideLoading()
       if (res.result.success) {
         wx.vibrateShort()
+        logger.info(TAG + ':cancelOrder', { success: true, orderId: id })
         wx.showToast({ 
           title: '已取消', 
           icon: 'success',
           duration: 1500
         })
-        // 只更新库存，不重新加载整个菜单
         this.updateMenuStock(id)
       } else {
-        // 恢复订单数据
+        logger.warn(TAG + ':cancelOrder', { success: false, message: res.result.message })
         this.loadMyOrders()
         wx.showToast({ title: res.result.message || '取消失败', icon: 'none' })
       }
-    }).catch(() => {
+    }).catch((err) => {
       wx.hideLoading()
-      // 恢复订单数据
+      logger.error(TAG + ':cancelOrder', { error: err.message || String(err) })
       this.loadMyOrders()
       wx.showToast({ title: '取消失败', icon: 'error' })
     })
   },
 
-  // 取消订单中的单个产品
   cancelOrderItem(e) {
     const { orderid, productid } = e.currentTarget.dataset
     
-    console.group('[User:Index] 取消订单产品')
-    console.log('订单ID:', orderid, '产品ID:', productid)
-    console.groupEnd()
+    logger.info(TAG + ':cancelOrderItem', { orderId: orderid, productId: productid })
     
-    // 先更新本地UI，避免闪烁
     const orders = this.data.submittedOrders.map(order => {
       if (order._id === orderid) {
         const updatedItems = order.items.map(item => {
           if (item.product_id === productid) {
-            return { ...item, item_status: 'cancelling' } // 临时状态
+            return { ...item, item_status: 'cancelling' }
           }
           return item
         })
@@ -253,7 +259,6 @@ Page({
           duration: 1500
         })
         
-        // 更新本地数据，移除取消的产品或更新状态
         const updatedOrders = this.data.submittedOrders.map(order => {
           if (order._id === orderid) {
             const items = order.items
@@ -263,28 +268,26 @@ Page({
                 }
                 return item
               })
-              .filter(item => item.item_status !== 'cancelled') // 移除以取消的
+              .filter(item => item.item_status !== 'cancelled')
         
-            // 如果所有产品都取消了，则移除整个订单
             if (items.length === 0) {
               return null
             }
             return { ...order, items }
           }
           return order
-        }).filter(order => order !== null) // 过滤掉空的订单
+        }).filter(order => order !== null)
       
         this.setData({ submittedOrders: updatedOrders })
-      
-        // 更新菜单库存
+        logger.info(TAG + ':cancelOrderItem', { success: true, orderId: orderid, productId: productid })
         this.updateMenuStock(orderid)
       } else {
-        // 恢复原始状态
+        logger.warn(TAG + ':cancelOrderItem', { success: false, message: res.result.message })
         this.loadMyOrders()
         wx.showToast({ title: res.result.message || '取消失败', icon: 'none' })
       }
-    }).catch(() => {
-      // 恢复原始状态
+    }).catch((err) => {
+      logger.error(TAG + ':cancelOrderItem', { error: err.message || String(err) })
       this.loadMyOrders()
       wx.showToast({ title: '网络错误，请重试', icon: 'error' })
     })
@@ -348,16 +351,15 @@ Page({
     }, 300)
   },
 
-  // 检查授权状态
   checkAuthStatus() {
-    // 检查是否已授权
+    logger.info(TAG + ':checkAuthStatus', { check: true })
     wx.getSetting({
       success: res => {
         if (res.authSetting['scope.userInfo']) {
-          // 已授权，获取用户信息
+          logger.info(TAG + ':checkAuthStatus', { authorized: true })
           this.getUserInfo()
         } else {
-          // 未授权，显示授权按钮
+          logger.info(TAG + ':checkAuthStatus', { authorized: false })
           this.setData({ 
             needAuth: true,
             loading: false 
@@ -365,17 +367,16 @@ Page({
         }
       },
       fail: err => {
-        console.error('检查授权失败', err)
+        logger.error(TAG + ':checkAuthStatus', { error: err.message || String(err) })
       }
     })
   },
 
-  // 获取用户信息
   getUserInfo() {
+    logger.info(TAG + ':getUserInfo', { get: true })
     wx.getUserInfo({
       success: res => {
         const userInfo = res.userInfo
-        // 保存到本地存储
         wx.setStorageSync('userProfile', { 
           nickname: userInfo.nickName,
           avatarUrl: userInfo.avatarUrl 
@@ -387,12 +388,12 @@ Page({
           needAuth: false
         })
         
-        // 加载菜单和订单
+        logger.info(TAG + ':getUserInfo', { success: true, nickname: userInfo.nickName })
         this.loadMenu()
         this.loadMyOrders()
       },
       fail: err => {
-        console.error('获取用户信息失败', err)
+        logger.error(TAG + ':getUserInfo', { error: err.message || String(err) })
         wx.showToast({ title: '获取用户信息失败', icon: 'none' })
       }
     })
