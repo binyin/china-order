@@ -1,0 +1,9 @@
+{
+  "name": "common-layer",
+  "version": "1.0.0",
+  "description": "公共层 - wx-server-sdk",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}
