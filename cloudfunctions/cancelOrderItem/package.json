@@ -1,0 +1,7 @@
+{
+  "name": "cancelOrderItem",
+  "version": "1.0.0",
+  "description": "取消订单项",
+  "main": "index.js",
+  "dependencies": {}
+}
