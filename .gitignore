@@ -1,5 +1,7 @@
 node_modules/
-**/node_modules/
+/node_modules/*
+**/node_modules/*
+!cloudfunctions/*/node_modules
 .aider*
 .env
 dist/

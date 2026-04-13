@@ -1,9 +1,0 @@
-{
-  "name": "getLatestMenuTime",
-  "version": "1.0.0",
-  "description": "获取最新菜单发布时间",
-  "main": "index.js",
-  "dependencies": {
-    "wx-server-sdk": "~2.6.3"
-  }
-}

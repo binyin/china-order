@@ -1,0 +1,8 @@
+{
+  "name": "china-order-cloudfunctions",
+  "version": "1.0.0",
+  "description": "馒头店云函数依赖",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
