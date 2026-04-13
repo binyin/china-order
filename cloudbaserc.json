@@ -1,13 +1,17 @@
 {
-  "envId": "{{env.ENV_ID}}",
-  "functionRoot": "./functions",
-  "functions": [],
-  "ai": {
-    "defaultAgent": "{{env.AI_DEFAULT_AGENT}}",
-    "agents": {
-      "codebuddy": {
-        "type": "none"
-      }
-    }
-  }
+  "envId": "cloudbase-2gjs1hdd0c429545",
+  "framework": {
+    "plugins": {}
+  },
+  "functionRoot": "cloudfunctions",
+  "functions": [
+    { "name": "getLatestMenuTime" },
+    { "name": "adminLogin" },
+    { "name": "cancelOrder" },
+    { "name": "createOrder" },
+    { "name": "getMyOrders" },
+    { "name": "getOpenId" },
+    { "name": "undoCancel" },
+    { "name": "publishMenu" }
+  ]
 }

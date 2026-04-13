@@ -44,7 +44,7 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "latest",
+  "libVersion": "3.15.1",
   "appid": "wx5042fe729caf4dfb",
   "miniprogramRoot": "miniprogram/",
   "srcMiniprogramRoot": "miniprogram/",
