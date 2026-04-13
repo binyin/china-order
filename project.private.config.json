@@ -1,6 +1,6 @@
 {
-  "libVersion": "latest",
-  "projectname": "",
+  "libVersion": "3.15.1",
+  "projectname": "china-order-new",
   "condition": {},
   "setting": {
     "urlCheck": true,

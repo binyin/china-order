@@ -1,14 +1,17 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/user/index",
+    "pages/user/history",
+    "pages/admin/login",
+    "pages/admin/products",
+    "pages/admin/menu",
+    "pages/admin/orders"
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#6A5ACD",
-    "navigationBarTitleText": "小程序+云开发空白项目",
-    "navigationBarTextStyle": "white"
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "馒头店",
+    "navigationBarTextStyle": "black"
   },
-  "style": "v2",
-  "sitemapLocation": "sitemap.json",
-  "lazyCodeLoading": "requiredComponents"
-} 
+  "sitemapLocation": "sitemap.json"
+}

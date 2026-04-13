@@ -1,3 +1,4 @@
+// pages/user/index.js
 const { getTodayMenu, getMyOrders } = require('../../utils/db')
 
 Page({

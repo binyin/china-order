@@ -44,9 +44,10 @@
     "disableSWC": true
   },
   "compileType": "miniprogram",
-  "libVersion": "2.19.4",
+  "libVersion": "latest",
   "appid": "wx5042fe729caf4dfb",
-  "srcMiniprogramRoot": "./",
+  "miniprogramRoot": "miniprogram/",
+  "srcMiniprogramRoot": "miniprogram/",
   "cloudfunctionRoot": "cloudfunctions/",
   "cloudbaseRoot": "cloudbase/",
   "condition": {},
