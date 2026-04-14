@@ -1,67 +1,168 @@
-/* app.wxss - 全局样式 极简大字风格 */
+/* app.wxss - Apple Design Language */
 page {
-  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
-  background-color: #f5f5f5;
-  color: #333;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+  background-color: #F5F5F7;
+  color: #1d1d1f;
+  font-size: 28rpx;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --apple-gray: #F5F5F7;
+  --apple-blue: #007AFF;
+  --shadow-sm: 0 1rpx 3rpx rgba(0,0,0,0.02);
 }
 
-/* 通用按钮 */
+/* 通用按钮 - Apple Style */
 .btn-primary {
-  background: #ff6b35;
+  background: #000000;
   color: #fff;
   border: none;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   font-size: 32rpx;
-  padding: 20rpx 0;
+  font-weight: 600;
+  padding: 24rpx 0;
   width: 100%;
+  letter-spacing: 1rpx;
+}
+
+.btn-primary:active {
+  background: #333333;
+  transform: scale(0.98);
 }
 
 .btn-secondary {
-  background: #fff;
-  color: #ff6b35;
-  border: 2rpx solid #ff6b35;
-  border-radius: 12rpx;
+  background: #ffffff;
+  color: #000000;
+  border: 2rpx solid #e5e5ea;
+  border-radius: 16rpx;
   font-size: 32rpx;
-  padding: 20rpx 0;
+  font-weight: 600;
+  padding: 24rpx 0;
   width: 100%;
+}
+
+.btn-secondary:active {
+  background: #F5F5F7;
+  transform: scale(0.98);
 }
 
 .btn-danger {
-  background: #e74c3c;
+  background: #FF3B30;
   color: #fff;
   border: none;
-  border-radius: 12rpx;
+  border-radius: 16rpx;
   font-size: 32rpx;
-  padding: 20rpx 0;
+  font-weight: 600;
+  padding: 24rpx 0;
   width: 100%;
 }
 
-/* 卡片 */
+.btn-danger:active {
+  background: #D63027;
+  transform: scale(0.98);
+}
+
+/* 卡片 - Apple Style */
 .card {
   background: #fff;
-  border-radius: 16rpx;
-  padding: 24rpx;
-  margin: 16rpx 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
+  border-radius: 20rpx;
+  padding: 28rpx 32rpx;
+  margin: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
 }
 
 /* 页面标题 */
 .page-title {
-  font-size: 40rpx;
-  font-weight: bold;
-  padding: 32rpx 24rpx 16rpx;
-  color: #222;
+  font-size: 44rpx;
+  font-weight: 700;
+  padding: 32rpx 32rpx 20rpx;
+  color: #1d1d1f;
+  letter-spacing: -0.5rpx;
 }
 
 /* 标签 */
-.tag-pending { background: #fff3cd; color: #856404; padding: 4rpx 16rpx; border-radius: 20rpx; font-size: 24rpx; }
-.tag-completed { background: #d4edda; color: #155724; padding: 4rpx 16rpx; border-radius: 20rpx; font-size: 24rpx; }
-.tag-cancelled { background: #f8d7da; color: #721c24; padding: 4rpx 16rpx; border-radius: 20rpx; font-size: 24rpx; }
+.tag-pending { 
+  background: #fff7d6; 
+  color: #b8860b; 
+  padding: 6rpx 18rpx; 
+  border-radius: 20rpx; 
+  font-size: 24rpx;
+  font-weight: 500;
+}
+.tag-completed { 
+  background: #d6f5d6; 
+  color: #155724; 
+  padding: 6rpx 18rpx; 
+  border-radius: 20rpx; 
+  font-size: 24rpx;
+  font-weight: 500;
+}
+.tag-cancelled { 
+  background: #f5d6d6; 
+  color: #8b0000; 
+  padding: 6rpx 18rpx; 
+  border-radius: 20rpx; 
+  font-size: 24rpx;
+  font-weight: 500;
+}
 
 /* 空状态 */
 .empty-tip {
   text-align: center;
-  color: #999;
-  font-size: 30rpx;
-  padding: 80rpx 0;
+  color: #86868b;
+  font-size: 28rpx;
+  padding: 120rpx 0;
 }
+
+/* Section Header */
+.section-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #1d1d1f;
+  padding: 24rpx 32rpx 16rpx;
+}
+
+/* 小字辅助 */
+.text-secondary {
+  color: #86868b;
+  font-size: 26rpx;
+}
+
+.text-tertiary {
+  color: #aeaeb2;
+  font-size: 24rpx;
+}
+
+/* 分割线 */
+.divider {
+  height: 1rpx;
+  background: #e5e5ea;
+  margin: 0 32rpx;
+}
+
+/* 玻璃拟态卡片 */
+.glass {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.5);
+  border-radius: 24rpx;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 按钮点击态 */
+.btn-active:active {
+  transform: scale(0.96);
+  transition: transform 0.1s;
+}
+
+/* 等宽数字 */
+.font-mono {
+  font-family: ui-monospace, "SF Mono", monospace;
+}
+
+/* 副标题样式 */
+.text-xs { font-size: 22rpx; }
+.text-gray-400 { color: #86868b; }
+.text-gray-500 { color: #6e6e73; }
+.uppercase { text-transform: uppercase; }
+.tracking-widest { letter-spacing: 0.1em; }
+.font-black { font-weight: 900; }

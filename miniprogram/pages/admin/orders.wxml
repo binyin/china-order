@@ -21,44 +21,35 @@
     <view class="dashboard">
       <view class="dashboard-title">今日看板</view>
 
-      <!-- 营收汇总 -->
+      <!-- 营收汇总 - 精简版 -->
       <view class="revenue-row">
         <view class="revenue-item">
-          <view class="revenue-num">¥{{totalRevenue}}</view>
-          <view class="revenue-label">预计总营收</view>
+          <view class="revenue-num">{{totalRevenue}}</view>
+          <view class="revenue-label">预计</view>
         </view>
         <view class="revenue-divider"></view>
         <view class="revenue-item">
-          <view class="revenue-num actual">¥{{actualRevenue}}</view>
-          <view class="revenue-label">实收金额</view>
+          <view class="revenue-num actual">{{actualRevenue}}</view>
+          <view class="revenue-label">实收</view>
         </view>
       </view>
 
-      <!-- 各品类统计（可展开） -->
+      <!-- 各品类统计 - 直接显示预定人 -->
       <view class="stats-list">
-        <view class="stats-row stats-header-row">
-          <text class="stats-name">品类</text>
-          <text class="stats-num">总预定</text>
-          <text class="stats-num">待取</text>
-        </view>
-        <view wx:for="{{menuStats}}" wx:key="name" class="stat-group">
-          <view class="stats-row stat-main" bindtap="toggleStatExpand" data-index="{{index}}">
-            <text class="stats-name">{{item.name}}</text>
-            <text class="stats-num big">{{item.total}}</text>
-            <text class="stats-num pending-highlight">{{item.pending}}</text>
-            <text class="expand-arrow {{item.expanded ? 'expanded' : ''}}">▶</text>
-          </view>
-          <!-- 展开预定人列表 -->
-          <view wx:if="{{item.expanded && item.customers.length > 0}}" class="customer-detail-list">
-            <view class="customer-detail-row" wx:for="{{item.customers}}" wx:for-item="c" wx:key="orderId">
-              <text class="cd-name">{{c.name}}</text>
-              <text class="cd-num">×{{c.num}}</text>
-              <text wx:if="{{c.time}}" class="cd-time">{{c.time}}</text>
+        <view wx:for="{{menuStats}}" wx:key="name" class="stat-card">
+          <view class="stat-header">
+            <text class="stat-name">{{item.name}}</text>
+            <view class="stat-badges">
+              <text class="badge-total">总订 {{item.total}}</text>
+              <text class="badge-pending">待取 {{item.pending}}</text>
             </view>
           </view>
-          <view wx:if="{{item.expanded && item.customers.length === 0}}" class="customer-detail-empty">
-            暂无预定
+          <view wx:if="{{item.customers.length > 0}}" class="stat-customers">
+            <text wx:for="{{item.customers}}" wx:for-item="c" wx:key="orderId" class="customer-tag">
+              {{c.name}}×{{c.num}}
+            </text>
           </view>
+          <view wx:if="{{item.customers.length === 0}}" class="stat-empty">暂无预定</view>
         </view>
         <view wx:if="{{menuStats.length === 0}}" class="stats-empty">暂无数据</view>
       </view>

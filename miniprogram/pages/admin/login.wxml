@@ -34,7 +34,6 @@
     
     <button 
       class="btn-login" 
-      hover-class="btn-login-hover"
       bindtap="doLogin" 
       loading="{{loading}}"
     >登 录</button>

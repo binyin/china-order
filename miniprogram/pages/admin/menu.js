@@ -118,22 +118,17 @@ Page({
   addToMenu(e) {
     const index = e.currentTarget.dataset.index
     const product = this.data.unlistedProducts[index]
-    
+    const targetDate = this.data.selectedDate
+
     const postData = {
       product_id: product._id,
       name: product.name,
       price: Number(product.price),
       unit: product.unit || '个',
       image_url: product.image_url || '',
-      stock: Number(product.initStock) || 50
+      stock: Number(product.initStock) || 50,
+      date: targetDate
     }
-
-    // 优化日志格式
-    console.group('[Admin:Menu] 上架产品')
-    console.log('产品:', product.name)
-    console.log('价格:', product.price)
-    console.log('库存:', product.initStock || 50)
-    console.groupEnd()
 
     this.setData({ loading: true })
     addMenuItem(postData).then((res) => {

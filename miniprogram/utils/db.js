@@ -87,7 +87,7 @@ function deleteProduct(id) {
  * 向今日菜单新增单个产品
  */
 function addMenuItem(item) {
-  const today = getDateStr()
+  const targetDate = item.date || getTomorrowBJDateStr()
   return db.collection('active_menu').add({
     data: {
       product_id: item.product_id || item._id,
@@ -97,7 +97,9 @@ function addMenuItem(item) {
       image_url: item.image_url || '',
       stock: item.stock || 50,
       ordered: 0,
-      date: today
+      date: targetDate,
+      menu_id: `menu_${targetDate}_${Date.now()}`,
+      publish_time: Date.now()
     }
   })
 }

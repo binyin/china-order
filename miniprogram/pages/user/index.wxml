@@ -82,13 +82,7 @@
           </view>
           <view class="submitted-items">
             <view wx:for="{{item.items}}" wx:for-item="prod" wx:key="product_id" class="product-item">
-              <text>{{prod.name}}×{{prod.num}}</text>
-              <button class="btn-cancel-item" size="mini" bindtap="cancelOrderItem"
-                      data-orderid="{{item._id}}" 
-                      data-productid="{{prod.product_id}}"
-                      wx:if="{{item.status === 'pending' && prod.item_status === 'pending'}}">
-                取消
-              </button>
+              <text>{{prod.name}}×{{prod.num}}</text>              
             </view>
           </view>
           <view class="submitted-footer">

@@ -2,7 +2,10 @@
 <view class="container">
   <!-- 顶部 -->
   <view class="header">
-    <view class="header-title">产品池</view>
+    <view class="header-content">
+      <view class="header-title">产品池</view>
+      <view class="header-subtitle">产品库管理</view>
+    </view>
     <view class="header-add" bindtap="showAddModal">+ 新增</view>
   </view>
 
@@ -10,7 +13,7 @@
 
   <scroll-view scroll-y style="height: calc(100vh - 120rpx)">
     <view class="product-list">
-      <view class="product-item card" wx:for="{{products}}" wx:key="_id">
+      <view class="product-item" wx:for="{{products}}" wx:key="_id">
         <view class="product-info">
           <view class="product-name">{{item.name}}</view>
           <view class="product-meta">¥{{item.price}} / {{item.unit}}</view>

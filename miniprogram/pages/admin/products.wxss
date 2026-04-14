@@ -2,107 +2,135 @@
 
 .container {
   min-height: 100vh;
-  background-color: #f5f5f5;
-  padding-bottom: 40rpx;
+  background-color: #F5F5F7;
+  padding-bottom: 60rpx;
 }
 
 .header {
   background-color: #ffffff;
-  padding: 32rpx 24rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
+  padding: 32rpx 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
   position: sticky;
   top: 0;
   z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.header-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
 }
 
 .header-title {
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #333;
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.5rpx;
+}
+
+.header-subtitle {
+  font-size: 22rpx;
+  color: #86868b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
 .header-add {
-  font-size: 28rpx;
-  color: #ff6b35;
-  padding: 8rpx 24rpx;
-  border: 1rpx solid #ff6b35;
-  border-radius: 12rpx;
+  font-size: 26rpx;
+  color: #ffffff;
+  padding: 16rpx 28rpx;
+  background-color: #000000;
+  border-radius: 20rpx;
+  font-weight: 600;
 }
 
 .header-add:active {
-  background-color: #ff6b35;
-  color: #ffffff;
+  background-color: #333333;
+  transform: scale(0.96);
 }
 
 /* 产品列表 */
 .product-list {
-  padding: 24rpx 0 80rpx;
+  padding: 24rpx;
 }
 
 .product-item {
-  background-color: #ffffff;
-  border-radius: 16rpx;
-  margin: 0 24rpx 16rpx;
-  padding: 24rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
-  border-left: 6rpx solid #ff6b35;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20rpx);
+  border: 1rpx solid rgba(255, 255, 255, 0.5);
+  border-radius: 24rpx;
+  padding: 28rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 1rpx 3rpx rgba(0,0,0,0.02);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   transition: transform 0.2s;
 }
 
 .product-item:active {
-  transform: translateY(-2rpx);
+  transform: scale(0.98);
 }
 
 .product-info {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
 }
 
 .product-name {
   font-size: 32rpx;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 8rpx;
+  color: #1d1d1f;
 }
 
 .product-meta {
-  font-size: 28rpx;
-  color: #666;
+  font-size: 26rpx;
+  color: #86868b;
+  font-family: ui-monospace, "SF Mono", monospace;
 }
 
 .product-meta .unit {
-  color: #999;
+  color: #aeaeb2;
 }
 
 .product-actions {
   display: flex;
-  gap: 16rpx;
+  gap: 12rpx;
 }
 
 .action-btn {
-  padding: 8rpx 24rpx;
-  font-size: 26rpx;
+  padding: 12rpx 20rpx;
+  font-size: 24rpx;
   min-height: auto;
   border-radius: 12rpx;
 }
 
 .action-btn.edit {
-  background-color: rgba(0, 183, 255, 0.1);
-  color: #007BFF;
-  border: 1rpx solid rgba(0, 123, 255, 0.3);
+  background-color: rgba(0, 122, 255, 0.1);
+  color: #007AFF;
+  border: 1rpx solid rgba(0, 122, 255, 0.3);
 }
 
 .action-btn.edit:active {
-  background-color: rgba(0, 123, 255, 0.2);
+  background-color: rgba(0, 122, 255, 0.2);
+  transform: scale(0.96);
 }
 
 .action-btn.delete {
-  background-color: rgba(255, 107, 107, 0.1);
-  color: #dc3545;
-  border: 1rpx solid rgba(220, 53, 69, 0.3);
+  background-color: rgba(255, 59, 48, 0.1);
+  color: #FF3B30;
+  border: 1rpx solid rgba(255, 59, 48, 0.3);
 }
 
 .action-btn.delete:active {
-  background-color: rgba(220, 53, 69, 0.2);
+  background-color: rgba(255, 59, 48, 0.2);
+  transform: scale(0.96);
 }
 
 /* 弹窗 */
