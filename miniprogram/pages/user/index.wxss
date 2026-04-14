@@ -128,17 +128,17 @@
 .submitted-section { margin-top: 24rpx; }
 .section-title { font-size: 32rpx; font-weight: bold; color: #555; padding: 16rpx 32rpx 0; }
 .submitted-item.card {
-  margin: 12rpx 24rpx; padding: 24rpx;
+  margin: 16rpx 24rpx; padding: 28rpx;
   background: #fff; border-radius: 16rpx;
   box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06);
   transition: opacity 0.3s;
 }
 .submitted-item.cancelled { opacity: 0.5; }
 .submitted-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12rpx;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx;
 }
 .submitted-name { font-size: 32rpx; font-weight: bold; }
-.submitted-items { font-size: 28rpx; color: #666; margin-bottom: 12rpx; }
+.submitted-items { font-size: 28rpx; color: #666; margin-bottom: 16rpx; line-height: 1.8; }
 .submitted-footer { display: flex; justify-content: space-between; align-items: center; }
 .submitted-price { font-size: 34rpx; color: #ff6b35; font-weight: bold; }
 .btn-cancel-order {
