@@ -12,25 +12,32 @@ exports.main = async (event, context) => {
     return { success: false, message: '订单为空' }
   }
 
-  const today = getDateStr()
-  const now = new Date()
+  const today = getBJDateStr()
+  const now = new Date(Date.now() + 8 * 3600 * 1000)
 
   try {
-    // 获取最新菜单发布时间
-    let latestPublishTime = 0
+    // 获取最新菜单信息
+    let latestMenu = null
     try {
-      const menuTimeRes = await db.collection('active_menu')
+      const menuRes = await db.collection('active_menu')
         .where({ date: today })
         .orderBy('publish_time', 'desc')
         .limit(1)
         .get()
       
-      if (menuTimeRes.data.length > 0) {
-        latestPublishTime = menuTimeRes.data[0].publish_time || 0
+      if (menuRes.data.length > 0) {
+        latestMenu = menuRes.data[0]
       }
     } catch (e) {
-      console.warn('获取最新菜单时间失败，使用默认值0', e)
+      console.warn('获取最新菜单失败', e)
     }
+
+    if (!latestMenu) {
+      return { success: false, message: '今日未发布菜单' }
+    }
+
+    const menuId = latestMenu.menu_id
+    const menuPublishTime = latestMenu.publish_time
 
     // 1. 逐项检查库存并原子扣减
     for (const item of items) {
@@ -69,13 +76,14 @@ exports.main = async (event, context) => {
       items: items.map(i => ({
         name: i.name,
         num: i.num,
-        product_id: i.product_id,  // 添加产品ID
-        item_status: 'pending'      // 添加产品状态字段
+        product_id: i.product_id,
+        item_status: 'pending'
       })),
       total_price: total_price,
       status: 'pending',
       date: today,
-      menu_publish_time: latestPublishTime,  // 新增：记录菜单发布时间
+      menu_id: menuId,
+      menu_publish_time: menuPublishTime,
       create_time: now.getTime(),
       create_time_str: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
     }
@@ -92,7 +100,8 @@ exports.main = async (event, context) => {
   }
 }
 
-function getDateStr() {
+function getBJDateStr() {
   const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const bjTime = new Date(d.getTime() + 8 * 3600 * 1000)
+  return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
 }

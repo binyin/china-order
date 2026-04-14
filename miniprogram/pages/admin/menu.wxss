@@ -1,46 +1,70 @@
-/* pages/admin/menu.wxss - 基于设计系统 */
+/* pages/admin/menu.wxss */
 
 .container {
   min-height: 100vh;
-  background-color: var(--color-bg-page);
-  padding-bottom: var(--spacing-8);
+  background-color: #f5f5f5;
+  padding-bottom: 40rpx;
 }
 
-.header {
-  background-color: var(--color-bg-card);
-  padding: var(--spacing-5) var(--spacing-4);
-  box-shadow: var(--shadow-sm);
+/* 顶部导航 */
+.nav-header {
+  background-color: #ffffff;
+  padding: 24rpx;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.05);
 }
 
-.header-title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-primary);
+.nav-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.nav-date {
+  display: flex;
+  gap: 12rpx;
+}
+
+.date-tab {
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 26rpx;
+  color: #666;
+  background-color: #f5f5f5;
+}
+
+.date-tab.active {
+  background-color: #ff6b35;
+  color: #ffffff;
 }
 
 /* Tab切换 */
 .tab-bar {
   display: flex;
-  background-color: var(--color-bg-card);
-  border-bottom: 1rpx solid var(--color-border-light);
+  background-color: #ffffff;
+  border-bottom: 1rpx solid #f0f0f0;
   position: sticky;
-  top: 0;
+  top: 88rpx;
   z-index: 90;
 }
 
 .tab-item {
   flex: 1;
   text-align: center;
-  font-size: var(--font-size-base);
-  color: var(--color-text-secondary);
-  padding: var(--spacing-4) 0;
+  font-size: 28rpx;
+  color: #666;
+  padding: 24rpx 0;
   position: relative;
-  transition: color var(--transition-fast);
 }
 
 .tab-item.active {
-  color: var(--color-primary);
-  font-weight: var(--font-weight-semibold);
+  color: #ff6b35;
+  font-weight: 600;
 }
 
 .tab-item.active::after {
@@ -50,21 +74,8 @@
   left: 25%;
   right: 25%;
   height: 4rpx;
-  background-color: var(--color-primary);
+  background-color: #ff6b35;
   border-radius: 2rpx;
-  animation: slideIn var(--transition-normal);
-}
-
-@keyframes slideIn {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-
-/* 日期选择器 */
-.date-selector {
-  background-color: var(--color-bg-card);
-  padding: var(--spacing-3) 0;
-  box-shadow: var(--shadow-sm);
 }
 
 .date-scroll {
@@ -84,13 +95,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-3) var(--spacing-4);
-  margin-right: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-5);
+  margin: 0 var(--spacing-2);
   border-radius: var(--radius-lg);
   background-color: var(--color-gray-50);
-  min-width: 150rpx;
+  min-width: 160rpx;
   transition: all var(--transition-normal);
   user-select: none;
+}
+
+.date-label {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.date-val {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin-top: 4rpx;
 }
 
 .date-item.active {
@@ -125,12 +148,28 @@
   padding: var(--spacing-4);
   margin-top: var(--spacing-3);
   border-bottom: 1rpx solid var(--color-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .section-title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
+}
+
+.btn-publish {
+  background-color: #ff6b35;
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  padding: var(--spacing-2) var(--spacing-4);
+  font-size: var(--font-size-sm);
+  min-height: auto;
+}
+
+.btn-publish:active {
+  background-color: #e05a2b;
 }
 
 /* 移除计数显示 */

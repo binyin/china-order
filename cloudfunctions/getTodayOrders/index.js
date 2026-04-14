@@ -5,11 +5,11 @@ const db = cloud.database()
 exports.main = async (event, context) => {
   const { date } = event
   
-  const today = date || getDateStr()
+  const today = date || getBJDateStr()
   
   try {
-    // 获取今日最新菜单的发布时间
-    let latestPublishTime = 0
+    // 获取今日最新菜单的 menu_id
+    let latestMenuId = null
     const menuRes = await db.collection('active_menu')
       .where({ date: today })
       .orderBy('publish_time', 'desc')
@@ -17,19 +17,20 @@ exports.main = async (event, context) => {
       .get()
     
     if (menuRes.data.length > 0) {
-      latestPublishTime = menuRes.data[0].publish_time || 0
+      latestMenuId = menuRes.data[0].menu_id
     }
     
-    // 构建查询条件
-    const query = { date: today }
-    if (latestPublishTime > 0) {
-      query.menu_publish_time = latestPublishTime
-    } else {
-      query.menu_publish_time = 0
+    // 如果没有发布菜单，返回空
+    if (!latestMenuId) {
+      return { success: true, data: [], message: '今日未发布菜单' }
     }
     
+    // 使用 menu_id 查询订单
     const ordersRes = await db.collection('orders')
-      .where(query)
+      .where({
+        date: today,
+        menu_id: latestMenuId
+      })
       .orderBy('create_time', 'asc')
       .get()
     
@@ -43,7 +44,8 @@ exports.main = async (event, context) => {
   }
 }
 
-function getDateStr() {
+function getBJDateStr() {
   const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const bjTime = new Date(d.getTime() + 8 * 3600 * 1000)
+  return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
 }

@@ -9,7 +9,6 @@ exports.main = async (event, context) => {
   try {
     // 计算开始日期
     const startDate = getDateStr(new Date(Date.now() - days * 24 * 60 * 60 * 1000))
-    const today = getDateStr()
     
     // 1. 获取日期范围内的所有日期（有订单的日期）
     const dateRes = await db.collection('orders')
@@ -31,8 +30,8 @@ exports.main = async (event, context) => {
       return { success: true, data: [] }
     }
     
-    // 2. 批量获取每个日期的最新菜单时间
-    const dateTimePromises = dates.map(date => 
+    // 2. 批量获取每个日期的最新菜单的 menu_id
+    const dateMenuPromises = dates.map(date => 
       db.collection('active_menu')
         .where({ date: date })
         .orderBy('publish_time', 'desc')
@@ -40,31 +39,31 @@ exports.main = async (event, context) => {
         .get()
         .then(res => ({
           date,
-          latestTime: res.data.length > 0 ? (res.data[0].publish_time || 0) : 0
+          menuId: res.data.length > 0 ? (res.data[0].menu_id || null) : null
         }))
         .catch(() => ({
           date,
-          latestTime: 0
+          menuId: null
         }))
     )
     
-    const dateTimeResults = await Promise.all(dateTimePromises)
-    const dateTimeMap = {}
-    dateTimeResults.forEach(result => {
-      dateTimeMap[result.date] = result.latestTime
+    const dateMenuResults = await Promise.all(dateMenuPromises)
+    const dateMenuMap = {}
+    dateMenuResults.forEach(result => {
+      dateMenuMap[result.date] = result.menuId
     })
     
-    // 3. 为每个日期查询对应最新菜单时间的订单
+    // 3. 为每个日期查询对应最新菜单的订单
     const orderPromises = dates.map(date => {
-      const latestTime = dateTimeMap[date]
-      if (latestTime === 0) {
+      const menuId = dateMenuMap[date]
+      if (!menuId) {
         return Promise.resolve([])
       }
       
       return db.collection('orders')
         .where({
           date: date,
-          menu_publish_time: latestTime
+          menu_id: menuId
         })
         .orderBy('create_time', 'desc')
         .get()

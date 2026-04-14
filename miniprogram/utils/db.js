@@ -3,14 +3,43 @@ const db = wx.cloud.database()
 const _ = db.command
 
 /**
- * 获取今日菜单（active_menu）
+ * 获取今日菜单（active_menu）- 返回明天的菜单
+ * 业务场景：老板提前一天发布明天要销售的品种
  */
 function getTodayMenu() {
-  const today = getDateStr()
+  const tomorrow = getTomorrowBJDateStr()
   return db.collection('active_menu')
-    .where({ date: today })
-    .orderBy('name', 'asc')
+    .where({ date: tomorrow })
+    .orderBy('publish_time', 'desc')
     .get()
+}
+
+/**
+ * 获取指定日期的菜单
+ * @param {string} date - 可选，不传则返回明天的菜单（用户端用）
+ */
+function getMenuByDate(date) {
+  const targetDate = date || getTomorrowBJDateStr()
+  return db.collection('active_menu')
+    .where({ date: targetDate })
+    .orderBy('publish_time', 'desc')
+    .get()
+}
+
+/**
+ * 获取今日订单（通过云函数，使用 menu_id 关联）- 使用北京时间
+ */
+function getTodayOrders(date) {
+  const targetDate = date || getTomorrowBJDateStr()
+  return wx.cloud.callFunction({
+    name: 'getTodayOrders',
+    data: { date: targetDate }
+  }).then(res => {
+    if (res.result && res.result.success) {
+      return { data: res.result.data || [] }
+    }
+    return { data: [] }
+  })
 }
 
 /**
@@ -90,99 +119,23 @@ function updateMenuStock(id, stock) {
 }
 
 /**
- * 获取今日订单（只返回关联最新菜单的订单）
- */
-async function getTodayOrders() {
-  const today = getDateStr()
-  
-  // 先获取今日最新菜单的发布时间
-  let latestPublishTime = 0
-  try {
-    const menuRes = await db.collection('active_menu')
-      .where({ date: today })
-      .orderBy('publish_time', 'desc')
-      .limit(1)
-      .get()
-    
-    if (menuRes.data.length > 0) {
-      latestPublishTime = menuRes.data[0].publish_time || 0
-    }
-  } catch (e) {
-    console.warn('获取最新菜单时间失败', e)
-  }
-  
-  // 构建查询条件：今日订单，且菜单发布时间等于最新发布时间
-  // 如果 latestPublishTime = 0，则表示没有发布菜单，不应该查询到订单
-  const query = { date: today }
-  if (latestPublishTime > 0) {
-    query.menu_publish_time = latestPublishTime
-  } else {
-    // 如果没有发布菜单，不应该查询到订单
-    query.menu_publish_time = 0
-  }
-  
-  const countRes = await db.collection('orders').where(query).count()
-  const total = countRes.total
-  if (total === 0) return { data: [] }
-  
-  const batchTimes = Math.ceil(total / 20)
-  const tasks = []
-  for (let i = 0; i < batchTimes; i++) {
-    tasks.push(db.collection('orders')
-      .where(query)
-      .orderBy('create_time', 'asc')
-      .skip(i * 20)
-      .limit(20)
-      .get())
-  }
-  
-  const results = await Promise.all(tasks)
-  return { data: results.reduce((acc, res) => acc.concat(res.data), []) }
-}
-
-/**
- * 获取历史订单（按日期，只返回关联最新菜单的订单）
+ * 获取历史订单（按日期，使用 menu_id 关联）
  */
 async function getOrdersByDate(date) {
-  // 先获取该日期最新菜单的发布时间
-  let latestPublishTime = 0
   try {
-    const menuRes = await db.collection('active_menu')
-      .where({ date: date })
-      .orderBy('publish_time', 'desc')
-      .limit(1)
-      .get()
+    const result = await wx.cloud.callFunction({
+      name: 'getTodayOrders',
+      data: { date: date }
+    })
     
-    if (menuRes.data.length > 0) {
-      latestPublishTime = menuRes.data[0].publish_time || 0
+    if (result.result && result.result.success) {
+      return { data: result.result.data || [] }
     }
+    return { data: [] }
   } catch (e) {
-    console.warn('获取最新菜单时间失败', e)
+    console.warn('获取历史订单失败', e)
+    return { data: [] }
   }
-  
-  // 构建查询条件
-  let query = { date: date }
-  if (latestPublishTime > 0) {
-    query.menu_publish_time = latestPublishTime
-  }
-  
-  const countRes = await db.collection('orders').where(query).count()
-  const total = countRes.total
-  if (total === 0) return { data: [] }
-  
-  const batchTimes = Math.ceil(total / 20)
-  const tasks = []
-  for (let i = 0; i < batchTimes; i++) {
-    tasks.push(db.collection('orders')
-      .where(query)
-      .orderBy('create_time', 'desc')
-      .skip(i * 20)
-      .limit(20)
-      .get())
-  }
-  
-  const results = await Promise.all(tasks)
-  return { data: results.reduce((acc, res) => acc.concat(res.data), []) }
 }
 
 /**
@@ -232,8 +185,8 @@ async function getRecentOrdersFallback(days) {
     return { data: [] }
   }
   
-  // 为每个日期获取最新菜单时间
-  const dateTimePromises = dates.map(date => 
+  // 为每个日期获取最新菜单的 menu_id
+  const dateMenuPromises = dates.map(date => 
     db.collection('active_menu')
       .where({ date: date })
       .orderBy('publish_time', 'desc')
@@ -241,31 +194,31 @@ async function getRecentOrdersFallback(days) {
       .get()
       .then(res => ({
         date,
-        latestTime: res.data.length > 0 ? (res.data[0].publish_time || 0) : 0
+        menuId: res.data.length > 0 ? (res.data[0].menu_id || null) : null
       }))
       .catch(() => ({
         date,
-        latestTime: 0
+        menuId: null
       }))
   )
   
-  const dateTimeResults = await Promise.all(dateTimePromises)
-  const dateTimeMap = {}
-  dateTimeResults.forEach(result => {
-    dateTimeMap[result.date] = result.latestTime
+  const dateMenuResults = await Promise.all(dateMenuPromises)
+  const dateMenuMap = {}
+  dateMenuResults.forEach(result => {
+    dateMenuMap[result.date] = result.menuId
   })
   
   // 构建查询条件
   const orderPromises = dates.map(date => {
-    const latestTime = dateTimeMap[date]
-    if (latestTime === 0) {
+    const menuId = dateMenuMap[date]
+    if (!menuId) {
       return Promise.resolve([])
     }
     
     return db.collection('orders')
       .where({
         date: date,
-        menu_publish_time: latestTime
+        menu_id: menuId
       })
       .orderBy('create_time', 'desc')
       .get()
@@ -332,17 +285,37 @@ async function getMenuHistory() {
 }
 
 /**
- * 获取日期字符串 YYYY-MM-DD
+ * 获取日期字符串 YYYY-MM-DD（本地时区）
  */
 function getDateStr(date) {
   const d = date || new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+/**
+ * 获取北京时间日期字符串 YYYY-MM-DD
+ */
+function getBJDateStr(date) {
+  const d = date || new Date()
+  const bjTime = new Date(d.getTime() + 8 * 3600 * 1000)
+  return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
+}
+
+/**
+ * 获取明天北京时间日期字符串 YYYY-MM-DD
+ */
+function getTomorrowBJDateStr() {
+  const d = new Date()
+  const bjTime = new Date(d.getTime() + 8 * 3600 * 1000)
+  bjTime.setDate(bjTime.getDate() + 1)
+  return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
+}
+
 module.exports = {
   db,
   _,
   getTodayMenu,
+  getMenuByDate,
   getAllProducts,
   addProduct,
   updateProduct,
@@ -357,5 +330,7 @@ module.exports = {
   cancelOrder,
   getMyOrders,
   getMenuHistory,
-  getDateStr
+  getDateStr,
+  getBJDateStr,
+  getTomorrowBJDateStr
 }

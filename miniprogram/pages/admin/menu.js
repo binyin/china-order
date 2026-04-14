@@ -1,10 +1,13 @@
 // pages/admin/menu.js
 const app = getApp()
-const { getAllProducts, getTodayMenu, addMenuItem, removeMenuItem, updateMenuStock, getMenuHistory } = require('../../utils/db')
+const { getAllProducts, getTodayMenu, getMenuByDate, addMenuItem, removeMenuItem, updateMenuStock, getMenuHistory, getBJDateStr } = require('../../utils/db')
 
 Page({
   data: {
     activeTab: 'publish',
+    selectedDate: '',
+    dateIndex: 1,
+    dateList: [],
     todayMenu: [],        
     unlistedProducts: [], 
     historyDates: [],
@@ -16,11 +19,60 @@ Page({
       wx.redirectTo({ url: '/pages/admin/login' })
       return
     }
-    this.loadPublishData()
+    this.initDateList()
   },
 
   onShow() {
+    if (this.data.selectedDate) {
+      this.loadPublishData()
+    }
+  },
+
+  initDateList() {
+    const dates = []
+    const today = new Date()
+    for (let i = 0; i < 3; i++) {
+      const d = new Date(today.getTime() + i * 24 * 3600 * 1000)
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      let label = ''
+      if (i === 0) label = '今天'
+      else if (i === 1) label = '明天'
+      else label = '后天'
+      dates.push({ date: dateStr, label })
+    }
+    this.setData({
+      dateList: dates,
+      selectedDate: dates[1].date,
+      dateIndex: 1
+    })
     this.loadPublishData()
+  },
+
+  onDateChange(e) {
+    const index = e.currentTarget.dataset.index
+    const date = this.data.dateList[index].date
+    this.setData({
+      selectedDate: date,
+      dateIndex: index
+    })
+    this.loadPublishData()
+  },
+
+  onDateSwipe(e) {
+    const direction = e.detail.direction
+    let newIndex = this.data.dateIndex
+    if (direction === 'left' && newIndex < 2) {
+      newIndex++
+    } else if (direction === 'right' && newIndex > 0) {
+      newIndex--
+    }
+    if (newIndex !== this.data.dateIndex) {
+      this.setData({
+        selectedDate: this.data.dateList[newIndex].date,
+        dateIndex: newIndex
+      })
+      this.loadPublishData()
+    }
   },
 
   switchTab(e) {
@@ -35,7 +87,7 @@ Page({
     this.setData({ loading: true })
     try {
       const [menuRes, prodRes] = await Promise.all([
-        getTodayMenu(),
+        getMenuByDate(this.data.selectedDate),
         getAllProducts()
       ])
       
@@ -148,6 +200,38 @@ Page({
     this.setData({ unlistedProducts })
   },
 
+  publishTodayMenu() {
+    if (this.data.todayMenu.length === 0) {
+      wx.showToast({ title: '请先选择产品', icon: 'none' })
+      return
+    }
+    const items = this.data.todayMenu.map(m => ({
+      product_id: m.product_id,
+      name: m.name,
+      price: m.price,
+      unit: m.unit,
+      image_url: m.image_url,
+      stock: m.stock
+    }))
+    wx.showLoading({ title: '发布中...' })
+    wx.cloud.callFunction({
+      name: 'publishMenu',
+      data: { items, date: this.data.selectedDate }
+    }).then(result => {
+      wx.hideLoading()
+      const r = result.result
+      if (r.success) {
+        wx.showToast({ title: `已发布 ${r.data.count} 种`, icon: 'success' })
+        this.loadPublishData()
+      } else {
+        wx.showModal({ title: '发布失败', content: r.message, showCancel: false })
+      }
+    }).catch(err => {
+      wx.hideLoading()
+      wx.showToast({ title: '网络错误', icon: 'error' })
+    })
+  },
+
   loadHistory() {
     getMenuHistory().then(res => {
       const dateMap = {}
@@ -221,12 +305,12 @@ Page({
         wx.showLoading({ title: '发布中...' })
         wx.cloud.callFunction({
           name: 'publishMenu',
-          data: { items }
+          data: { items, date: this.data.selectedDate }
         }).then(result => {
           wx.hideLoading()
           const r = result.result
           if (r.success) {
-            console.log(`[Admin:Menu] 历史复用发布成功: ${r.data.count} 种`);
+            console.log(`[Admin:Menu] 复用发布成功: ${r.data.count} 种，日期: ${r.data.date}`);
             wx.showToast({ title: `已发布 ${r.data.count} 种`, icon: 'success' })
             this.loadPublishData()
           } else {

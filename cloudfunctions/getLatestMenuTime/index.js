@@ -4,12 +4,11 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
 exports.main = async (event, context) => {
-  const today = getDateStr()
+  const targetDate = event.date || getBJDateStr()
   
   try {
-    // 获取今日所有菜单，按发布时间降序排序
     const menuRes = await db.collection('active_menu')
-      .where({ date: today })
+      .where({ date: targetDate })
       .orderBy('publish_time', 'desc')
       .limit(1)
       .get()
@@ -28,7 +27,8 @@ exports.main = async (event, context) => {
   }
 }
 
-function getDateStr() {
+function getBJDateStr() {
   const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  const bjTime = new Date(d.getTime() + 8 * 3600 * 1000)
+  return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
 }

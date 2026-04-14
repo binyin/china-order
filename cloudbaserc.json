@@ -12,6 +12,7 @@
     { "name": "getMyOrders" },
     { "name": "getOpenId" },
     { "name": "undoCancel" },
-    { "name": "publishMenu" }
+    { "name": "publishMenu" },
+    { "name": "getTodayOrders" }
   ]
 }

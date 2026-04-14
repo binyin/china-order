@@ -1,21 +1,28 @@
 <!--pages/admin/menu.wxml-->
 <view class="container">
-  <view class="header">
-    <view class="header-title">菜单管理</view>
+  <!-- 顶部导航 -->
+  <view class="nav-header">
+    <view class="nav-title">菜单管理</view>
+    <view class="nav-date">
+      <view class="date-tab {{dateIndex === 0 ? 'active' : ''}}" bindtap="onDateChange" data-index="0">今天</view>
+      <view class="date-tab {{dateIndex === 1 ? 'active' : ''}}" bindtap="onDateChange" data-index="1">明天</view>
+      <view class="date-tab {{dateIndex === 2 ? 'active' : ''}}" bindtap="onDateChange" data-index="2">后天</view>
+    </view>
   </view>
 
   <!-- Tab -->
   <view class="tab-bar">
-    <view class="tab-item {{activeTab === 'publish' ? 'active' : ''}}" bindtap="switchTab" data-tab="publish">今日菜单</view>
+    <view class="tab-item {{activeTab === 'publish' ? 'active' : ''}}" bindtap="switchTab" data-tab="publish">菜单发布</view>
     <view class="tab-item {{activeTab === 'history' ? 'active' : ''}}" bindtap="switchTab" data-tab="history">历史复用</view>
   </view>
 
   <!-- 今日菜单 Tab -->
   <view wx:if="{{activeTab === 'publish'}}">
 
-    <!-- 区域1：今日已发布产品（置顶） -->
+    <!-- 区域1：已发布产品 -->
     <view class="section-header">
-      <view class="section-title">今日售卖 <text class="section-count">{{todayMenu.length}} 种</text></view>
+      <view class="section-title">已发布 <text class="section-count">{{todayMenu.length}} 种</text></view>
+      <button class="btn-publish" bindtap="publishTodayMenu" wx:if="{{todayMenu.length > 0}}">重新发布</button>
     </view>
 
     <view wx:if="{{todayMenu.length === 0}}" class="empty-inline">暂未发布任何产品</view>
