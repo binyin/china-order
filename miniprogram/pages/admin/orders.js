@@ -259,7 +259,9 @@ Page({
             this.loadVerifyData()
           },
           onError: err => {
-            console.error('订单监听错误', err)
+            console.error('订单监听断开，3秒后重连', err)
+            this.setData({ orderWatcher: null })
+            setTimeout(() => this.startWatch(), 3000)
           }
         })
 
@@ -278,7 +280,9 @@ Page({
             this.loadVerifyData()
           },
           onError: err => {
-            console.error('订单监听错误', err)
+            console.error('订单监听断开，3秒后重连', err)
+            this.setData({ orderWatcher: null })
+            setTimeout(() => this.startWatch(), 3000)
           }
         })
       

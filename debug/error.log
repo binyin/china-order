@@ -1,44 +1,9 @@
-VM6507:11 页面【pages/user/index]错误:
- Error: module '@babel/runtime/helpers/defineProperty.js' is not defined, require args is './defineProperty'
-    at q (VM6450 WASubContext.js:1)
-    at n (VM6450 WASubContext.js:1)
-    at <anonymous>:1:865
-    at VM6450 WASubContext.js:1
-    at f.runWith (VM6450 WASubContext.js:1)
-    at q (VM6450 WASubContext.js:1)
-    at n (VM6450 WASubContext.js:1)
-    at index.js:4
-    at VM6450 WASubContext.js:1
-    at f.runWith (VM6450 WASubContext.js:1)(env: Linux,mp,2.01.2510290; lib: 3.15.1)
-(anonymous) @ VM6507:11
-Error: module '@babel/runtime/helpers/defineProperty.js' is not defined, require args is './defineProperty'
-    at q (VM6450 WASubContext.js:1)
-    at n (VM6450 WASubContext.js:1)
-    at <anonymous>:1:865
-    at VM6450 WASubContext.js:1
-    at f.runWith (VM6450 WASubContext.js:1)
-    at q (VM6450 WASubContext.js:1)
-    at n (VM6450 WASubContext.js:1)
-    at index.js:4
-    at VM6450 WASubContext.js:1
-    at f.runWith (VM6450 WASubContext.js:1)(env: Linux,mp,2.01.2510290; lib: 3.15.1)
-Error: module '@babel/runtime/helpers/defineProperty.js' is not defined, require args is './defineProperty'
-    at q (VM6450 WASubContext.js:1)
-    at n (VM6450 WASubContext.js:1)
-    at <anonymous>:1:865
-    at VM6450 WASubContext.js:1
-    at f.runWith (VM6450 WASubContext.js:1)
-    at q (VM6450 WASubContext.js:1)
-    at n (VM6450 WASubContext.js:1)
-    at index.js:4
-    at VM6450 WASubContext.js:1
-    at f.runWith (VM6450 WASubContext.js:1)(env: Linux,mp,2.01.2510290; lib: 3.15.1)
-Component is not found in path "wx://not-found".(env: Linux,mp,2.01.2510290; lib: 3.15.1)
-[Violation] 'message' handler took 731ms
-[system] Launch Time: 10465 ms
-The resource http://127.0.0.1:50076/appservice/__dev__/WAServiceMainContext.js?t=wechat&v=3.15.1 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
-Error: timeout
-    at Function.<anonymous> (WAServiceMainContext.js?t=wechat&v=3.15.1:1)
-    at p (WAServiceMainContext.js?t=wechat&v=3.15.1:1)
-    at WAServiceMainContext.js?t=wechat&v=3.15.1:1
-    at WAServiceMainContext.js?t=wechat&v=3.15.1:1(env: Linux,mp,2.01.2510290; lib: 3.15.1)
+[渲染层网络层错误] Failed to load local image resource /assets/default-avatar.png 
+ the server responded with a status of 500 (HTTP/1.1 500 Internal Server Error) 
+(env: Linux,mp,2.01.2510290; lib: 3.15.1)
+[Violation] 'setTimeout' handler took 58ms
+orders.js? [sm]:262 订单监听错误 Error: errCode: -402011 realtime listener unexpected fatal error | errMsg: Error: errCode: -402010 realtime listener check last fail | errMsg: Error: invalid state: ws connection not exists, can not send message 
+history states: UNINIT-(loginStart)->INIT_LOGGING_IN-(loginSuccess)->INIT_LOGGED_IN-(initWatchStart)->INIT_WATCH_PENDING-(initWatchSuccess)->INIT_WATCH_SUCCESS-(close)->CLOSED
+    at new T (<anonymous>:1:254517)
+    at Fa.closeWithError (<anonymous>:1:389125)
+    at Fa.sendACK (<anonymous>:1:379341)(env: Linux,mp,2.01.2510290; lib: 3.15.1)
