@@ -65,7 +65,7 @@
               wx:for="{{pendingOrders}}" wx:key="_id">
           <view class="customer-header">
             <image class="customer-avatar" src="{{item.customer_avatar}}" mode="aspectFill" wx:if="{{item.customer_avatar}}"></image>
-            <view class="customer-avatar-placeholder" wx:else>{{(item.customer_nickname || item.customer_name || '?').substring(0,1)}}</view>
+            <view class="customer-avatar-placeholder" wx:else>?</view>
             <view class="customer-name">
               <text wx:if="{{item.create_time_str}}" class="order-time-badge">{{item.create_time_str}}</text>
               {{item.customer_nickname || item.customer_name}}
