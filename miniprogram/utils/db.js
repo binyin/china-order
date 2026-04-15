@@ -313,11 +313,32 @@ function getTomorrowBJDateStr() {
   return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
 }
 
+/**
+ * 获取最近发布的菜单（最新一次发布的日期的所有产品）
+ */
+function getLatestMenu() {
+  return db.collection('active_menu')
+    .orderBy('publish_time', 'desc')
+    .limit(1)
+    .get()
+    .then(res => {
+      if (res.data.length > 0) {
+        const latestDate = res.data[0].date
+        return db.collection('active_menu')
+          .where({ date: latestDate })
+          .orderBy('publish_time', 'desc')
+          .get()
+      }
+      return { data: [] }
+    })
+}
+
 module.exports = {
   db,
   _,
   getTodayMenu,
   getMenuByDate,
+  getLatestMenu,
   getAllProducts,
   addProduct,
   updateProduct,

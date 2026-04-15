@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/user/index",
+    "pages/user/setting",
     "pages/user/history",
     "pages/admin/login",
     "pages/admin/products",

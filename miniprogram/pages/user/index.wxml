@@ -19,12 +19,11 @@
 <view wx:elif="{{!loading}}">
   <!-- 顶部导航 -->
   <view class="header">
-    <view class="header-title">今日预定</view>
+    <view class="header-left">
+      <view class="header-setting" bindtap="goSetting">☰</view>
+    </view>
+    <view class="header-title">{{dateTime}}</view>
     <view class="header-right">
-      <view class="header-profile" wx:if="{{hasProfile}}" bindtap="editProfile">
-        <text class="profile-name">{{customerName}}</text>
-      </view>
-      <view class="header-history" bindtap="goHistory">我的订单</view>
       <view class="header-admin" bindtap="goAdmin">店主入口</view>
     </view>
   </view>

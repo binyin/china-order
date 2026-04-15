@@ -14,8 +14,17 @@
   padding: 36rpx 32rpx 28rpx;
   border-bottom: 1rpx solid #e5e5ea;
 }
+.header-left { display: flex; align-items: center; }
+.header-setting {
+  font-size: 40rpx;
+  padding: 8rpx 16rpx;
+  font-weight: 300;
+  color: #333;
+}
 .header-title { 
-  font-size: 48rpx; 
+  flex: 1;
+  text-align: center;
+  font-size: 40rpx; 
   font-weight: 700; 
   color: #1d1d1f;
   letter-spacing: -0.5rpx;

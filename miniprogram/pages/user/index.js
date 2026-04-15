@@ -1,5 +1,5 @@
 // pages/user/index.js
-const { getTodayMenu, getMyOrders } = require('../../utils/db')
+const { getLatestMenu, getMyOrders } = require('../../utils/db')
 const logger = require('../../utils/logger')
 
 const TAG = 'user:index'
@@ -16,8 +16,9 @@ Page({
     orderSummary: [],
     submitting: false,
     hasProfile: false,
-    needAuth: false,  // 新增：是否需要授权
-    loadingOrders: false, // 添加：控制订单加载状态
+    needAuth: false,
+    loadingOrders: false,
+    dateTime: '',
     statusText: {
       pending: '待取货',
       completed: '已完成',
@@ -32,7 +33,17 @@ Page({
       system: systemInfo,
       version: wx.envVersion
     })
+    this.setDateTime()
     this.checkAuthStatus()
+  },
+
+  setDateTime() {
+    const now = new Date()
+    const month = now.getMonth() + 1
+    const day = now.getDate()
+    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    const weekDay = weekDays[now.getDay()]
+    this.setData({ dateTime: `${month}月${day}日 ${weekDay}` })
   },
 
   onShow() {
@@ -40,13 +51,38 @@ Page({
     this.checkAuthStatus()
   },
 
+  getTodayStr() {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  },
+
   loadMenu() {
     logger.info(TAG + ':loadMenu', { start: true })
     this.setData({ loading: true })
-    getTodayMenu().then(res => {
+    const todayStr = this.getTodayStr()
+    logger.info(TAG + ':loadMenu', { todayStr })
+    getLatestMenu().then(res => {
       const list = res.data.map(item => ({ ...item, qty: 0 }))
-      this.setData({ menuList: list, loading: false })
-      logger.info(TAG + ':loadMenu', { success: true, count: list.length })
+      logger.info(TAG + ':loadMenu', { rawList: list.map(i => ({ date: i.date, name: i.name })) })
+      
+      const validMenus = list.filter(item => item.date >= todayStr)
+      logger.info(TAG + ':loadMenu', { validCount: validMenus.length, invalidCount: list.length - validMenus.length })
+      
+      if (validMenus.length > 0) {
+        const latestMenu = validMenus[0]
+        const dateParts = latestMenu.date.split('-')
+        const month = parseInt(dateParts[1])
+        const day = parseInt(dateParts[2])
+        this.setData({ 
+          dateTime: `${month}月${day}日`,
+          menuList: validMenus,
+          loading: false
+        })
+      } else {
+        this.setData({ menuList: [], dateTime: '', loading: false })
+      }
+      
+      logger.info(TAG + ':loadMenu', { success: true, count: validMenus.length })
       this.calcTotal()
     }).catch((err) => {
       this.setData({ loading: false })
@@ -436,5 +472,9 @@ Page({
 
   goHistory() {
     wx.navigateTo({ url: '/pages/user/history' })
+  },
+
+  goSetting() {
+    wx.navigateTo({ url: '/pages/user/setting' })
   }
 })
