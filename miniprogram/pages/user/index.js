@@ -389,28 +389,28 @@ Page({
 
   checkAuthStatus() {
     logger.info(TAG + ':checkAuthStatus', { check: true })
-    wx.getSetting({
-      success: res => {
-        if (res.authSetting['scope.userInfo']) {
-          logger.info(TAG + ':checkAuthStatus', { authorized: true })
-          this.getUserInfo()
-        } else {
-          logger.info(TAG + ':checkAuthStatus', { authorized: false })
-          this.setData({ 
-            needAuth: true,
-            loading: false 
-          })
-        }
-      },
-      fail: err => {
-        logger.error(TAG + ':checkAuthStatus', { error: err.message || String(err) })
-      }
-    })
+    const userProfile = wx.getStorageSync('userProfile')
+    if (userProfile && userProfile.nickname) {
+      this.setData({
+        customerName: userProfile.nickname,
+        hasProfile: true,
+        needAuth: false
+      })
+      logger.info(TAG + ':checkAuthStatus', { fromStorage: true, nickname: userProfile.nickname })
+      this.loadMenu()
+      this.loadMyOrders()
+    } else {
+      this.setData({ 
+        needAuth: true,
+        loading: false 
+      })
+    }
   },
 
   getUserInfo() {
     logger.info(TAG + ':getUserInfo', { get: true })
-    wx.getUserInfo({
+    wx.getUserProfile({
+      desc: '用于显示您的昵称和头像',
       success: res => {
         const userInfo = res.userInfo
         wx.setStorageSync('userProfile', { 

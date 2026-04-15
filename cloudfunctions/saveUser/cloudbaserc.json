@@ -1,0 +1,15 @@
+{
+  "name": "saveUser",
+  "version": "1.0.0",
+  "envId": "cloudbase-2gjs1hdd0c429545",
+  "functionRoot": "cloudfunctions/saveUser",
+  "functions": [
+    {
+      "name": "saveUser",
+      "timeout": 15,
+      "memory": 256,
+      "runtime": "Nodejs18.15",
+      "handler": "index.main"
+    }
+  ]
+}

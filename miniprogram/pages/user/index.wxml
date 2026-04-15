@@ -7,8 +7,7 @@
     <view class="auth-desc">请授权获取您的微信信息以使用预定功能</view>
     <button 
       class="auth-button" 
-      open-type="getUserInfo" 
-      bindgetuserinfo="onAuthSuccess"
+      bindtap="getUserInfo"
     >
       授权登录
     </button>
