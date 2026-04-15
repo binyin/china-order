@@ -424,6 +424,19 @@ Page({
           needAuth: false
         })
         
+        // 保存用户信息到数据库
+        wx.cloud.callFunction({
+          name: 'saveUser',
+          data: {
+            nickname: userInfo.nickName,
+            avatarUrl: userInfo.avatarUrl
+          }
+        }).then(r => {
+          logger.info(TAG + ':saveUser', { success: r.result && r.result.success })
+        }).catch(e => {
+          logger.error(TAG + ':saveUser', { error: e.message })
+        })
+        
         logger.info(TAG + ':getUserInfo', { success: true, nickname: userInfo.nickName })
         this.loadMenu()
         this.loadMyOrders()
