@@ -1,39 +1,44 @@
-[2026-04-15 15:17:40] [INFO] user:index:loadMenu: {"start":true}
-logger.js? [sm]:45 [2026-04-15 15:17:40] [INFO] user:index:loadMenu: {"todayStr":"2026-04-15"}
-logger.js? [sm]:45 [2026-04-15 15:17:40] [INFO] user:index:loadMyOrders: {"start":true}
-logger.js? [sm]:45 [2026-04-15 15:17:40] [INFO] user:index:getUserInfo: {"success":true,"nickname":"微信用户"}
-logger.js? [sm]:45 [2026-04-15 15:17:40] [INFO] user:index:loadMenu: {"start":true}
-logger.js? [sm]:45 [2026-04-15 15:17:40] [INFO] user:index:loadMenu: {"todayStr":"2026-04-15"}
-Wed Apr 15 2026 15:17:40 GMT+0800 (中国标准时间) 云开发数据库索引建议
-发起的如下数据库查询可能缺乏高效的索引支持，如果此查询需在生产环境频繁使用，建议建立相应完整索引
-查询语句:
-db.collection('active_menu').where({})
-.orderBy('publish_time', 'desc')
-.get()
-1. 全量查询告警: 空查询语句可能需扫全表
-索引建议 : 
-  publish_time: 降序
-
-快速创建索引链接：cloud://createindex?env=cloudbase-2gjs1hdd0c429545&collection=active_menu&from=console&s=%5B%7B%22field%22%3A%22publish_time%22%2C%22type%22%3A-1%7D%5D
-logger.js? [sm]:45 [2026-04-15 15:17:41] [INFO] user:index:loadMenu: {"rawList":[{"date":"2026-04-15","name":"桂花米糕"},{"date":"2026-04-15","name":"南瓜馒头"},{"date":"2026-04-15","name":"全麦馒头"},{"date":"2026-04-15","name":"白馒头"}]}
-logger.js? [sm]:45 [2026-04-15 15:17:41] [INFO] user:index:loadMenu: {"validCount":4,"invalidCount":0}
-logger.js? [sm]:45 [2026-04-15 15:17:41] [INFO] user:index:loadMenu: {"success":true,"count":4}
-Wed Apr 15 2026 15:17:41 GMT+0800 (中国标准时间) 云开发数据库索引建议
-发起的如下数据库查询经自动检测发现以下问题，且可能缺乏高效的索引支持，如果此查询需在生产环境频繁使用，建议建立相应完整索引
-查询语句:
-db.collection('active_menu').where({
-  date: '2026-04-15'
-})
-.orderBy('publish_time', 'desc')
-.get()
-索引建议 : 
-组合索引: 
-  date: 升序
-  publish_time: 降序
-
-快速创建索引链接：cloud://createindex?env=cloudbase-2gjs1hdd0c429545&collection=active_menu&from=console&s=%5B%7B%22field%22%3A%22date%22%2C%22type%22%3A1%7D%2C%7B%22field%22%3A%22publish_time%22%2C%22type%22%3A-1%7D%5D
-logger.js? [sm]:45 [2026-04-15 15:17:41] [INFO] user:index:loadMenu: {"rawList":[{"date":"2026-04-15","name":"桂花米糕"},{"date":"2026-04-15","name":"南瓜馒头"},{"date":"2026-04-15","name":"全麦馒头"},{"date":"2026-04-15","name":"白馒头"}]}
-logger.js? [sm]:45 [2026-04-15 15:17:41] [INFO] user:index:loadMenu: {"validCount":4,"invalidCount":0}
-logger.js? [sm]:45 [2026-04-15 15:17:41] [INFO] user:index:loadMenu: {"success":true,"count":4}
+VM6507:11 页面【pages/user/index]错误:
+ Error: module '@babel/runtime/helpers/defineProperty.js' is not defined, require args is './defineProperty'
+    at q (VM6450 WASubContext.js:1)
+    at n (VM6450 WASubContext.js:1)
+    at <anonymous>:1:865
+    at VM6450 WASubContext.js:1
+    at f.runWith (VM6450 WASubContext.js:1)
+    at q (VM6450 WASubContext.js:1)
+    at n (VM6450 WASubContext.js:1)
+    at index.js:4
+    at VM6450 WASubContext.js:1
+    at f.runWith (VM6450 WASubContext.js:1)(env: Linux,mp,2.01.2510290; lib: 3.15.1)
+(anonymous) @ VM6507:11
+Error: module '@babel/runtime/helpers/defineProperty.js' is not defined, require args is './defineProperty'
+    at q (VM6450 WASubContext.js:1)
+    at n (VM6450 WASubContext.js:1)
+    at <anonymous>:1:865
+    at VM6450 WASubContext.js:1
+    at f.runWith (VM6450 WASubContext.js:1)
+    at q (VM6450 WASubContext.js:1)
+    at n (VM6450 WASubContext.js:1)
+    at index.js:4
+    at VM6450 WASubContext.js:1
+    at f.runWith (VM6450 WASubContext.js:1)(env: Linux,mp,2.01.2510290; lib: 3.15.1)
+Error: module '@babel/runtime/helpers/defineProperty.js' is not defined, require args is './defineProperty'
+    at q (VM6450 WASubContext.js:1)
+    at n (VM6450 WASubContext.js:1)
+    at <anonymous>:1:865
+    at VM6450 WASubContext.js:1
+    at f.runWith (VM6450 WASubContext.js:1)
+    at q (VM6450 WASubContext.js:1)
+    at n (VM6450 WASubContext.js:1)
+    at index.js:4
+    at VM6450 WASubContext.js:1
+    at f.runWith (VM6450 WASubContext.js:1)(env: Linux,mp,2.01.2510290; lib: 3.15.1)
+Component is not found in path "wx://not-found".(env: Linux,mp,2.01.2510290; lib: 3.15.1)
+[Violation] 'message' handler took 731ms
+[system] Launch Time: 10465 ms
 The resource http://127.0.0.1:50076/appservice/__dev__/WAServiceMainContext.js?t=wechat&v=3.15.1 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
-logger.js? [sm]:45 [2026-04-15 15:17:42] [INFO] user:index:loadMyOrders: {"success":true,"count":0}
+Error: timeout
+    at Function.<anonymous> (WAServiceMainContext.js?t=wechat&v=3.15.1:1)
+    at p (WAServiceMainContext.js?t=wechat&v=3.15.1:1)
+    at WAServiceMainContext.js?t=wechat&v=3.15.1:1
+    at WAServiceMainContext.js?t=wechat&v=3.15.1:1(env: Linux,mp,2.01.2510290; lib: 3.15.1)
