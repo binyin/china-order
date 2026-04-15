@@ -247,11 +247,16 @@
 }
 
 .customer-header {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 10rpx;
+  display: flex; align-items: center; margin-bottom: 10rpx; gap: 16rpx;
+}
+.customer-avatar {
+  width: 72rpx; height: 72rpx;
+  border-radius: 50%;
+  background: #f0f0f0;
 }
 .customer-name {
   font-size: 38rpx; font-weight: bold; color: #222;
-  display: flex; align-items: center; gap: 12rpx;
+  display: flex; align-items: center; gap: 12rpx; flex: 1;
 }
 .customer-name.dimmed { color: #999; }
 .order-time-badge {

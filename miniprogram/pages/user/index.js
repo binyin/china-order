@@ -186,7 +186,8 @@ Page({
       return
     }
 
-    wx.setStorageSync('userProfile', { nickname: name })
+    const userProfile = wx.getStorageSync('userProfile') || {}
+    wx.setStorageSync('userProfile', { ...userProfile, nickname: name })
     this.setData({ hasProfile: true })
 
     const items = this.data.menuList
@@ -202,7 +203,9 @@ Page({
       data: {
         items,
         total_price: parseFloat(this.data.totalPrice),
-        customer_name: name
+        customer_name: name,
+        customer_nickname: userProfile.nickname || '',
+        customer_avatar: userProfile.avatarUrl || ''
       }
     }).then(res => {
       this.setData({ submitting: false })
