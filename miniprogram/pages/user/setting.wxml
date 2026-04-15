@@ -1,0 +1,19 @@
+<!--pages/user/setting.wxml-->
+<view class="setting-container">
+  <view class="setting-item" bindtap="goHistory">
+    <text class="setting-label">我的订单</text>
+    <text class="setting-arrow">›</text>
+  </view>
+  <view class="setting-item">
+    <text class="setting-label">小程序名称</text>
+    <text class="setting-value">馒头店预定</text>
+  </view>
+  <view class="setting-item">
+    <text class="setting-label">版本号</text>
+    <text class="setting-value">{{version}}</text>
+  </view>
+  <view class="setting-item intro-item">
+    <text class="setting-label">介绍</text>
+    <text class="setting-value intro">馒头店预定小程序，方便快捷预订每日菜品</text>
+  </view>
+</view>

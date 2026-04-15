@@ -1,0 +1,52 @@
+/* pages/user/setting.wxss */
+.setting-container {
+  padding: 32rpx;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 32rpx 24rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.setting-item:first-child {
+  border-top-left-radius: 12rpx;
+  border-top-right-radius: 12rpx;
+}
+
+.setting-item:last-child {
+  border-bottom-left-radius: 12rpx;
+  border-bottom-right-radius: 12rpx;
+  border-bottom: none;
+}
+
+.setting-label {
+  font-size: 30rpx;
+  color: #333;
+}
+
+.setting-value {
+  font-size: 30rpx;
+  color: #666;
+}
+
+.setting-arrow {
+  font-size: 36rpx;
+  color: #ccc;
+}
+
+.intro-item {
+  align-items: flex-start;
+}
+
+.intro-item .setting-label {
+  flex-shrink: 0;
+}
+
+.intro {
+  text-align: right;
+  line-height: 1.5;
+}

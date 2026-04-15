@@ -54,18 +54,18 @@
     <!-- 产品卡片列表 -->
     <scroll-view scroll-y class="menu-scroll">
       <view class="menu-list">
-        <view class="menu-item card" wx:for="{{menuList}}" wx:key="_id">
-          <view class="item-info">
-            <view class="item-name">{{item.name}}</view>
-            <view class="item-meta">
-              <text class="item-price">¥{{item.price}}/{{item.unit}}</text>
-              <text class="item-stock">库存 {{item.stock - item.ordered}}</text>
-            </view>
+        <view class="menu-item" wx:for="{{menuList}}" wx:key="_id">
+          <view class="item-left">
+            <text class="item-name">{{item.name}}</text>
+            <text class="item-stock">剩{{item.stock - item.ordered}}</text>
           </view>
-          <view class="item-counter">
-            <view class="counter-btn minus" bindtap="decrease" data-index="{{index}}" wx:if="{{item.qty > 0}}">-</view>
-            <view class="counter-num" wx:if="{{item.qty > 0}}">{{item.qty}}</view>
-            <view class="counter-btn plus" bindtap="increase" data-index="{{index}}">+</view>
+          <view class="item-right">
+            <text class="item-price">¥{{item.price}}</text>
+            <view class="item-counter">
+              <view class="counter-btn minus" bindtap="decrease" data-index="{{index}}" wx:if="{{item.qty > 0}}">-</view>
+              <view class="counter-num" wx:if="{{item.qty > 0}}">{{item.qty}}</view>
+              <view class="counter-btn plus" bindtap="increase" data-index="{{index}}">+</view>
+            </view>
           </view>
         </view>
       </view>

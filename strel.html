@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>馒头助手 Pro (手机同步版)</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root { --apple-blue: #007AFF; --apple-gray: #F5F5F7; }
+        body { background-color: var(--apple-gray); font-family: -apple-system, BlinkMacSystemFont, sans-serif; -webkit-font-smoothing: antialiased; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.4); }
+        .btn-active:active { transform: scale(0.96); transition: transform 0.1s; }
+        .editable-input { background: transparent; border: none; padding: 0; outline: none; width: 100%; }
+        .number-input { width: 34px; text-align: center; font-family: ui-monospace, monospace; font-weight: bold; font-size: 14px; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* 针对手机端长按选中的优化 */
+        .no-select { -webkit-user-select: none; user-select: none; }
+    </style>
+</head>
+<body class="pb-40"> <div id="app" class="max-w-2xl mx-auto p-4">
+        
+        <header class="flex justify-between items-end mb-6 px-1">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 tracking-tight">馒头助手 Pro</h1>
+                <p class="text-[10px] text-gray-400 font-black uppercase tracking-[0.2em]">Mobile Sync Ready</p>
+            </div>
+            <div class="flex gap-4">
+                <div class="text-right">
+                    <div class="text-[9px] font-bold text-gray-400 uppercase">预计</div>
+                    <div class="text-lg font-semibold text-gray-900 font-mono">¥{{ statsSummary.totalPrice }}</div>
+                </div>
+                <div class="text-right border-l pl-4 border-gray-200">
+                    <div class="text-[9px] font-bold text-blue-500 uppercase">已收</div>
+                    <div class="text-lg font-semibold text-blue-600 font-mono">¥{{ statsSummary.collectedPrice }}</div>
+                </div>
+            </div>
+        </header>
+
+        <section class="mb-8">
+            <div class="glass rounded-3xl p-4 shadow-sm">
+                <textarea v-model="rawText" 
+                    class="w-full h-28 bg-transparent border-none focus:ring-0 text-sm text-gray-700 placeholder-gray-300 resize-none" 
+                    placeholder="粘贴接龙名单..."></textarea>
+                <button @click="handleAiProcess" :disabled="isLoading || !rawText.trim()"
+                    class="w-full py-4 mt-2 bg-black text-white rounded-2xl font-bold text-sm btn-active disabled:bg-gray-200 shadow-lg">
+                    {{ isLoading ? '正在深度解析数据...' : '🚀 AI 智能理单' }}
+                </button>
+            </div>
+        </section>
+
+        <div v-if="orders.length > 0" class="flex flex-col gap-8">
+            <aside>
+                <h2 class="text-[11px] font-black text-gray-400 mb-3 px-2 tracking-widest uppercase">待取货统计</h2>
+                <div class="flex flex-col gap-3">
+                    <div v-for="item in inventoryStats" :key="item.name" class="glass p-4 rounded-2xl">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold text-gray-800">{{ item.name }}</span>
+                            <span class="bg-blue-600 text-white px-2 py-0.5 rounded-lg text-[12px] font-black font-mono">{{ item.pending }} 件待取</span>
+                        </div>
+                        <div class="text-[11px] text-gray-400 leading-relaxed">
+                            <span v-for="(detail, idx) in item.details" :key="idx">
+                                @{{ detail.customer }}({{ detail.count }}){{ idx === item.details.length - 1 ? '' : '、' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <main>
+                <div class="flex justify-between items-center mb-3 px-2">
+                    <h2 class="text-[11px] font-black text-gray-400 tracking-widest uppercase">客户清单 (待取优先)</h2>
+                    <span class="text-[10px] text-gray-300">自动根据状态重排</span>
+                </div>
+                
+                <div class="space-y-3">
+                    <div v-for="order in sortedOrders" :key="order.id" 
+                        :class="['glass p-4 rounded-3xl transition-all duration-300 border-l-4 shadow-sm', 
+                                 order.status === 'picked' ? 'opacity-40 border-gray-300 bg-gray-50' : 
+                                 order.status === 'cancelled' ? 'opacity-30 border-red-200 grayscale' : 'border-blue-500']">
+                        
+                        <div class="flex justify-between items-center mb-3">
+                            <input v-model="order.customerName" class="editable-input font-bold text-gray-800 text-base w-2/3">
+                            <span class="text-sm font-black text-gray-900 font-mono">¥{{ order.totalPrice }}</span>
+                        </div>
+                        
+                        <div class="space-y-2 mb-4">
+                            <div v-for="(item, idx) in order.items" :key="idx" 
+                                class="flex items-center justify-between bg-white/40 px-3 py-2 rounded-xl border border-white/50">
+                                <input v-model="item.name" class="editable-input text-xs text-gray-600">
+                                <div class="flex items-center gap-1 bg-white rounded-lg px-1 shadow-sm no-select">
+                                    <button @click="item.count > 0 ? item.count-- : null" class="w-7 h-7 flex items-center justify-center text-gray-400 font-bold">-</button>
+                                    <input type="number" v-model.number="item.count" class="editable-input number-input">
+                                    <button @click="item.count++" class="w-7 h-7 flex items-center justify-center text-gray-400 font-bold">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2">
+                            <button v-if="order.status === 'normal'" @click="updateStatus(order.id, 'picked')"
+                                class="flex-1 py-3 bg-blue-600 text-white rounded-2xl text-xs font-bold btn-active shadow-md shadow-blue-100">确认取走</button>
+                            <button v-if="order.status === 'normal'" @click="updateStatus(order.id, 'cancelled')"
+                                class="px-4 py-3 bg-gray-100 text-gray-400 rounded-2xl text-xs font-bold btn-active">取消</button>
+                            <button v-if="order.status !== 'normal'" @click="updateStatus(order.id, 'normal')"
+                                class="flex-1 py-3 border border-gray-200 text-gray-500 rounded-2xl text-xs font-medium btn-active">重置状态</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <footer class="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-xl border-t border-gray-100 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-50">
+            <div class="max-w-2xl mx-auto">
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <span class="text-[9px] font-black text-gray-400 uppercase tracking-tighter">数据同步快照 (JSON)</span>
+                    <div class="flex gap-4">
+                        <button @click="copySyncData" class="text-[11px] font-bold text-blue-600 btn-active">复制快照</button>
+                        <button @click="parseSyncData" class="text-[11px] font-bold text-orange-600 btn-active">解析还原</button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <input v-model="syncJson" 
+                        class="w-full bg-gray-50 rounded-xl px-3 py-2.5 text-[10px] font-mono text-gray-400 border border-gray-100 focus:ring-1 focus:ring-blue-400 outline-none"
+                        placeholder="粘贴快照代码到此处，点击解析...">
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const { createApp, ref, computed, watch } = Vue;
+
+        const DataPipeline = {
+            cleanRawText(content) {
+                return content.replace(/```json/g, '').replace(/```/g, '').trim();
+            },
+            standardize(aiResponse) {
+                const rawList = aiResponse.orders || (Array.isArray(aiResponse) ? aiResponse : []);
+                return rawList.map((entry, index) => ({
+                    id: entry.id || `ORD-${Date.now()}-${index}`,
+                    customerName: entry.userName || entry.customerName || "匿名",
+                    items: entry.items.map(i => ({
+                        name: i.name,
+                        count: parseInt(i.count || 0),
+                        price: parseFloat(i.price || 0)
+                    })),
+                    status: entry.status || 'normal',
+                    totalPrice: 0,
+                    originalIndex: entry.originalIndex !== undefined ? entry.originalIndex : index
+                }));
+            }
+        };
+
+        createApp({
+            setup() {
+                const rawText = ref("");
+                const orders = ref([]);
+                const isLoading = ref(false);
+                const syncJson = ref("");
+
+                // 排序：待领取(0) -> 已取走(1) -> 取消(2)
+                const sortedOrders = computed(() => {
+                    return [...orders.value].sort((a, b) => {
+                        const weights = { 'normal': 0, 'picked': 1, 'cancelled': 2 };
+                        const wA = weights[a.status] ?? 0;
+                        const wB = weights[b.status] ?? 0;
+                        if (wA !== wB) return wA - wB;
+                        return a.originalIndex - b.originalIndex;
+                    });
+                });
+
+                watch(orders, (newOrders) => {
+                    newOrders.forEach(o => {
+                        o.totalPrice = o.items.reduce((s, i) => s + (i.count * i.price), 0).toFixed(1);
+                    });
+                    // 生成轻量化快照
+                    if (newOrders.length > 0) {
+                        syncJson.value = JSON.stringify(newOrders.map(o => ({
+                            n: o.customerName,
+                            s: o.status,
+                            i: o.items.map(it => ({ n: it.name, c: it.count, p: it.price })),
+                            x: o.originalIndex
+                        })));
+                    }
+                }, { deep: true });
+
+                const handleAiProcess = async () => {
+                    const userinputxxx = "GwpDEAQIJx0kChkLABgfARMPEgUXLx04ARcWCAUAGRcFAA8dOAc2Ah4ZFhgGBgsUFg0T";
+                    const getlv = (e, k) => {
+                        const b = atob(e); let r = "";
+                        for (let i = 0; i < b.length; i++) r += String.fromCharCode(b.charCodeAt(i) ^ k.charCodeAt(i % k.length));
+                        return r;
+                    };
+                    const lv = getlv(userinputxxx, "handleAiProcess");
+                    if (!lv) return;
+
+                    isLoading.value = true;
+                    try {
+                        const res = await fetch('https://api.siliconflow.cn/v1/chat/completions', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${lv}` },
+                            body: JSON.stringify({
+                                model: "deepseek-ai/DeepSeek-V3",
+                                messages: [{ role: "system", content: "提取JSON: {orders:[{userName, items:[{name, count, price}]}]}" }, { role: "user", content: rawText.value }],
+                                temperature: 0.1
+                            })
+                        });
+                        const data = await res.json();
+                        orders.value = DataPipeline.standardize(JSON.parse(DataPipeline.cleanRawText(data.choices[0].message.content)));
+                    } catch (err) { alert("解析失败"); } finally { isLoading.value = false; }
+                };
+
+                const updateStatus = (id, s) => {
+                    const o = orders.value.find(x => x.id === id);
+                    if (o) o.status = s;
+                };
+
+                const inventoryStats = computed(() => {
+                    const map = {};
+                    orders.value.forEach(o => {
+                        if (o.status !== 'normal') return;
+                        o.items.forEach(i => {
+                            if (!map[i.name]) map[i.name] = { name: i.name, pending: 0, details: [] };
+                            map[i.name].pending += i.count;
+                            map[i.name].details.push({ customer: o.customerName, count: i.count });
+                        });
+                    });
+                    return Object.values(map).sort((a, b) => b.pending - a.pending);
+                });
+
+                const statsSummary = computed(() => {
+                    const active = orders.value.filter(o => o.status !== 'cancelled');
+                    const total = active.reduce((s, o) => s + parseFloat(o.totalPrice), 0);
+                    const collected = orders.value.filter(o => o.status === 'picked').reduce((s, o) => s + parseFloat(o.totalPrice), 0);
+                    return { totalPrice: total.toFixed(1), collectedPrice: collected.toFixed(1) };
+                });
+
+                const copySyncData = () => {
+                    if (!syncJson.value) return;
+                    navigator.clipboard.writeText(syncJson.value).then(() => alert("✅ 快照已拷贝\n可发送到微信同步状态"));
+                };
+
+                const parseSyncData = () => {
+                    try {
+                        const data = JSON.parse(syncJson.value);
+                        orders.value = data.map((o, index) => ({
+                            id: `S-${Date.now()}-${index}`,
+                            customerName: o.n,
+                            status: o.s,
+                            items: o.i.map(it => ({ name: it.n, count: it.c, price: it.p })),
+                            originalIndex: o.x || index,
+                            totalPrice: 0
+                        }));
+                        alert("✅ 状态还原成功");
+                    } catch (e) { alert("快照代码无效"); }
+                };
+
+                return { 
+                    rawText, orders, sortedOrders, isLoading, inventoryStats, 
+                    statsSummary, handleAiProcess, updateStatus, syncJson,
+                    copySyncData, parseSyncData
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

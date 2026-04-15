@@ -8,6 +8,7 @@
     "pages/admin/menu",
     "pages/admin/orders"
   ],
+  "lazyCodeLoading": "requiredComponents",
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#fff",
