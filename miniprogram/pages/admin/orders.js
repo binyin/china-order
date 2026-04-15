@@ -309,7 +309,8 @@ Page({
             date: o.date,
             orders: [],
             totalRevenue: 0,
-            productNames: new Set()
+            productNames: new Set(),
+            customerNames: new Set()
           }
         }
         dateMap[o.date].orders.push(o)
@@ -317,6 +318,8 @@ Page({
           dateMap[o.date].totalRevenue += o.total_price || 0
         }
         o.items.forEach(i => dateMap[o.date].productNames.add(i.name))
+        const cName = o.customer_nickname || o.customer_name
+        if (cName) dateMap[o.date].customerNames.add(cName)
       })
 
       const dailyList = Object.values(dateMap)
@@ -325,7 +328,7 @@ Page({
           date: d.date,
           orderCount: d.orders.length,
           totalRevenue: d.totalRevenue.toFixed(2),
-          productNames: [...d.productNames].join('、'),
+          customerNames: [...d.customerNames].join('、'),
           pendingCount: d.orders.filter(o => o.status === 'pending').length,
           completedCount: d.orders.filter(o => o.status === 'completed').length,
           _orders: d.orders

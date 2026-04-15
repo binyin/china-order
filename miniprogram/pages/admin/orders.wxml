@@ -123,7 +123,7 @@
             <view class="daily-date">{{item.date}}</view>
             <view class="daily-revenue">¥{{item.totalRevenue}}</view>
           </view>
-          <view class="daily-products">{{item.productNames}}</view>
+          <view class="daily-products">{{item.customerNames}}</view>
           <view class="daily-stats">
             <text class="stat-badge pending">{{item.pendingCount}} 待取</text>
             <text class="stat-badge completed">{{item.completedCount}} 已取</text>
