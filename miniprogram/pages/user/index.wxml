@@ -98,36 +98,40 @@
 <!-- 提交弹窗 -->
 <view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal">
   <view class="modal-box" catchtap>
-    <view class="modal-title">{{orderSummary.length > 0 ? '确认预定' : '修改信息'}}</view>
+    <scroll-view scroll-y class="modal-scroll">
+      <view class="modal-content">
+        <view class="modal-title">{{orderSummary.length > 0 ? '确认预定' : '修改信息'}}</view>
 
-    <!-- 昵称区：仅保留名字输入框 -->
-    <view class="nickname-row">
-      <view class="nickname-input-wrap">
-        <view class="form-label">您的姓名（可修改）</view>
-        <input class="modal-input nickname-input"
-               placeholder="请输入姓名"
-               value="{{customerName}}"
-               bindinput="onNameInput"
-               maxlength="20"
-               placeholder-class="placeholder"
-               adjust-position="{{false}}"
-               style="width: 100%;" />
+        <!-- 昵称区：仅保留名字输入框 -->
+        <view class="nickname-row">
+          <view class="nickname-input-wrap">
+            <view class="form-label">您的姓名（可修改）</view>
+            <input class="modal-input nickname-input"
+                   placeholder="请输入姓名"
+                   value="{{customerName}}"
+                   bindinput="onNameInput"
+                   maxlength="20"
+                   placeholder-class="placeholder"
+                   adjust-position="{{false}}"
+                   style="width: 100%;" />
+          </view>
+        </view>
+
+        <!-- 订单汇总 -->
+        <view wx:if="{{orderSummary.length > 0}}" class="modal-summary">
+          <view wx:for="{{orderSummary}}" wx:key="name" class="summary-row">
+            <text>{{item.name}} × {{item.qty}}</text>
+            <text>¥{{item.subtotal}}</text>
+          </view>
+          <view class="summary-total">合计：¥{{totalPrice}}</view>
+        </view>
+
+        <view class="modal-actions">
+          <button class="btn-secondary" bindtap="closeModal">取消</button>
+          <button wx:if="{{orderSummary.length > 0}}" class="btn-primary" bindtap="confirmOrder" loading="{{submitting}}">确认提交</button>
+          <button wx:else class="btn-primary" bindtap="saveProfile">保存</button>
+        </view>
       </view>
-    </view>
-
-    <!-- 订单汇总 -->
-    <view wx:if="{{orderSummary.length > 0}}" class="modal-summary">
-      <view wx:for="{{orderSummary}}" wx:key="name" class="summary-row">
-        <text>{{item.name}} × {{item.qty}}</text>
-        <text>¥{{item.subtotal}}</text>
-      </view>
-      <view class="summary-total">合计：¥{{totalPrice}}</view>
-    </view>
-
-    <view class="modal-actions">
-      <button class="btn-secondary" bindtap="closeModal">取消</button>
-      <button wx:if="{{orderSummary.length > 0}}" class="btn-primary" bindtap="confirmOrder" loading="{{submitting}}">确认提交</button>
-      <button wx:else class="btn-primary" bindtap="saveProfile">保存</button>
-    </view>
+    </scroll-view>
   </view>
 </view>

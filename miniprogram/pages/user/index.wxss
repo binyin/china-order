@@ -216,16 +216,36 @@
 
 /* 弹窗 */
 .modal-mask {
-  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5); z-index: 1000;
-  display: flex; align-items: flex-end;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .modal-box {
-  background: #fff; width: 100%;
-  border-radius: 32rpx 32rpx 0 0;
+  background: #fff;
+  width: 90%;
+  max-height: 80%;
+  border-radius: 24rpx;
+  overflow: hidden;
+}
+.modal-scroll {
+  max-height: 80vh;
+}
+.modal-content {
   padding: 40rpx 32rpx 60rpx;
 }
-.modal-title { font-size: 38rpx; font-weight: bold; margin-bottom: 28rpx; text-align: center; }
+.modal-title {
+  font-size: 38rpx;
+  font-weight: bold;
+  margin-bottom: 28rpx;
+  text-align: center;
+}
 
 /* 昵称区 */
 .nickname-row {
