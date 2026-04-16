@@ -31,14 +31,17 @@ Page({
   initDateList() {
     const dates = []
     const today = new Date()
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 7; i++) {
       const d = new Date(today.getTime() + i * 24 * 3600 * 1000)
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      const day = d.getDay()
+      const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+      const weekDay = weekDays[day]
       let label = ''
       if (i === 0) label = '今天'
       else if (i === 1) label = '明天'
-      else label = '后天'
-      dates.push({ date: dateStr, label })
+      else label = weekDay
+      dates.push({ date: dateStr, label, month: d.getMonth() + 1, day: d.getDate() })
     }
     this.setData({
       dateList: dates,
