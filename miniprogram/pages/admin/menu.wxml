@@ -5,7 +5,6 @@
     <view class="nav-title-row">
       <view class="nav-content">
         <view class="nav-title">菜单管理</view>
-        <view class="nav-subtitle">订单发布</view>
       </view>
       <view class="nav-action">
         <view class="action-btn" bindtap="publishTodayMenu" wx:if="{{todayMenu.length > 0}}">
