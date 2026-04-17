@@ -102,7 +102,6 @@ Page({
       }
     })
   },
-  },
 
   saveProduct() {
     const { name, price, unit, image_url } = this.data.form
