@@ -49,8 +49,12 @@
           <text class="status-tag tag-{{item.status}}">{{statusText[item.status]}}</text>
         </view>
         <view class="order-content">
-          <view wx:for="{{item.items}}" wx:for-item="prod" wx:key="product_id" class="prod-line">
-            {{prod.name}} <text class="prod-qty">× {{prod.num}}</text>
+          <view class="prod-item" wx:for="{{item.items}}" wx:for-item="prod" wx:key="product_id">
+            <image class="prod-img" src="{{prod.image_url}}" mode="aspectFill" wx:if="{{prod.image_url}}" />
+            <view class="prod-info">
+              <text class="prod-name">{{prod.name}}</text>
+              <text class="prod-qty">× {{prod.num}}</text>
+            </view>
           </view>
         </view>
         <view class="order-footer">

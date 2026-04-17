@@ -74,17 +74,29 @@ exports.main = async (event, context) => {
     }
 
     // 2. 创建订单
+    const orderItems = await Promise.all(items.map(async (i) => {
+      let image_url = ''
+      try {
+        const menuRes = await db.collection('active_menu').doc(i.product_id).get()
+        if (menuRes.data) {
+          image_url = menuRes.data.image_url || ''
+        }
+      } catch (e) {}
+      return {
+        name: i.name,
+        num: i.num,
+        product_id: i.product_id,
+        item_status: 'pending',
+        image_url: image_url
+      }
+    }))
+
     const orderData = {
       customer_name: customer_name,
       customer_id: OPENID,
       customer_nickname: customer_nickname || '',
       customer_avatar: customer_avatar || '',
-      items: items.map(i => ({
-        name: i.name,
-        num: i.num,
-        product_id: i.product_id,
-        item_status: 'pending'
-      })),
+      items: orderItems,
       total_price: total_price,
       status: 'pending',
       date: today,
