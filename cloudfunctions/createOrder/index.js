@@ -12,6 +12,10 @@ exports.main = async (event, context) => {
     return { success: false, message: '订单为空' }
   }
 
+  if (!customer_name) {
+    return { success: false, message: '请填写姓名' }
+  }
+
   const today = getBJDateStr()
   const now = new Date(Date.now() + 8 * 3600 * 1000)
 
@@ -71,7 +75,7 @@ exports.main = async (event, context) => {
 
     // 2. 创建订单
     const orderData = {
-      customer_name: customer_name || '微信用户',
+      customer_name: customer_name,
       customer_id: OPENID,
       customer_nickname: customer_nickname || '',
       customer_avatar: customer_avatar || '',

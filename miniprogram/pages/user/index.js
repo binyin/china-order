@@ -180,13 +180,14 @@ Page({
 
   confirmOrder() {
     const name = this.data.customerName.trim()
+    const userProfile = wx.getStorageSync('userProfile') || {}
+
     if (!name) {
       logger.warn(TAG + ':confirmOrder', { reason: '未输入姓名' })
       wx.showToast({ title: '请输入您的姓名', icon: 'none' })
       return
     }
 
-    const userProfile = wx.getStorageSync('userProfile') || {}
     wx.setStorageSync('userProfile', { ...userProfile, nickname: name })
     this.setData({ hasProfile: true })
 

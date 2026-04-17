@@ -108,8 +108,10 @@ Page({
         })
       })
 
-      // 按待取数量降序排列
-      const menuStats = Object.values(statsMap).sort((a, b) => b.pending - a.pending)
+      // 按待取数量降序排列，过滤掉总订量为0的品类
+      const menuStats = Object.values(statsMap)
+        .filter(item => item.total > 0)
+        .sort((a, b) => b.pending - a.pending)
 
       // 营收统计
       let totalRev = 0, actualRev = 0

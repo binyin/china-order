@@ -34,9 +34,35 @@ exports.main = async (event, context) => {
       .orderBy('create_time', 'asc')
       .get()
     
+    let orders = ordersRes.data
+    
+    // 关联 users 表获取头像
+    if (orders.length > 0) {
+      const openids = [...new Set(orders.map(o => o.customer_id).filter(Boolean))]
+      if (openids.length > 0) {
+        const userRes = await db.collection('users')
+          .where({
+            _id: db.command.in(openids)
+          })
+          .get()
+        
+        const userMap = {}
+        userRes.data.forEach(u => {
+          userMap[u._id] = u
+        })
+        
+        orders = orders.map(o => {
+          if (!o.customer_avatar && userMap[o.customer_id]) {
+            o.customer_avatar = userMap[o.customer_id].avatarUrl || ''
+          }
+          return o
+        })
+      }
+    }
+    
     return {
       success: true,
-      data: ordersRes.data
+      data: orders
     }
   } catch (err) {
     console.error('获取今日订单失败', err)
