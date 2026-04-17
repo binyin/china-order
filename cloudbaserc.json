@@ -1,5 +1,5 @@
 {
-  "envId": "cloud1-0guiskpadbfb2681",
+  "envId": "cloudbase-2gjs1hdd0c429545",
   "framework": {
     "plugins": {}
   },
@@ -8,15 +8,11 @@
     { "name": "getLatestMenuTime" },
     { "name": "adminLogin" },
     { "name": "cancelOrder" },
-    { "name": "cancelOrderItem" },
     { "name": "createOrder" },
     { "name": "getMyOrders" },
     { "name": "getOpenId" },
     { "name": "undoCancel" },
     { "name": "publishMenu" },
-    { "name": "getTodayOrders" },
-    { "name": "getRecentOrders" },
-    { "name": "saveUser" },
-    { "name": "initDb" }
+    { "name": "getTodayOrders" }
   ]
 }

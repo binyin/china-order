@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 设置环境 ID（请确保 ID 正确）
-ENV_ID="cloud1-0guiskpadbfb2681"
+ENV_ID="cloudbase-2gjs1hdd0c429545"
 # 云函数根目录
 FUNCTIONS_DIR="cloudfunctions"
 

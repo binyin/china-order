@@ -2,7 +2,7 @@
 App({
   onLaunch() {
     wx.cloud.init({
-      env: 'cloud1-0guiskpadbfb2681',
+      env: 'cloudbase-2gjs1hdd0c429545',
       traceUser: true
     })
   },
