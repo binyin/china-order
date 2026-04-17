@@ -25,6 +25,7 @@
 
     <view class="menu-list">
       <view class="menu-item" wx:for="{{menuList}}" wx:key="_id">
+        <image class="item-img" src="{{item.image_url}}" mode="aspectFill" wx:if="{{item.image_url}}" />
         <view class="item-left">
           <text class="item-name">{{item.name}}</text>
           <text class="item-stock">剩余 {{item.stock - (item.ordered || 0)}}</text>

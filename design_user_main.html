@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>苹果风馒头预定</title>
+    <style>
+        /* --- 苹果风 WXSS 核心变量 --- */
+        :root {
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-text-main: #000000;
+            --ios-text-sub: #8E8E93;
+            --ios-blue: #007AFF;
+            --ios-orange: #FF9500;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+        }
+
+        body {
+            background-color: var(--ios-bg);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+            margin: 0;
+            padding: 0;
+            color: var(--ios-text-main);
+        }
+
+        /* --- 布局容器 --- */
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- 顶部大标题 (iOS Large Title Style) --- */
+        .header {
+            padding: 60px 20px 20px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 0.5px solid #D1D1D6;
+        }
+
+        .header-left .date {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--ios-text-sub);
+            text-transform: uppercase;
+            display: block;
+        }
+
+        .header-left .title {
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin: 0;
+        }
+
+        .header-right .admin-btn {
+            font-size: 15px;
+            color: var(--ios-blue);
+            text-decoration: none;
+            padding-bottom: 5px;
+        }
+
+        /* --- 内容列表区 --- */
+        .content {
+            padding: 16px;
+            flex: 1;
+        }
+
+        .section-label {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 24px 0 12px 4px;
+        }
+
+        /* --- 菜单卡片 (Card Style) --- */
+        .menu-card {
+            background: var(--ios-card);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        }
+
+        .item-info .name {
+            font-size: 18px;
+            font-weight: 600;
+            display: block;
+        }
+
+        .item-info .stock {
+            font-size: 13px;
+            color: var(--ios-text-sub);
+            margin-top: 4px;
+            display: block;
+        }
+
+        .item-action {
+            display: flex;
+            align-items: center;
+        }
+
+        .price {
+            font-size: 17px;
+            font-weight: 700;
+            margin-right: 12px;
+        }
+
+        /* --- 步进器 (Stepper) --- */
+        .stepper {
+            background: #F2F2F7;
+            border-radius: 100px;
+            padding: 3px;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .btn.minus { color: var(--ios-text-sub); }
+        .btn.plus { 
+            background: white; 
+            color: var(--ios-orange);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .num {
+            width: 32px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        /* --- 已预定卡片 (My Orders) --- */
+        .order-capsule {
+            background: white;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .status-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: #F2F2F7;
+        }
+
+        .tag-pending { color: var(--ios-orange); background: #FFF4E5; }
+
+        /* --- 底部结算栏 (Floating Bar) --- */
+        .dock {
+            position: fixed;
+            bottom: 30px;
+            left: 20px;
+            right: 20px;
+            background: rgba(28, 28, 30, 0.95); /* 深色苹果风 */
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transform: translateY(120%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .dock.active { transform: translateY(0); }
+
+        .dock-left .total-label {
+            font-size: 12px;
+            color: #8E8E93;
+            display: block;
+        }
+
+        .dock-left .total-price {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .submit-btn {
+            background: var(--ios-orange);
+            border: none;
+            color: white;
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* --- 弹窗组件 --- */
+        .modal-mask {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: white;
+            width: 85%;
+            border-radius: 20px;
+            padding: 24px;
+        }
+
+        .ios-input {
+            width: 100%;
+            height: 44px;
+            background: #F2F2F7;
+            border: none;
+            border-radius: 10px;
+            padding: 0 12px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin: 16px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <div class="header-left">
+            <span class="date">4月18日 周六</span>
+            <h1 class="title">馒头预定</h1>
+        </div>
+        <div class="header-right">
+            <a href="#" class="admin-btn">店主入口</a>
+        </div>
+    </header>
+
+    <main class="content">
+        <div class="section-label">今日新鲜供应</div>
+        
+        <div class="menu-card">
+            <div class="item-info">
+                <span class="name">白面大馒头</span>
+                <span class="stock">剩余 45 个</span>
+            </div>
+            <div class="item-action">
+                <span class="price">¥1.50</span>
+                <div class="stepper">
+                    <div class="btn minus">－</div>
+                    <div class="num">2</div>
+                    <div class="btn plus">＋</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-card">
+            <div class="item-info">
+                <span class="name">全麦红薯包</span>
+                <span class="stock">剩余 12 个</span>
+            </div>
+            <div class="item-action">
+                <span class="price">¥3.00</span>
+                <div class="stepper">
+                    <div class="btn plus">＋</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-label">我的预定</div>
+        <div class="order-capsule">
+            <div class="order-row">
+                <span style="font-weight: 700;">张三</span>
+                <span class="status-tag tag-pending">待取货</span>
+            </div>
+            <div style="font-size: 14px; color: #444;">
+                白面大馒头 x5
+            </div>
+        </div>
+    </main>
+
+    <div class="dock active">
+        <div class="dock-left">
+            <span class="total-label">合计</span>
+            <span class="total-price">¥7.50</span>
+        </div>
+        <button class="submit-btn">提交预定</button>
+    </div>
+</div>
+
+</body>
+</html>

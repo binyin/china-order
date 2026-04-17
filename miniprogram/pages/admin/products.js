@@ -7,8 +7,9 @@ Page({
     products: [],
     showModal: false,
     editId: null,
-    form: { name: '', price: '', unit: '个' },
-    saving: false
+    form: { name: '', price: '', unit: '个', image_url: '' },
+    saving: false,
+    uploading: false
   },
 
   onLoad() {
@@ -33,7 +34,7 @@ Page({
     this.setData({
       showModal: true,
       editId: null,
-      form: { name: '', price: '', unit: '个' }
+      form: { name: '', price: '', unit: '个', image_url: '' }
     })
   },
 
@@ -43,7 +44,7 @@ Page({
     this.setData({
       showModal: true,
       editId: item._id,
-      form: { name: item.name, price: String(item.price), unit: item.unit || '个' }
+      form: { name: item.name, price: String(item.price), unit: item.unit || '个', image_url: item.image_url || '' }
     })
   },
 
@@ -57,8 +58,44 @@ Page({
     this.setData({ form })
   },
 
+  chooseImage() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const tempFilePath = res.tempFiles[0].tempFilePath
+        this.setData({ 'form.tempImage': tempFilePath })
+        this.uploadImage(tempFilePath)
+      }
+    })
+  },
+
+  uploadImage(filePath) {
+    this.setData({ uploading: true })
+    const ext = filePath.split('.').pop() || 'jpg'
+    const cloudPath = `products/${Date.now()}-${Math.random().toString(36).substr(2)}.${ext}`
+    
+    wx.cloud.uploadFile({
+      cloudPath,
+      filePath,
+      success: res => {
+        this.setData({ 
+          'form.image_url': res.fileID,
+          uploading: false 
+        })
+        wx.showToast({ title: '图片上传成功', icon: 'success' })
+      },
+      fail: err => {
+        this.setData({ uploading: false })
+        wx.showToast({ title: '上传失败', icon: 'error' })
+        console.error('uploadImage fail:', err)
+      }
+    })
+  },
+
   saveProduct() {
-    const { name, price, unit } = this.data.form
+    const { name, price, unit, image_url } = this.data.form
     if (!name.trim()) {
       wx.showToast({ title: '请输入产品名称', icon: 'none' }); return
     }
@@ -68,7 +105,7 @@ Page({
     }
 
     this.setData({ saving: true })
-    const data = { name: name.trim(), price: priceNum, unit: unit.trim() || '个', image_url: '' }
+    const data = { name: name.trim(), price: priceNum, unit: unit.trim() || '个', image_url: image_url || '' }
 
     const op = this.data.editId
       ? updateProduct(this.data.editId, data)

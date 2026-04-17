@@ -1,0 +1,1 @@
+# 微信开发者工具操作日志\n# 时间: 2026-04-16\n# 任务: 清空缓存、重新编译、调试\n\n# 1. 进入项目目录\ncd /data/work/idear/china-order-new\n\n# 2. 清空缓存并重新编译\ncli --auto-preview=false --auto-reload=false --clear-cache=true --project-path=miniprogram/\n\n# 3. 启动调试模式\ncli --auto-preview=true --project-path=miniprogram/
