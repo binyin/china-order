@@ -340,7 +340,7 @@ Page({
     const { menuList } = this.data
     
     // 模拟更新：重新获取今日菜单，但使用更平滑的方式
-    getTodayMenu().then(res => {
+    getLatestMenu().then(res => {
       const todayMenu = res.data
       const updatedMenuList = menuList.map(menuItem => {
         const todayItem = todayMenu.find(item => item._id === menuItem._id)

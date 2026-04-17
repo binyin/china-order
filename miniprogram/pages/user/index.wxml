@@ -1,136 +1,102 @@
-<!--pages/user/index.wxml-->
-<!-- 授权提示区域 -->
-<view wx:if="{{needAuth}}" class="auth-container">
-  <view class="auth-content">
-    <view class="auth-icon">🔐</view>
-    <view class="auth-title">需要授权</view>
-    <view class="auth-desc">请授权获取您的微信信息以使用预定功能</view>
-    <button 
-      class="auth-button" 
-      bindtap="getUserInfo"
-    >
-      授权登录
-    </button>
+<view class="container" wx:if="{{!loading}}">
+  <view wx:if="{{needAuth}}" class="auth-wrapper">
+    <view class="auth-icon">🍞</view>
+    <view class="auth-title">欢迎使用馒头预定</view>
+    <view class="auth-desc">请先授权登录以继续</view>
+    <button class="btn-auth" bindtap="getUserInfo">微信授权登录</button>
   </view>
-</view>
-
-<!-- 原有页面内容，只在未授权时不显示 -->
-<view wx:elif="{{!loading}}">
-  <!-- 顶部导航 -->
+  <block wx:else>
   <view class="header">
     <view class="header-left">
       <view class="header-setting" bindtap="goSetting">☰</view>
     </view>
-    <view class="header-title">{{dateTime}}</view>
+    <view class="header-title">{{dateTime || '馒头预定'}}</view>
     <view class="header-right">
       <view class="header-admin" bindtap="goAdmin">店主入口</view>
     </view>
   </view>
 
-  <!-- 加载中 -->
-  <view wx:if="{{loading}}" class="empty-tip">加载中...</view>
+  <scroll-view scroll-y class="content-scroll">
+    <view wx:if="{{menuList.length === 0}}" class="empty-tip">
+      <view class="empty-icon">🍞</view>
+      <view>今日暂无预定品种</view>
+      <view class="empty-sub">请等待店主发布今日菜单</view>
+    </view>
 
-  <!-- 无菜单 -->
-  <view wx:elif="{{menuList.length === 0}}" class="empty-tip">
-    <view>今日暂无预定品种</view>
-    <view style="font-size:26rpx;margin-top:16rpx;color:#bbb">请等待店主发布今日菜单</view>
-  </view>
-
-  <!-- 菜单列表 -->
-  <view wx:else class="menu-wrap">
-    <!-- 顶部总价 + 操作栏 -->
-    <view class="order-bar">
-      <view class="total-price">
-        <text class="total-label">合计</text>
-        <text class="total-amount">¥{{totalPrice}}</text>
-      </view>
-      <view class="order-actions">
-        <button class="btn-cancel-all" bindtap="cancelAllItems" wx:if="{{hasSelected}}">清空</button>
-        <button class="btn-submit" bindtap="submitOrder" wx:if="{{hasSelected}}">提交预定</button>
+    <view class="menu-list">
+      <view class="menu-item" wx:for="{{menuList}}" wx:key="_id">
+        <view class="item-left">
+          <text class="item-name">{{item.name}}</text>
+          <text class="item-stock">剩余 {{item.stock - (item.ordered || 0)}}</text>
+        </view>
+        <view class="item-right">
+          <text class="item-price">¥{{item.price}}</text>
+          <view class="item-counter">
+            <view class="counter-btn minus" bindtap="decrease" data-index="{{index}}" wx:if="{{item.qty > 0}}">－</view>
+            <view class="counter-num" wx:if="{{item.qty > 0}}">{{item.qty}}</view>
+            <view class="counter-btn plus" bindtap="increase" data-index="{{index}}">＋</view>
+          </view>
+        </view>
       </view>
     </view>
 
-    <!-- 产品卡片列表 -->
-    <scroll-view scroll-y class="menu-scroll">
-      <view class="menu-list">
-        <view class="menu-item" wx:for="{{menuList}}" wx:key="_id">
-          <view class="item-left">
-            <text class="item-name">{{item.name}}</text>
-            <text class="item-stock">剩{{item.stock - item.ordered}}</text>
-          </view>
-          <view class="item-right">
-            <text class="item-price">¥{{item.price}}</text>
-            <view class="item-counter">
-              <view class="counter-btn minus" bindtap="decrease" data-index="{{index}}" wx:if="{{item.qty > 0}}">-</view>
-              <view class="counter-num" wx:if="{{item.qty > 0}}">{{item.qty}}</view>
-              <view class="counter-btn plus" bindtap="increase" data-index="{{index}}">+</view>
-            </view>
+    <view wx:if="{{submittedOrders.length > 0}}" class="submitted-section">
+      <view class="section-title">我的预定</view>
+      <view class="order-card {{item.status === 'cancelled' ? 'cancelled' : ''}}" wx:for="{{submittedOrders}}" wx:key="_id">
+        <view class="order-header">
+          <text class="order-user">{{item.customer_name}}</text>
+          <text class="status-tag tag-{{item.status}}">{{statusText[item.status]}}</text>
+        </view>
+        <view class="order-content">
+          <view wx:for="{{item.items}}" wx:for-item="prod" wx:key="product_id" class="prod-line">
+            {{prod.name}} <text class="prod-qty">× {{prod.num}}</text>
           </view>
         </view>
+        <view class="order-footer">
+          <text class="order-price">¥{{item.total_price}}</text>
+          <button class="btn-cancel-small" bindtap="cancelOrder" data-id="{{item._id}}" wx:if="{{item.status === 'pending'}}">取消预定</button>
+        </view>
       </view>
+    </view>
+    
+    <view style="height: 200rpx;"></view>
+  </scroll-view>
 
-      <!-- 我的订单 -->
-      <view wx:if="{{submittedOrders.length > 0}}" class="submitted-section">
-        <view class="section-title">我的预定</view>
-        <view class="submitted-item card {{item.status === 'cancelled' ? 'cancelled' : ''}}"
-              wx:for="{{submittedOrders}}" wx:key="_id">
-          <view class="submitted-header">
-            <text class="submitted-name">{{item.customer_name}}</text>
-            <text class="tag-{{item.status}}">{{statusText[item.status]}}</text>
-          </view>
-          <view class="submitted-items">
-            <view wx:for="{{item.items}}" wx:for-item="prod" wx:key="product_id" class="product-item">
-              <text>{{prod.name}}×{{prod.num}}</text>              
-            </view>
-          </view>
-          <view class="submitted-footer">
-            <text class="submitted-price">¥{{item.total_price}}</text>
-            <button class="btn-cancel-order" size="mini" bindtap="cancelOrder"
-                    data-id="{{item._id}}" wx:if="{{item.status === 'pending'}}">取消</button>
-          </view>
-        </view>
+  <view class="floating-bar {{hasSelected ? 'active' : ''}}">
+    <view class="bar-content">
+      <view class="price-info">
+        <text class="bar-label">合计</text>
+        <text class="bar-amount">¥{{totalPrice}}</text>
       </view>
-    </scroll-view>
+      <view class="bar-actions">
+        <text class="bar-clear" bindtap="cancelAllItems">清空</text>
+        <button class="btn-primary-apple" bindtap="submitOrder">提交订单</button>
+      </view>
+    </view>
   </view>
+  </block>
 </view>
 
-<!-- 提交弹窗 -->
-<view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal">
-  <view class="modal-box" catchtap>
-    <scroll-view scroll-y class="modal-scroll">
-      <view class="modal-content">
-        <view class="modal-title">{{orderSummary.length > 0 ? '确认预定' : '修改信息'}}</view>
-
-        <!-- 昵称区：仅保留名字输入框 -->
-        <view class="nickname-row">
-          <view class="nickname-input-wrap">
-            <view class="form-label">您的姓名（可修改）</view>
-            <input class="modal-input nickname-input"
-                   placeholder="请输入姓名"
-                   value="{{customerName}}"
-                   bindinput="onNameInput"
-                   maxlength="20"
-                   placeholder-class="placeholder"
-                   adjust-position="{{false}}"
-                   style="width: 100%;" />
-          </view>
-        </view>
-
-        <!-- 订单汇总 -->
-        <view wx:if="{{orderSummary.length > 0}}" class="modal-summary">
-          <view wx:for="{{orderSummary}}" wx:key="name" class="summary-row">
-            <text>{{item.name}} × {{item.qty}}</text>
-            <text>¥{{item.subtotal}}</text>
-          </view>
-          <view class="summary-total">合计：¥{{totalPrice}}</view>
-        </view>
-
-        <view class="modal-actions">
-          <button class="btn-secondary" bindtap="closeModal">取消</button>
-          <button wx:if="{{orderSummary.length > 0}}" class="btn-primary" bindtap="confirmOrder" loading="{{submitting}}">确认提交</button>
-          <button wx:else class="btn-primary" bindtap="saveProfile">保存</button>
+<view class="apple-modal-mask" wx:if="{{showModal}}" bindtap="closeModal">
+  <view class="apple-modal-box" catchtap>
+    <view class="modal-header">
+      <text class="modal-title">{{orderSummary.length > 0 ? '确认订单' : '设置姓名'}}</text>
+    </view>
+    <view class="modal-body">
+      <view class="input-group">
+        <text class="input-label">取货人姓名</text>
+        <input class="apple-input" placeholder="请输入姓名" value="{{customerName}}" bindinput="onNameInput" />
+      </view>
+      <view class="summary-list" wx:if="{{orderSummary.length > 0}}">
+        <view class="summary-item" wx:for="{{orderSummary}}" wx:key="name">
+          <text>{{item.name}} x{{item.qty}}</text>
+          <text>¥{{item.subtotal}}</text>
         </view>
       </view>
-    </scroll-view>
+    </view>
+    <view class="modal-footer">
+      <button class="btn-modal-cancel" bindtap="closeModal">返回</button>
+      <button class="btn-modal-confirm" bindtap="{{orderSummary.length > 0 ? 'confirmOrder' : 'saveProfile'}}" loading="{{submitting}}">确定</button>
+    </view>
   </view>
 </view>
