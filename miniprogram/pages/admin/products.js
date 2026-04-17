@@ -65,16 +65,25 @@ Page({
       sourceType: ['album', 'camera'],
       success: (res) => {
         const tempFilePath = res.tempFiles[0].tempFilePath
-        this.setData({ 'form.tempImage': tempFilePath })
-        this.uploadImage(tempFilePath)
+        this.setData({ 'form.tempImage': tempFilePath, uploading: true })
+        
+        wx.compressImage({
+          src: tempFilePath,
+          quality: 80,
+          success: (compressRes) => {
+            this.uploadImage(compressRes.tempFilePath)
+          },
+          fail: () => {
+            this.setData({ uploading: false })
+            this.uploadImage(tempFilePath)
+          }
+        })
       }
     })
   },
 
   uploadImage(filePath) {
-    this.setData({ uploading: true })
-    const ext = filePath.split('.').pop() || 'jpg'
-    const cloudPath = `products/${Date.now()}-${Math.random().toString(36).substr(2)}.${ext}`
+    const cloudPath = `products/${Date.now()}-${Math.random().toString(36).substr(2)}.jpg`
     
     wx.cloud.uploadFile({
       cloudPath,
@@ -92,6 +101,7 @@ Page({
         console.error('uploadImage fail:', err)
       }
     })
+  },
   },
 
   saveProduct() {
