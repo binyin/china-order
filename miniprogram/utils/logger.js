@@ -1,4 +1,4 @@
-const ENABLED = false
+const ENABLED = true
 
 const LOG_LEVEL = {
   debug: 'DEBUG',
