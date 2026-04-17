@@ -74,12 +74,6 @@ Page({
         const month = parseInt(dateParts[1])
         const day = parseInt(dateParts[2])
         
-        const menuWithImages = validMenus.filter(m => m.image_url)
-        logger.info(TAG + ':loadMenu', { 
-          withImageCount: menuWithImages.length, 
-          sampleImages: menuWithImages.slice(0, 2).map(m => ({ name: m.name, image_url: m.image_url })) 
-        })
-        
         this.setData({ 
           dateTime: `${month}月${day}日`,
           menuList: validMenus,
@@ -87,12 +81,8 @@ Page({
         })
         
         this.calcTotal()
-        
-        if (menuWithImages.length > 0) {
-          wx.showToast({ title: `加载成功(${validMenus.length}种，含${menuWithImages.length}张图片)`, icon: 'none', duration: 2000 })
-        }
       } else {
-        this.setData({ menuList: [], dateTime: '', loading: false })
+this.setData({ menuList: [], dateTime: '', loading: false })
       }
     }).catch((err) => {
       this.setData({ loading: false })
