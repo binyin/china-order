@@ -43,9 +43,16 @@ exports.main = async (event, context) => {
     const cancelledItem = order.items.find(item => item.product_id === productId)
     if (cancelledItem) {
       const today = order.date
-      const menuRes = await db.collection('active_menu')
-        .where({ name: cancelledItem.name, date: today })
-        .get()
+      // 使用 product_id 匹配更准确
+      let menuRes = null
+      try {
+        const docRes = await db.collection('active_menu').doc(cancelledItem.product_id).get()
+        menuRes = { data: [docRes.data] }
+      } catch (e) {
+        menuRes = await db.collection('active_menu')
+          .where({ product_id: cancelledItem.product_id, date: today })
+          .get()
+      }
 
       if (menuRes.data.length > 0) {
         await db.collection('active_menu').doc(menuRes.data[0]._id).update({

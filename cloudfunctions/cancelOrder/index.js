@@ -35,9 +35,16 @@ exports.main = async (event, context) => {
     // 3. 恢复库存（ordered 减少对应数量）
     const today = order.date
     for (const item of order.items) {
-      const menuRes = await db.collection('active_menu')
-        .where({ name: item.name, date: today })
-        .get()
+      // 使用 product_id 匹配更准确
+      let menuRes = null
+      try {
+        const docRes = await db.collection('active_menu').doc(item.product_id).get()
+        menuRes = { data: [docRes.data] }
+      } catch (e) {
+        menuRes = await db.collection('active_menu')
+          .where({ product_id: item.product_id, date: today })
+          .get()
+      }
 
       if (menuRes.data.length > 0) {
         await db.collection('active_menu').doc(menuRes.data[0]._id).update({
