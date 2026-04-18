@@ -56,17 +56,15 @@ Page({
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
   },
 
-  loadMenu() {
+loadMenu() {
     logger.info(TAG + ':loadMenu', { start: true })
     this.setData({ loading: true })
     const todayStr = this.getTodayStr()
     logger.info(TAG + ':loadMenu', { todayStr })
-    getLatestMenu().then(res => {
-      const defaultImg = 'https://mmbiz.qpic.cn/mmbiz_png/SoO2qawVN1xicS2ib8o1QVPp6ibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibib'
+    return getLatestMenu().then(res => {
       const list = res.data.map(item => ({ 
         ...item, 
-        qty: 0,
-        image_url: item.image_url || defaultImg
+        qty: 0
       }))
       logger.info(TAG + ':loadMenu', { rawList: list.map(i => ({ date: i.date, name: i.name })) })
       
@@ -125,11 +123,10 @@ this.setData({ menuList: [], dateTime: '', loading: false })
     })
   },
 
-  onPullDownRefresh() {
+  async onPullDownRefresh() {
     logger.info(TAG + ':onPullDownRefresh', { action: 'refresh' })
-    this.loadMenu().then(() => {
-      wx.stopPullDownRefresh()
-    })
+    await this.loadMenu()
+    wx.stopPullDownRefresh()
   },
 
   onReachBottom() {
@@ -210,14 +207,12 @@ this.setData({ menuList: [], dateTime: '', loading: false })
     wx.setStorageSync('userProfile', { ...userProfile, nickname: name })
     this.setData({ hasProfile: true })
 
-    const defaultImg = 'https://mmbiz.qpic.cn/mmbiz_png/SoO2qawVN1xicS2ib8o1QVPp6ibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibib'
     const items = this.data.menuList
       .filter(i => i.qty > 0)
       .map(i => ({ 
         product_id: i._id, 
         name: i.name, 
-        num: i.qty,
-        image_url: i.image_url || defaultImg
+        num: i.qty
       }))
 
     logger.info(TAG + ':confirmOrder', { customer: name, itemCount: items.length, totalPrice: this.data.totalPrice })

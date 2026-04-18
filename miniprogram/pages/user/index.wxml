@@ -25,7 +25,8 @@
 
     <view class="menu-list">
       <view class="menu-item" wx:for="{{menuList}}" wx:key="_id">
-        <image class="item-img" src="{{item.image_url}}" mode="aspectFill" wx:if="{{item.image_url}}" bindtap="previewImage" data-url="{{item.image_url}}" />
+        <image wx:if="{{item.image_url}}" class="item-img" src="{{item.image_url}}" mode="aspectFill" bindtap="previewImage" data-url="{{item.image_url}}" />
+        <view wx:if="{{!item.image_url}}" class="item-img item-img-placeholder" />
         <view class="item-left">
           <text class="item-name">{{item.name}}</text>
           <text class="item-price">¥{{item.price}}</text>
