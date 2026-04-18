@@ -51,6 +51,10 @@ Page({
     this.checkAuthStatus()
   },
 
+  onHide() {
+    logger.info(TAG + ':onHide', { time: new Date().toISOString() })
+  },
+
   getTodayStr() {
     const now = new Date()
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
@@ -117,10 +121,23 @@ this.setData({ menuList: [], dateTime: '', loading: false })
 
   previewImage(e) {
     const url = e.currentTarget.dataset.url
+    logger.info(TAG + ':previewImage', { url, exist: !!url })
     if (!url) return
     wx.previewImage({
-      urls: [url]
+      urls: [url],
+      success: () => logger.info(TAG + ':previewImage', { action: 'open' }),
+      fail: (err) => logger.error(TAG + ':previewImage', { error: err.message })
     })
+  },
+
+  onImageError(e) {
+    const index = e.currentTarget.dataset.index
+    const list = this.data.menuList
+    if (list[index]) {
+      logger.warn(TAG + ':onImageError', { index, url: list[index].image_url })
+      list[index].image_url = ''
+      this.setData({ menuList: list })
+    }
   },
 
   async onPullDownRefresh() {
