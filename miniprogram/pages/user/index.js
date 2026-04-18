@@ -47,11 +47,20 @@ Page({
   },
 
   onShow() {
-    logger.info(TAG + ':onShow', { time: new Date().toISOString() })
+    const now = Date.now()
+    const isFromPreview = this._lastHideTime && (now - this._lastHideTime) < 2000
+    logger.info(TAG + ':onShow', { time: new Date().toISOString(), isFromPreview, lastHide: this._lastHideTime })
+    
+    if (isFromPreview) {
+      this._lastHideTime = null
+      return
+    }
+    
     this.checkAuthStatus()
   },
 
   onHide() {
+    this._lastHideTime = Date.now()
     logger.info(TAG + ':onHide', { time: new Date().toISOString() })
   },
 
