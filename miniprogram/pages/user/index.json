@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "馒头预定",
-  "usingComponents": {}
+  "usingComponents": {},
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "onReachBottomDistance": 50
 }

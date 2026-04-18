@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "馒头店云函数依赖",
   "dependencies": {
+    "ws": "^8.20.0",
     "wx-server-sdk": "~2.6.3"
+  },
+  "devDependencies": {
+    "miniprogram-automator": "^0.12.1"
   }
 }

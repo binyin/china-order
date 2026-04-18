@@ -62,7 +62,12 @@ Page({
     const todayStr = this.getTodayStr()
     logger.info(TAG + ':loadMenu', { todayStr })
     getLatestMenu().then(res => {
-      const list = res.data.map(item => ({ ...item, qty: 0 }))
+      const defaultImg = 'https://mmbiz.qpic.cn/mmbiz_png/SoO2qawVN1xicS2ib8o1QVPp6ibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibib'
+      const list = res.data.map(item => ({ 
+        ...item, 
+        qty: 0,
+        image_url: item.image_url || defaultImg
+      }))
       logger.info(TAG + ':loadMenu', { rawList: list.map(i => ({ date: i.date, name: i.name })) })
       
       const validMenus = list.filter(item => item.date >= todayStr)
@@ -95,12 +100,6 @@ this.setData({ menuList: [], dateTime: '', loading: false })
     const index = e.currentTarget.dataset.index
     const list = this.data.menuList
     const item = list[index]
-    const remaining = item.stock - (item.ordered || 0)
-    if (item.qty >= remaining) {
-      logger.warn(TAG + ':increase', { item: item.name, reason: '已售罄', remaining })
-      wx.showToast({ title: `最多预定 ${remaining} 件`, icon: 'none' })
-      return
-    }
     list[index].qty = (item.qty || 0) + 1
     this.setData({ menuList: list })
     logger.info(TAG + ':increase', { item: item.name, qty: list[index].qty })
@@ -116,6 +115,26 @@ this.setData({ menuList: [], dateTime: '', loading: false })
       logger.info(TAG + ':decrease', { item: list[index].name, qty: list[index].qty })
       this.calcTotal()
     }
+  },
+
+  previewImage(e) {
+    const url = e.currentTarget.dataset.url
+    if (!url) return
+    wx.previewImage({
+      urls: [url]
+    })
+  },
+
+  onPullDownRefresh() {
+    logger.info(TAG + ':onPullDownRefresh', { action: 'refresh' })
+    this.loadMenu().then(() => {
+      wx.stopPullDownRefresh()
+    })
+  },
+
+  onReachBottom() {
+    logger.info(TAG + ':onReachBottom', { action: 'loadMore' })
+    this.loadMyOrders()
   },
 
   calcTotal() {
@@ -191,9 +210,15 @@ this.setData({ menuList: [], dateTime: '', loading: false })
     wx.setStorageSync('userProfile', { ...userProfile, nickname: name })
     this.setData({ hasProfile: true })
 
+    const defaultImg = 'https://mmbiz.qpic.cn/mmbiz_png/SoO2qawVN1xicS2ib8o1QVPp6ibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibibib'
     const items = this.data.menuList
       .filter(i => i.qty > 0)
-      .map(i => ({ product_id: i._id, name: i.name, num: i.qty }))
+      .map(i => ({ 
+        product_id: i._id, 
+        name: i.name, 
+        num: i.qty,
+        image_url: i.image_url || defaultImg
+      }))
 
     logger.info(TAG + ':confirmOrder', { customer: name, itemCount: items.length, totalPrice: this.data.totalPrice })
 

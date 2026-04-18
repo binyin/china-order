@@ -73,22 +73,26 @@ exports.main = async (event, context) => {
       })
     }
 
-    // 2. 创建订单
-    const orderItems = await Promise.all(items.map(async (i) => {
-      let image_url = ''
-      try {
-        const menuRes = await db.collection('active_menu').doc(i.product_id).get()
-        if (menuRes.data) {
-          image_url = menuRes.data.image_url || ''
-        }
-      } catch (e) {}
-      return {
-        name: i.name,
-        num: i.num,
-        product_id: i.product_id,
-        item_status: 'pending',
-        image_url: image_url
-      }
+    // 2. 从 products 表获取产品信息
+    const productIds = items.map(i => i.product_id)
+    let productMap = {}
+    try {
+      const prodRes = await db.collection('products')
+        .where({ _id: _.in(productIds) })
+        .get()
+      prodRes.data.forEach(p => {
+        productMap[p._id] = { name: p.name, image_url: p.image_url || '' }
+      })
+    } catch (e) {
+      console.warn('获取产品信息失败', e)
+    }
+
+    const orderItems = items.map(i => ({
+      name: productMap[i.product_id]?.name || i.name,
+      num: i.num,
+      product_id: i.product_id,
+      item_status: 'pending',
+      image_url: productMap[i.product_id]?.image_url || ''
     }))
 
     const orderData = {

@@ -27,10 +27,6 @@ exports.main = async (event, context) => {
       return db.collection('active_menu').add({
         data: {
           product_id: item.product_id,
-          name: item.name,
-          price: Number(item.price),
-          unit: item.unit || '个',
-          image_url: item.image_url || '',
           stock: Number(item.stock) || 50,
           ordered: 0,
           date: targetDate,

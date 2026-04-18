@@ -17,6 +17,7 @@
     { "name": "getTodayOrders" },
     { "name": "getRecentOrders" },
     { "name": "saveUser" },
-    { "name": "initDb" }
+    { "name": "initDb" },
+    { "name": "cleanupDb" }
   ]
 }

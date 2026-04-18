@@ -125,10 +125,6 @@ Page({
 
     const postData = {
       product_id: product._id,
-      name: product.name,
-      price: Number(product.price),
-      unit: product.unit || '个',
-      image_url: product.image_url || '',
       stock: Number(product.initStock) || 50,
       date: targetDate
     }
@@ -138,7 +134,7 @@ Page({
       wx.showToast({ title: '已添加', icon: 'success' })
       this.loadPublishData()
     }).catch((err) => {
-      console.error(`[Admin:Menu] 上架失败 [${postData.name}]:`, err);
+      console.error(`[Admin:Menu] 上架失败:`, err);
       this.setData({ loading: false })
       wx.showToast({ title: '添加失败', icon: 'error' })
     })

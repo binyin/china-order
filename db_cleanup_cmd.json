@@ -1,0 +1,1 @@
+[{"TableName":"active_menu","CommandType":"UPDATE","Command":"{\"update\":\"active_menu\",\"updates\":[{\"q\":{},\"u\":{\"$unset\":{\"name\":\"\",\"price\":\"\",\"unit\":\"\",\"image_url\":\"\"}}},\"multi\":true}]}"}]

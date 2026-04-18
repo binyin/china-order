@@ -25,18 +25,15 @@
 
     <view class="menu-list">
       <view class="menu-item" wx:for="{{menuList}}" wx:key="_id">
-        <image class="item-img" src="{{item.image_url}}" mode="aspectFill" wx:if="{{item.image_url}}" />
+        <image class="item-img" src="{{item.image_url}}" mode="aspectFill" wx:if="{{item.image_url}}" bindtap="previewImage" data-url="{{item.image_url}}" />
         <view class="item-left">
           <text class="item-name">{{item.name}}</text>
-          <text class="item-stock">剩余 {{item.stock - (item.ordered || 0)}}</text>
+          <text class="item-price">¥{{item.price}}</text>
         </view>
         <view class="item-right">
-          <text class="item-price">¥{{item.price}}</text>
-          <view class="item-counter">
-            <view class="counter-btn minus" bindtap="decrease" data-index="{{index}}" wx:if="{{item.qty > 0}}">－</view>
-            <view class="counter-num" wx:if="{{item.qty > 0}}">{{item.qty}}</view>
-            <view class="counter-btn plus" bindtap="increase" data-index="{{index}}">＋</view>
-          </view>
+          <view class="counter-btn plus" bindtap="increase" data-index="{{index}}" wx:if="{{item.qty === 0}}">＋</view>
+          <view class="counter-btn minus" bindtap="decrease" data-index="{{index}}" wx:if="{{item.qty > 0}}">－</view>
+          <text class="counter-num" wx:if="{{item.qty > 0}}">{{item.qty}}</text>
         </view>
       </view>
     </view>

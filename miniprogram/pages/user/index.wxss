@@ -78,27 +78,18 @@ page {
   flex-direction: column;
 }
 
-.item-stock {
-  font-size: 24rpx;
-  color: var(--apple-gray);
+.item-price {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #666;
   margin-top: 6rpx;
   display: block;
 }
 
-.item-price {
-  font-size: 32rpx;
-  font-weight: 600;
-  color: #000;
-  margin-right: 24rpx;
-}
-
-/* 计数器 */
-.item-counter {
+.item-right {
   display: flex;
   align-items: center;
-  background: #f2f2f7;
-  border-radius: 40rpx;
-  padding: 4rpx;
+  gap: 16rpx;
 }
 
 .counter-btn {
@@ -109,20 +100,26 @@ page {
   justify-content: center;
   font-size: 36rpx;
   font-weight: 400;
+  border-radius: 50%;
 }
 
 .counter-btn.plus {
-  background: #fff;
-  border-radius: 50%;
-  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
+  background: var(--apple-orange);
+  color: #fff;
+  box-shadow: 0 4rpx 16rpx rgba(255,149,0,0.3);
+}
+
+.counter-btn.minus {
+  background: #f2f2f7;
   color: var(--apple-orange);
 }
 
 .counter-num {
-  width: 50rpx;
+  min-width: 40rpx;
   text-align: center;
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: 600;
+  color: #000;
 }
 
 /* 我的预定卡片 */

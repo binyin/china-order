@@ -17,6 +17,7 @@ function getTodayMenu() {
 /**
  * 获取指定日期的菜单
  * @param {string} date - 可选，不传则返回明天的菜单（用户端用）
+ * 关联 products 表获取产品完整信息
  */
 function getMenuByDate(date) {
   const targetDate = date || getTomorrowBJDateStr()
@@ -24,6 +25,34 @@ function getMenuByDate(date) {
     .where({ date: targetDate })
     .orderBy('publish_time', 'desc')
     .get()
+    .then(async res => {
+      const productIds = res.data.map(m => m.product_id).filter(Boolean)
+      let productMap = {}
+      if (productIds.length > 0) {
+        const batchTimes = Math.ceil(productIds.length / 20)
+        const tasks = []
+        for (let i = 0; i < batchTimes; i++) {
+          const ids = productIds.slice(i * 20, (i + 1) * 20)
+          tasks.push(db.collection('products')
+            .where({
+              _id: _.in(ids)
+            })
+            .get())
+        }
+        const results = await Promise.all(tasks)
+        results.forEach(r => {
+          r.data.forEach(p => {
+            productMap[p._id] = { name: p.name, price: p.price, unit: p.unit, image_url: p.image_url }
+          })
+        })
+      }
+      const list = res.data.map(item => ({
+        ...item,
+        ...productMap[item.product_id],
+        qty: 0
+      }))
+      return { data: list }
+    })
 }
 
 /**
@@ -91,10 +120,6 @@ function addMenuItem(item) {
   return db.collection('active_menu').add({
     data: {
       product_id: item.product_id || item._id,
-      name: item.name,
-      price: item.price,
-      unit: item.unit || '个',
-      image_url: item.image_url || '',
       stock: item.stock || 50,
       ordered: 0,
       date: targetDate,
@@ -268,6 +293,7 @@ function getMyOrders() {
 
 /**
  * 获取历史发布过的菜单（分页获取全部）
+ * 关联 products 表获取产品完整信息
  */
 async function getMenuHistory() {
   const countRes = await db.collection('active_menu').count()
@@ -283,7 +309,32 @@ async function getMenuHistory() {
       .get())
   }
   const results = await Promise.all(tasks)
-  return { data: results.reduce((acc, res) => acc.concat(res.data), []) }
+  const allData = results.reduce((acc, res) => acc.concat(res.data), [])
+
+  const productIds = [...new Set(allData.map(m => m.product_id).filter(Boolean))]
+  let productMap = {}
+  if (productIds.length > 0) {
+    const prodBatchTimes = Math.ceil(productIds.length / 20)
+    const prodTasks = []
+    for (let i = 0; i < prodBatchTimes; i++) {
+      const ids = productIds.slice(i * 20, (i + 1) * 20)
+      prodTasks.push(db.collection('products')
+        .where({ _id: _.in(ids) })
+        .get())
+    }
+    const prodResults = await Promise.all(prodTasks)
+    prodResults.forEach(r => {
+      r.data.forEach(p => {
+        productMap[p._id] = { name: p.name, price: p.price, unit: p.unit, image_url: p.image_url }
+      })
+    })
+  }
+
+  const list = allData.map(item => ({
+    ...item,
+    ...productMap[item.product_id]
+  }))
+  return { data: list }
 }
 
 /**
@@ -315,19 +366,48 @@ function getTomorrowBJDateStr() {
 
 /**
  * 获取最近发布的菜单（最新一次发布的日期的所有产品）
+ * 关联 products 表获取产品完整信息
  */
 function getLatestMenu() {
   return db.collection('active_menu')
     .orderBy('publish_time', 'desc')
     .limit(1)
     .get()
-    .then(res => {
+    .then(async res => {
       if (res.data.length > 0) {
         const latestDate = res.data[0].date
-        return db.collection('active_menu')
+        const menuRes = await db.collection('active_menu')
           .where({ date: latestDate })
           .orderBy('publish_time', 'desc')
           .get()
+
+        const productIds = menuRes.data.map(m => m.product_id).filter(Boolean)
+        let productMap = {}
+        if (productIds.length > 0) {
+          const batchTimes = Math.ceil(productIds.length / 20)
+          const tasks = []
+          for (let i = 0; i < batchTimes; i++) {
+            const ids = productIds.slice(i * 20, (i + 1) * 20)
+            tasks.push(db.collection('products')
+              .where({
+                _id: _.in(ids)
+              })
+              .get())
+          }
+          const results = await Promise.all(tasks)
+          results.forEach(r => {
+            r.data.forEach(p => {
+              productMap[p._id] = { name: p.name, price: p.price, unit: p.unit, image_url: p.image_url }
+            })
+          })
+        }
+
+        const list = menuRes.data.map(item => ({
+          ...item,
+          ...productMap[item.product_id],
+          qty: 0
+        }))
+        return { data: list }
       }
       return { data: [] }
     })
