@@ -18,6 +18,15 @@
     { "name": "getRecentOrders" },
     { "name": "saveUser" },
     { "name": "initDb" },
-    { "name": "cleanupDb" }
+    {
+      "name": "cleanupDb",
+      "triggers": [
+        {
+          "name": "daily",
+          "type": "timer",
+          "config": "0 0 3 * * * * *"
+        }
+      ]
+    }
   ]
 }
