@@ -345,6 +345,7 @@ module.exports = {
   deleteProduct,
   addMenuItem,
   removeMenuItem,
+  removeProduct: deleteProduct,
   updateMenuStock,
   getTodayOrders,
   getOrdersByDate,

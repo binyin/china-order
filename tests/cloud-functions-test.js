@@ -40,20 +40,59 @@ async function runCloudTests() {
 
   let testMenuItemId = null
   let testOrderId = null
+  let testProductImage = 'cloud://test-image-123.jpg'
 
   try {
-    // 准备：添加今日菜单项
+    // 准备：添加今日菜单项（带图片）
     log('准备测试数据...')
-    const { addMenuItem, removeMenuItem, getTodayMenu } = require('../../utils/db')
+    const { addMenuItem, removeMenuItem, getTodayMenu, addProduct } = require('../../utils/db')
     const addRes = await addMenuItem({
       _id: 'cloud_test_product',
       name: '云函数测试包子',
       price: 5.0,
       unit: '个',
+      image_url: testProductImage,
       stock: 20
     })
     testMenuItemId = addRes._id
     log(`测试菜单项已添加: ${testMenuItemId}`)
+
+    // === 0. 产品图片功能 ===
+    log('--- 产品图片功能测试 ---')
+
+    // 添加产品（带图片）
+    const prodRes = await addProduct({
+      name: '云函数测试图片产品',
+      price: 8.0,
+      unit: '个',
+      image_url: 'cloud://prod-img-test.jpg'
+    })
+    const testProdId = prodRes._id
+    assert(prodRes.image_url === 'cloud://prod-img-test.jpg', 'addProduct - 图片URL正确存储')
+
+    // 发布到菜单（带图片）
+    const menuRes = await addMenuItem({
+      _id: 'cloud_test_img_menu',
+      name: '云函数测试图片菜品',
+      price: 8.0,
+      unit: '个',
+      image_url: 'cloud://menu-img-test.jpg',
+      stock: 10
+    })
+    const testMenuImgId = menuRes._id
+    assert(menuRes.image_url === 'cloud://menu-img-test.jpg', 'addMenuItem - 图片URL正确存储')
+
+    // 验证菜单项图片在查询中正确返回
+    const menuList = await getTodayMenu()
+    const menuItem = menuList.data.find(m => m._id === testMenuImgId)
+    assert(menuItem && menuItem.image_url === 'cloud://menu-img-test.jpg', 'getTodayMenu - 图片URL正确返回')
+
+    // 清理测试产品
+    try {
+      const { removeProduct } = require('../../utils/db')
+      await removeProduct(testProdId)
+      await removeMenuItem(testMenuImgId)
+    } catch (e) {}
 
     // === 1. createOrder ===
     log('--- createOrder 测试 ---')
