@@ -32,8 +32,8 @@
           <text class="item-price">¥{{item.price}}</text>
         </view>
         <view class="item-right">
-          <view class="counter-btn plus" bindtap="increase" data-index="{{index}}" wx:if="{{item.qty === 0}}">＋</view>
-          <view class="counter-btn minus" bindtap="decrease" data-index="{{index}}" wx:if="{{item.qty > 0}}">－</view>
+          <view class="counter-btn plus" bindtap="increase" data-index="{{index}}" wx:if="{{!item.disabled}}">＋</view>
+          <view class="counter-btn minus" bindtap="decrease" data-index="{{index}}" wx:if="{{item.qty > 0 && !item.disabled}}">－</view>
           <text class="counter-num" wx:if="{{item.qty > 0}}">{{item.qty}}</text>
         </view>
       </view>

@@ -129,7 +129,7 @@ loadMenu() {
     const index = e.currentTarget.dataset.index
     const list = this.data.menuList
     const item = list[index]
-    if (item.disabled) {
+    if (item.disabled || item.qty <= 0) {
       return
     }
     if (list[index].qty > 0) {
