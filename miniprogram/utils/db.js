@@ -355,6 +355,15 @@ function getBJDateStr(date) {
 }
 
 /**
+ * 获取今天北京时间日期字符串 YYYY-MM-DD
+ */
+function getTodayBJDateStr() {
+  const d = new Date()
+  const bjTime = new Date(d.getTime() + 8 * 3600 * 1000)
+  return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
+}
+
+/**
  * 获取明天北京时间日期字符串 YYYY-MM-DD
  */
 function getTomorrowBJDateStr() {
@@ -369,19 +378,14 @@ function getTomorrowBJDateStr() {
  * 关联 products 表获取产品完整信息
  */
 function getLatestMenu() {
+  const todayDate = getTodayBJDateStr()
   return db.collection('active_menu')
+    .where({ date: todayDate })
     .orderBy('publish_time', 'desc')
-    .limit(1)
     .get()
     .then(async res => {
       if (res.data.length > 0) {
-        const latestDate = res.data[0].date
-        const menuRes = await db.collection('active_menu')
-          .where({ date: latestDate })
-          .orderBy('publish_time', 'desc')
-          .get()
-
-        const productIds = menuRes.data.map(m => m.product_id).filter(Boolean)
+        const productIds = res.data.map(m => m.product_id).filter(Boolean)
         let productMap = {}
         if (productIds.length > 0) {
           const batchTimes = Math.ceil(productIds.length / 20)
@@ -402,7 +406,7 @@ function getLatestMenu() {
           })
         }
 
-        const list = menuRes.data.map(item => ({
+        const list = res.data.map(item => ({
           ...item,
           ...productMap[item.product_id],
           qty: 0
@@ -436,5 +440,6 @@ module.exports = {
   getMenuHistory,
   getDateStr,
   getBJDateStr,
+  getTodayBJDateStr,
   getTomorrowBJDateStr
 }
