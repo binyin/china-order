@@ -244,21 +244,17 @@ function getMenuByDate(date) {
  */
 function getLatestMenu() {
   const todayStr = getTodayBJDateStr()
-  console.log('[getLatestMenu] todayStr:', todayStr)
   return db.collection('active_menu')
     .where({
-      date: _.gte(todayStr)
+      date: todayStr
     })
     .orderBy('publish_time', 'desc')
     .limit(1)
     .get()
     .then(async res => {
-      console.log('[getLatestMenu] 菜单查询结果:', res.data.length)
       if (res.data.length > 0) {
         const menu = res.data[0]
-        console.log('[getLatestMenu] menu:', menu)
         const productIds = menu.items || []
-        console.log('[getLatestMenu] productIds:', productIds)
         let productMap = {}
         if (productIds.length > 0) {
           const batchTimes = Math.ceil(productIds.length / 20)
@@ -278,7 +274,6 @@ function getLatestMenu() {
             })
           })
         }
-        console.log('[getLatestMenu] productMap:', productMap)
 
         const list = (menu.items || []).map(pid => ({
           _id: pid,
@@ -289,7 +284,6 @@ function getLatestMenu() {
           qty: 0
         }))
 
-        console.log('[getLatestMenu] list:', list)
         return { data: list, menuInfo: { date: menu.date, publish_time: menu.publish_time } }
       }
       return { data: [] }
