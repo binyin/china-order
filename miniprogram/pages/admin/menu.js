@@ -168,18 +168,22 @@ Page({
       image_url: m.image_url
     }))
     
+    console.log('[Admin:Menu] 发布菜单:', { date: this.data.selectedDate, count: postItems.length, items: postItems.map(i => i.name) })
+    
     wx.showLoading({ title: '发布中...' })
     wx.cloud.callFunction({
       name: 'publishMenu',
       data: { items: postItems, date: this.data.selectedDate }
     }).then(result => {
+      console.log('[Admin:Menu] 发布结果:', result)
       wx.hideLoading()
       const r = result.result
-      if (r.success) {
+      if (r && r.success) {
         wx.showToast({ title: `已发布 ${r.data.count} 种`, icon: 'success' })
         this.loadPublishData()
       } else {
-        wx.showModal({ title: '发布失败', content: r.message, showCancel: false })
+        console.error('[Admin:Menu] 发布失败:', r)
+        wx.showModal({ title: '发布失败', content: r?.message || '网络错误', showCancel: false })
       }
     }).catch(err => {
       wx.hideLoading()
