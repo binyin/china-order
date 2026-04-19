@@ -153,18 +153,20 @@ loadMenu() {
       return
     }
     const currentQty = item.qty || 0
-    const qtyList = []
-    for (let i = 0; i <= this.MAX_ORDER_QTY; i++) {
-      qtyList.push(String(i))
-    }
-    wx.showActionSheet({
-      itemList: qtyList,
+    wx.showModal({
+      title: '输入数量',
+      editable: true,
+      placeholderText: '请输入1-50的数字',
+      content: String(currentQty),
       success: (res) => {
-        const qty = res.tapIndex
-        list[index].qty = qty
-        this.setData({ menuList: list })
-        logger.info(TAG + ':editQty', { index, qty })
-        this.calcTotal()
+        if (res.confirm) {
+          let qty = parseInt(res.content) || 0
+          qty = Math.max(0, Math.min(this.MAX_ORDER_QTY, qty))
+          list[index].qty = qty
+          this.setData({ menuList: list })
+          logger.info(TAG + ':editQty', { index, qty })
+          this.calcTotal()
+        }
       }
     })
   },
