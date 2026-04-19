@@ -111,6 +111,8 @@ loadMenu() {
     })
   },
 
+  MAX_ORDER_QTY: 50,
+
   increase(e) {
     const index = e.currentTarget.dataset.index
     const list = this.data.menuList
@@ -119,7 +121,12 @@ loadMenu() {
       wx.showToast({ title: '该菜单已过期', icon: 'none' })
       return
     }
-    list[index].qty = (list[index].qty || 0) + 1
+    const currentQty = list[index].qty || 0
+    if (currentQty >= this.MAX_ORDER_QTY) {
+      wx.showToast({ title: `每种最多订${this.MAX_ORDER_QTY}个`, icon: 'none' })
+      return
+    }
+    list[index].qty = currentQty + 1
     this.setData({ menuList: list })
     logger.info(TAG + ':increase', { index, qty: list[index].qty })
     this.calcTotal()
@@ -227,16 +234,23 @@ loadMenu() {
 
   // 名字输入框变化
   onNameInput(e) {
-    this.setData({ customerName: e.detail.value })
+    let value = (e.detail.value || '').replace(/[<>\'\"\\]/g, '').slice(0, 20)
+    this.setData({ customerName: value })
   },
 
   confirmOrder() {
-    const name = this.data.customerName.trim()
+    let name = (this.data.customerName || '').trim()
     const userProfile = wx.getStorageSync('userProfile') || {}
 
     if (!name) {
       logger.warn(TAG + ':confirmOrder', { reason: '未输入姓名' })
       wx.showToast({ title: '请输入您的姓名', icon: 'none' })
+      return
+    }
+
+    name = name.replace(/[<>\'\"\\]/g, '').slice(0, 20)
+    if (name.length < 2) {
+      wx.showToast({ title: '姓名至少2个字', icon: 'none' })
       return
     }
 
@@ -246,22 +260,28 @@ loadMenu() {
     const items = this.data.menuList
       .filter(i => i.qty > 0)
       .map(i => ({ 
-        product_id: i._id, 
-        name: i.name, 
-        num: i.qty
+        product_id: (i._id || '').toString().slice(0, 100), 
+        name: (i.name || '').slice(0, 50), 
+        num: Math.min(Math.max(1, parseInt(i.qty) || 0), 50)
       }))
+
+    if (items.length === 0) {
+      wx.showToast({ title: '请选择产品', icon: 'none' })
+      return
+    }
 
     logger.info(TAG + ':confirmOrder', { customer: name, itemCount: items.length, totalPrice: this.data.totalPrice })
 
     this.setData({ submitting: true })
 
+    const savedProfile = wx.getStorageSync('userProfile') || {}
     wx.cloud.callFunction({
       name: 'createOrder',
       data: {
         items,
-        total_price: parseFloat(this.data.totalPrice),
+        total_price: parseFloat(this.data.totalPrice) || 0,
         customer_name: name,
-        customer_nickname: userProfile.nickname || '',
+        customer_nickname: (savedProfile.nickname || '').slice(0, 50),
         customer_avatar: userProfile.avatarUrl || ''
       }
     }).then(res => {
