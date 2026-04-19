@@ -230,6 +230,7 @@ function getMenuByDate(date) {
       const list = (menu.items || []).map(pid => ({
         _id: pid,
         product_id: pid,
+        stock: 50,
         ...productMap[pid],
         qty: 0
       }))
@@ -278,6 +279,7 @@ function getLatestMenu() {
           _id: pid,
           product_id: pid,
           date: menu.date,
+          stock: 50,
           ...productMap[pid],
           qty: 0
         }))
