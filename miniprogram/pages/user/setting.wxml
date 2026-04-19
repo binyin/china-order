@@ -14,6 +14,6 @@
   </view>
   <view class="setting-item intro-item">
     <text class="setting-label">介绍</text>
-    <text class="setting-value intro">馒头店预定小程序，方便快捷预订每日菜品</text>
+    <text class="setting-value intro">馒头店预定小程序，方便快捷预订每日菜品.开发支持:贝塔 微信(yinbin.cc)</text>
   </view>
 </view>
