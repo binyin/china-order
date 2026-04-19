@@ -289,27 +289,6 @@ function getLatestMenu() {
       return { data: [] }
     })
 }
-          const results = await Promise.all(tasks)
-          results.forEach(r => {
-            r.data.forEach(p => {
-              productMap[p._id] = { name: p.name, price: p.price, unit: p.unit, image_url: p.image_url }
-            })
-          })
-        }
-
-        const list = (menu.items || []).map(pid => ({
-          _id: pid,
-          product_id: pid,
-          date: menu.date,
-          stock: 50,
-          ...productMap[pid],
-          qty: 0
-        }))
-        return { data: list, menuInfo: { date: menu.date, publish_time: menu.publish_time } }
-      }
-      return { data: [] }
-    })
-}
 
 module.exports = {
   db,
