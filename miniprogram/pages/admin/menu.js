@@ -174,18 +174,24 @@ Page({
     wx.cloud.callFunction({
       name: 'publishMenu',
       data: { items: postItems, date: this.data.selectedDate }
-    }).then(result => {
-      console.log('[Admin:Menu] 发布结果:', result)
+    }).then(res => {
+      console.log('[Admin:Menu] 发布结果原始:', res)
       wx.hideLoading()
-      const r = result.result
+      if (!res) {
+        console.error('[Admin:Menu] 结果为空')
+        wx.showToast({ title: '网络错误', icon: 'error' })
+        return
+      }
+      const r = res.result
+      console.log('[Admin:Menu] 发布结果:', r)
       if (r && r.success) {
         wx.showToast({ title: `已发布 ${r.data.count} 种`, icon: 'success' })
         this.loadPublishData()
       } else {
-        console.error('[Admin:Menu] 发布失败:', r)
-        wx.showModal({ title: '发布失败', content: r?.message || '网络错误', showCancel: false })
+        wx.showModal({ title: '发布失败', content: r?.message || JSON.stringify(r), showCancel: false })
       }
     }).catch(err => {
+      console.error('[Admin:Menu] 调用异常:', err)
       wx.hideLoading()
       wx.showToast({ title: '网络错误', icon: 'error' })
     })
