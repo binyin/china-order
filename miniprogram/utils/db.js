@@ -138,11 +138,11 @@ function cancelOrder(id) {
 /**
  * 根据 menu_id 获取订单
  */
-async function getMyOrders(menuId) {
+async function getMyOrders(date) {
+  const todayStr = date || getTodayBJDateStr()
   return db.collection('orders')
     .where({
-      customer_id: db.command.globalThis ? undefined : '',
-      menu_id: menuId
+      date: todayStr
     })
     .orderBy('create_time', 'desc')
     .get()

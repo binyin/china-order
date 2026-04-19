@@ -160,11 +160,23 @@ loadMenu() {
       content: String(currentQty),
       success: (res) => {
         if (res.confirm) {
-          let qty = parseInt(res.content) || 0
-          qty = Math.max(0, Math.min(this.MAX_ORDER_QTY, qty))
-          list[index].qty = qty
+          const content = (res.content || '').trim()
+          const inputQty = parseInt(content)
+          const maxQty = this.MAX_ORDER_QTY
+          
+          if (content === '' || isNaN(inputQty)) {
+            wx.showToast({ title: '请输入有效数字', icon: 'none' })
+            return
+          }
+          
+          if (inputQty < 0 || inputQty > maxQty) {
+            wx.showToast({ title: `超出范围(0-${maxQty})`, icon: 'none' })
+            return
+          }
+          
+          list[index].qty = inputQty
           this.setData({ menuList: list })
-          logger.info(TAG + ':editQty', { index, qty })
+          logger.info(TAG + ':editQty', { index, qty: inputQty })
           this.calcTotal()
         }
       }
@@ -229,14 +241,10 @@ loadMenu() {
     logger.info(TAG + ':loadMyOrders', { start: true })
     
     getMyOrders().then(res => {
-      const today = new Date()
-      const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-      const todayOrders = (res.data || []).filter(o => 
-        o.date === todayStr && o.status !== 'cancelled'
-      )
-      this.setData({ submittedOrders: todayOrders })
+      const orders = res.data || []
+      this.setData({ submittedOrders: orders })
       this.loadingOrders = false
-      logger.info(TAG + ':loadMyOrders', { success: true, count: todayOrders.length })
+      logger.info(TAG + ':loadMyOrders', { success: true, count: orders.length })
     }).catch((err) => {
       this.loadingOrders = false
       logger.error(TAG + ':loadMyOrders', { error: err.message || String(err) })
