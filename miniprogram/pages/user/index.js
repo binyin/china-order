@@ -145,6 +145,30 @@ loadMenu() {
     this.calcTotal()
   },
 
+  editQty(e) {
+    const index = e.currentTarget.dataset.index
+    const list = this.data.menuList
+    const item = list[index]
+    if (item.disabled) {
+      return
+    }
+    const currentQty = item.qty || 0
+    const qtyList = []
+    for (let i = 0; i <= this.MAX_ORDER_QTY; i++) {
+      qtyList.push(String(i))
+    }
+    wx.showActionSheet({
+      itemList: qtyList,
+      success: (res) => {
+        const qty = res.tapIndex
+        list[index].qty = qty
+        this.setData({ menuList: list })
+        logger.info(TAG + ':editQty', { index, qty })
+        this.calcTotal()
+      }
+    })
+  },
+
   previewImage(e) {
     const url = e.currentTarget.dataset.url
     logger.info(TAG + ':previewImage', { url, exist: !!url })

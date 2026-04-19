@@ -33,7 +33,7 @@
         </view>
         <view class="item-right">
           <view class="counter-btn minus {{item.disabled ? 'disabled' : ''}}" bindtap="decrease" data-index="{{index}}">－</view>
-          <text class="counter-num {{item.disabled ? 'disabled' : ''}}">{{item.qty || 0}}</text>
+          <text class="counter-num {{item.disabled ? 'disabled' : ''}}" bindtap="editQty" data-index="{{index}}">{{item.qty || 0}}</text>
           <view class="counter-btn plus {{item.disabled ? 'disabled' : ''}}" bindtap="increase" data-index="{{index}}">＋</view>
         </view>
       </view>
