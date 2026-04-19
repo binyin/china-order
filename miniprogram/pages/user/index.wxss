@@ -133,6 +133,11 @@ page {
   color: #000;
 }
 
+.counter-btn.disabled,
+.counter-num.disabled {
+  opacity: 0.4;
+}
+
 /* 我的预定卡片 */
 .submitted-section {
   padding: 20rpx 30rpx;

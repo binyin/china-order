@@ -119,9 +119,9 @@ loadMenu() {
       wx.showToast({ title: '该菜单已过期', icon: 'none' })
       return
     }
-    list[index].qty = (item.qty || 0) + 1
+    list[index].qty = (list[index].qty || 0) + 1
     this.setData({ menuList: list })
-    logger.info(TAG + ':increase', { item: item.name, qty: list[index].qty })
+    logger.info(TAG + ':increase', { index, qty: list[index].qty })
     this.calcTotal()
   },
 
@@ -129,15 +129,13 @@ loadMenu() {
     const index = e.currentTarget.dataset.index
     const list = this.data.menuList
     const item = list[index]
-    if (item.disabled || item.qty <= 0) {
+    if (item.disabled || !list[index].qty) {
       return
     }
-    if (list[index].qty > 0) {
-      list[index].qty -= 1
-      this.setData({ menuList: list })
-      logger.info(TAG + ':decrease', { item: list[index].name, qty: list[index].qty })
-      this.calcTotal()
-    }
+    list[index].qty -= 1
+    this.setData({ menuList: list })
+    logger.info(TAG + ':decrease', { index, qty: list[index].qty })
+    this.calcTotal()
   },
 
   previewImage(e) {
