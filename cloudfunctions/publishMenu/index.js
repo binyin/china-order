@@ -1,57 +1,61 @@
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
+const _ = db.command
 
 exports.main = async (event, context) => {
   const { items, date } = event
-  const { OPENID } = cloud.getWXContext() // 获取老板的ID
+  const { OPENID } = cloud.getWXContext()
 
   if (!items || items.length === 0) return { success: false, message: '请选择品种' }
 
-  // 1. 获取日期字符串（默认明天）
-  const targetDate = date || getTomorrowBJDate()
+  const targetDate = date || getTodayBJDate()
+  const menuId = `menu_${targetDate}`
+  const publishTime = Date.now()
+  const productIds = items.map(i => i.product_id)
 
   try {
-    // 2. 清理逻辑
-    console.log(`正在清理日期为 ${targetDate} 的旧菜单...`)
-    await db.collection('active_menu').where({
-      date: targetDate
-    }).remove()
+    // 查询是否已存在该日期的菜单
+    const existing = await db.collection('active_menu')
+      .where({ date: targetDate })
+      .get()
 
-    // 生成唯一菜单ID
-    const menuId = `${targetDate}_${Date.now()}`
-    const publishTime = Date.now()
-
-    // 3. 批量插入 (使用Promise.all提升速度)
-    const insertTasks = items.map(item => {
-      return db.collection('active_menu').add({
+    if (existing.data.length > 0) {
+      // 存在则更新
+      await db.collection('active_menu').doc(existing.data[0]._id).update({
         data: {
-          product_id: item.product_id,
-          stock: Number(item.stock) || 50,
-          ordered: 0,
-          date: targetDate,
-          menu_id: menuId,
+          items: productIds,
           publish_time: publishTime,
+          menu_id: menuId,
+          update_time: db.serverDate()
+        }
+      })
+      console.log(`[publishMenu] 更新菜单: ${targetDate}, ${productIds.length}个产品`)
+    } else {
+      // 不存在则新增
+      await db.collection('active_menu').add({
+        data: {
+          date: targetDate,
+          items: productIds,
+          publish_time: publishTime,
+          menu_id: menuId,
           _openid: OPENID,
           create_time: db.serverDate()
         }
       })
-    })
+      console.log(`[publishMenu] 新增菜单: ${targetDate}, ${productIds.length}个产品`)
+    }
 
-    await Promise.all(insertTasks)
-    
     return {
       success: true,
-      data: { date: targetDate, count: items.length }
+      data: { date: targetDate, count: productIds.length }
     }
   } catch (err) {
-    console.error('发布失败详情:', err)
-    return { success: false, message: `发布失败: ${err.errMsg}` }
+    console.error('[publishMenu] 失败:', err)
+    return { success: false, message: `发布失败: ${err.message}` }
   }
 }
 
-function getTomorrowBJDate() {
+function getTodayBJDate() {
   const now = new Date(Date.now() + 8 * 3600 * 1000)
-  now.setDate(now.getDate() + 1)
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-}

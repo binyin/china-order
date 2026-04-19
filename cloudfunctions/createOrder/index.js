@@ -1,4 +1,4 @@
-// 云函数：创建订单（原子化库存扣减）
+// 云函数：创建订单（库存从 orders 表实时计算）
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
@@ -16,15 +16,17 @@ exports.main = async (event, context) => {
     return { success: false, message: '请填写姓名' }
   }
 
-  const today = getBJDateStr()
+  const today = getTodayBJDate()
   const now = new Date(Date.now() + 8 * 3600 * 1000)
 
   try {
-    // 获取最新菜单信息
+    // 获取今日菜单（新结构）
     let latestMenu = null
     try {
       const menuRes = await db.collection('active_menu')
-        .where({ date: today })
+        .where({
+          date: _.gte(today)
+        })
         .orderBy('publish_time', 'desc')
         .limit(1)
         .get()
@@ -33,47 +35,36 @@ exports.main = async (event, context) => {
         latestMenu = menuRes.data[0]
       }
     } catch (e) {
-      console.warn('获取最新菜单失败', e)
+      console.warn('[createOrder] 获取菜单失败', e)
     }
 
     if (!latestMenu) {
       return { success: false, message: '今日未发布菜单' }
     }
 
-    const menuId = latestMenu.menu_id
-    const menuPublishTime = latestMenu.publish_time
+    // 从 items 数组获取产品ID列表
+    const menuProductIds = latestMenu.items || []
+    if (menuProductIds.length === 0) {
+      return { success: false, message: '今日菜单为空' }
+    }
 
-    // 1. 逐项检查库存并原子扣减
+    // 从 orders 表实时计算每个产品的销量
+    const orderStats = await calcOrderStats(today)
+
+    // 验证库存
+    const STOCK = 50
     for (const item of items) {
-      // product_id 实际是 active_menu 的文档 _id
-      let menuItem = null
-      try {
-        const docRes = await db.collection('active_menu').doc(item.product_id).get()
-        menuItem = docRes.data
-      } catch (e) {
-        // doc查询失败，尝试用 product_id 字段 + date 查询
-        const menuRes = await db.collection('active_menu')
-          .where({ product_id: item.product_id, date: today })
-          .get()
-        if (menuRes.data.length > 0) menuItem = menuRes.data[0]
-      }
-
-      if (!menuItem) {
+      if (!menuProductIds.includes(item.product_id)) {
         return { success: false, message: `${item.name} 今日未上架` }
       }
-      const remaining = menuItem.stock - (menuItem.ordered || 0)
-
+      const sold = orderStats[item.product_id] || 0
+      const remaining = STOCK - sold
       if (remaining < item.num) {
         return { success: false, message: `${item.name} 库存不足，仅剩 ${remaining} 件` }
       }
-
-      // 原子化库存扣减
-      await db.collection('active_menu').doc(menuItem._id).update({
-        data: { ordered: _.inc(item.num) }
-      })
     }
 
-    // 2. 从 products 表获取产品信息
+    // 从 products 表获取产品信息
     const productIds = items.map(i => i.product_id)
     let productMap = {}
     try {
@@ -84,7 +75,7 @@ exports.main = async (event, context) => {
         productMap[p._id] = { name: p.name, image_url: p.image_url || '' }
       })
     } catch (e) {
-      console.warn('获取产品信息失败', e)
+      console.warn('[createOrder] 获取产品信息失败', e)
     }
 
     const orderItems = items.map(i => ({
@@ -104,8 +95,8 @@ exports.main = async (event, context) => {
       total_price: total_price,
       status: 'pending',
       date: today,
-      menu_id: menuId,
-      menu_publish_time: menuPublishTime,
+      menu_id: latestMenu.menu_id,
+      menu_publish_time: latestMenu.publish_time,
       create_time: now.getTime(),
       create_time_str: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
     }
@@ -117,13 +108,34 @@ exports.main = async (event, context) => {
       data: { orderId: orderRes._id }
     }
   } catch (err) {
-    console.error('创建订单失败', err)
+    console.error('[createOrder] 创建订单失败', err)
     return { success: false, message: '创建订单失败，请重试' }
   }
 }
 
-function getBJDateStr() {
-  const d = new Date()
-  const bjTime = new Date(d.getTime() + 8 * 3600 * 1000)
-  return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
+// 计算当天每个产品的销量
+async function calcOrderStats(date) {
+  const stats = {}
+  try {
+    const orderRes = await db.collection('orders')
+      .where({
+        date: date,
+        status: _.nin(['cancelled'])
+      })
+      .get()
+    
+    orderRes.data.forEach(order => {
+      (order.items || []).forEach(item => {
+        stats[item.product_id] = (stats[item.product_id] || 0) + item.num
+      })
+    })
+  } catch (e) {
+    console.warn('[calcOrderStats] 计算销量失败', e)
+  }
+  return stats
+}
+
+function getTodayBJDate() {
+  const now = new Date(Date.now() + 8 * 3600 * 1000)
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 }

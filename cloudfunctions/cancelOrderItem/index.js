@@ -1,4 +1,4 @@
-// 云函数：取消订单中的单个产品
+// 云函数：取消订单中的单个产品（库存从 orders 表实时计算，无需更新）
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
@@ -39,31 +39,9 @@ exports.main = async (event, context) => {
       }
     })
 
-    // 5. 恢复库存
-    const cancelledItem = order.items.find(item => item.product_id === productId)
-    if (cancelledItem) {
-      const today = order.date
-      // 使用 product_id 匹配更准确
-      let menuRes = null
-      try {
-        const docRes = await db.collection('active_menu').doc(cancelledItem.product_id).get()
-        menuRes = { data: [docRes.data] }
-      } catch (e) {
-        menuRes = await db.collection('active_menu')
-          .where({ product_id: cancelledItem.product_id, date: today })
-          .get()
-      }
-
-      if (menuRes.data.length > 0) {
-        await db.collection('active_menu').doc(menuRes.data[0]._id).update({
-          data: { ordered: _.inc(-cancelledItem.num) }
-        })
-      }
-    }
-
     return { success: true, message: '产品取消成功' }
   } catch (err) {
-    console.error('取消产品失败', err)
+    console.error('[cancelOrderItem] 取消产品失败', err)
     return { success: false, message: '取消产品失败' }
   }
 }

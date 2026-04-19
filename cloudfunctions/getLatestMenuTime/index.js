@@ -1,14 +1,17 @@
-// 云函数：获取今日最新菜单的发布时间
+// 云函数：获取今日最新菜单的发布时间（新结构）
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
+const _ = db.command
 
 exports.main = async (event, context) => {
-  const targetDate = event.date || getBJDateStr()
+  const today = getTodayBJDate()
   
   try {
     const menuRes = await db.collection('active_menu')
-      .where({ date: targetDate })
+      .where({
+        date: _.gte(today)
+      })
       .orderBy('publish_time', 'desc')
       .limit(1)
       .get()
@@ -22,13 +25,12 @@ exports.main = async (event, context) => {
     
     return { success: true, latest_publish_time: 0 }
   } catch (err) {
-    console.error('获取最新菜单时间失败', err)
+    console.error('[getLatestMenuTime] 获取失败', err)
     return { success: false, message: '获取失败' }
   }
 }
 
-function getBJDateStr() {
-  const d = new Date()
-  const bjTime = new Date(d.getTime() + 8 * 3600 * 1000)
-  return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
+function getTodayBJDate() {
+  const now = new Date(Date.now() + 8 * 3600 * 1000)
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
 }

@@ -72,33 +72,28 @@ Page({
 loadMenu() {
     logger.info(TAG + ':loadMenu', { start: true })
     this.setData({ loading: true })
-    const todayStr = this.getTodayStr()
-    logger.info(TAG + ':loadMenu', { todayStr })
     return getLatestMenu().then(res => {
       const list = res.data.map(item => ({ 
         ...item, 
         qty: 0
       }))
-      logger.info(TAG + ':loadMenu', { rawList: list.map(i => ({ date: i.date, name: i.name })) })
+      logger.info(TAG + ':loadMenu', { count: list.length, date: res.menuInfo?.date })
       
-      const validMenus = list.filter(item => item.date >= todayStr)
-      logger.info(TAG + ':loadMenu', { validCount: validMenus.length, invalidCount: list.length - validMenus.length })
-      
-      if (validMenus.length > 0) {
-        const latestMenu = validMenus[0]
-        const dateParts = latestMenu.date.split('-')
+      if (list.length > 0) {
+        const dateStr = res.menuInfo?.date || ''
+        const dateParts = dateStr.split('-')
         const month = parseInt(dateParts[1])
         const day = parseInt(dateParts[2])
         
         this.setData({ 
           dateTime: `${month}月${day}日`,
-          menuList: validMenus,
+          menuList: list,
           loading: false
         })
         
         this.calcTotal()
       } else {
-this.setData({ menuList: [], dateTime: '', loading: false })
+        this.setData({ menuList: [], dateTime: '', loading: false })
       }
     }).catch((err) => {
       this.setData({ loading: false })
