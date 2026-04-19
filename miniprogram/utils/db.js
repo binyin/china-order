@@ -12,20 +12,10 @@ function getTodayBJDateStr() {
 }
 
 /**
- * 获取明天北京时间日期字符串 YYYY-MM-DD
- */
-function getTomorrowBJDateStr() {
-  const d = new Date()
-  const bjTime = new Date(d.getTime() + 8 * 3600 * 1000)
-  bjTime.setDate(bjTime.getDate() + 1)
-  return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
-}
-
-/**
  * 获取今日订单（通过云函数，使用 menu_id 关联）- 使用北京时间
  */
 function getTodayOrders(date) {
-  const targetDate = date || getTomorrowBJDateStr()
+  const targetDate = date || getTodayBJDateStr()
   return wx.cloud.callFunction({
     name: 'getTodayOrders',
     data: { date: targetDate }
@@ -243,11 +233,7 @@ function getMenuByDate(date) {
  * 关联 products 表获取产品完整信息
  */
 function getLatestMenu() {
-  const todayStr = getTodayBJDateStr()
   return db.collection('active_menu')
-    .where({
-      date: todayStr
-    })
     .orderBy('publish_time', 'desc')
     .limit(1)
     .get()
@@ -308,6 +294,5 @@ module.exports = {
   getMenuHistory,
   getDateStr,
   getBJDateStr,
-  getTodayBJDateStr,
-  getTomorrowBJDateStr
+  getTodayBJDateStr
 }

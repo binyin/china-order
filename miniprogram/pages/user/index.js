@@ -72,22 +72,31 @@ Page({
 loadMenu() {
     logger.info(TAG + ':loadMenu', { start: true })
     this.setData({ loading: true })
+    const todayStr = this.getTodayStr()
     return getLatestMenu().then(res => {
       const list = res.data.map(item => ({ 
         ...item, 
-        qty: 0
+        qty: 0,
+        disabled: false
       }))
-      logger.info(TAG + ':loadMenu', { count: list.length, date: res.menuInfo?.date })
+      logger.info(TAG + ':loadMenu', { count: list.length, date: res.menuInfo?.date, today: todayStr })
       
       if (list.length > 0) {
-        const dateStr = res.menuInfo?.date || ''
-        const dateParts = dateStr.split('-')
+        const menuDate = res.menuInfo?.date || ''
+        const isExpired = menuDate < todayStr
+        
+        const processedList = list.map(item => ({
+          ...item,
+          disabled: isExpired
+        }))
+        
+        const dateParts = menuDate.split('-')
         const month = parseInt(dateParts[1])
         const day = parseInt(dateParts[2])
         
         this.setData({ 
-          dateTime: `${month}月${day}日`,
-          menuList: list,
+          dateTime: isExpired ? `${month}月${day}日(已过期)` : `${month}月${day}日`,
+          menuList: processedList,
           loading: false
         })
         
@@ -106,6 +115,10 @@ loadMenu() {
     const index = e.currentTarget.dataset.index
     const list = this.data.menuList
     const item = list[index]
+    if (item.disabled) {
+      wx.showToast({ title: '该菜单已过期', icon: 'none' })
+      return
+    }
     list[index].qty = (item.qty || 0) + 1
     this.setData({ menuList: list })
     logger.info(TAG + ':increase', { item: item.name, qty: list[index].qty })
@@ -115,6 +128,10 @@ loadMenu() {
   decrease(e) {
     const index = e.currentTarget.dataset.index
     const list = this.data.menuList
+    const item = list[index]
+    if (item.disabled) {
+      return
+    }
     if (list[index].qty > 0) {
       list[index].qty -= 1
       this.setData({ menuList: list })
