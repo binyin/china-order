@@ -128,6 +128,7 @@ Page({
 
   removeFromMenu(e) {
     const index = e.currentTarget.dataset.index
+    if (index === undefined) return
     const product = this.data.todayMenu[index]
     
     this.setData({

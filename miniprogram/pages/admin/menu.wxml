@@ -54,9 +54,7 @@
                        bindinput="onMenuStockInput" data-id="{{item._id}}"
                        bindblur="saveMenuStock" data-id="{{item._id}}" />
               </view>
-              <view class="btn-remove" bindtap="removeFromMenu" data-id="{{item._id}}" data-name="{{item.name}}">
-                <text class="btn-icon">✕</text>
-              </view>
+              <view class="btn-remove" bindtap="removeFromMenu" data-index="{{index}}">✕</view>
             </view>
           </view>
         </view>
