@@ -57,6 +57,8 @@ Page({
     }
     
     this.checkAuthStatus()
+    this.loadMenu()
+    this.loadMyOrders()
   },
 
   onHide() {
