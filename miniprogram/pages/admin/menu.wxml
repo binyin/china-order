@@ -47,15 +47,7 @@
               <text class="item-name">{{item.name}}</text>
               <text class="item-price">¥{{item.price}}</text>
             </view>
-            <view class="item-right">
-              <view class="stock-control">
-                <text class="stock-label">库存</text>
-                <input class="stock-input" type="number" value="{{item.stock}}"
-                       bindinput="onMenuStockInput" data-id="{{item._id}}"
-                       bindblur="saveMenuStock" data-id="{{item._id}}" />
-              </view>
-              <view class="btn-remove" bindtap="removeFromMenu" data-index="{{index}}">✕</view>
-            </view>
+            <view class="btn-remove" bindtap="removeFromMenu" data-index="{{index}}">✕</view>
           </view>
         </view>
       </view>
