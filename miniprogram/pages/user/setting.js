@@ -56,7 +56,14 @@ Page({
       phone: phone
     })
 
-    wx.showToast({ title: '保存成功', icon: 'success' })
+    wx.cloud.callFunction({
+      name: 'saveUser',
+      data: { nickname: nickname.trim(), avatarUrl, phone: phone || null }
+    }).then(r => {
+      wx.showToast({ title: '保存成功', icon: 'success' })
+    }).catch(e => {
+      wx.showToast({ title: '保存成功', icon: 'success' })
+    })
   },
 
   goHistory() {
