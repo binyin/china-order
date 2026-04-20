@@ -76,6 +76,30 @@ exports.main = async (event, context) => {
     // 4. 合并所有订单并按日期排序
     let allOrders = orderResults.reduce((acc, orders) => acc.concat(orders), [])
     
+    // 5. 关联 users 表获取头像
+    if (allOrders.length > 0) {
+      const openids = [...new Set(allOrders.map(o => o.customer_id).filter(Boolean))]
+      if (openids.length > 0) {
+        const userRes = await db.collection('users')
+          .where({
+            _id: db.command.in(openids)
+          })
+          .get()
+        
+        const userMap = {}
+        userRes.data.forEach(u => {
+          userMap[u._id] = u
+        })
+        
+        allOrders = allOrders.map(o => {
+          if (!o.customer_avatar && userMap[o.customer_id]) {
+            o.customer_avatar = userMap[o.customer_id].avatarUrl || ''
+          }
+          return o
+        })
+      }
+    }
+    
     // 按日期倒序排列
     allOrders.sort((a, b) => {
       if (a.date !== b.date) {
