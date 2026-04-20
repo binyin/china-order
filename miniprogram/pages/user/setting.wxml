@@ -1,5 +1,25 @@
 <!--pages/user/setting.wxml-->
 <view class="setting-container">
+  <view class="section-title">个人信息</view>
+  <view class="user-info-card">
+    <button class="avatar-btn-setting" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image wx:if="{{userProfile.avatarUrl}}" class="avatar-img" src="{{userProfile.avatarUrl}}" mode="aspectFill" />
+      <view wx:else class="avatar-placeholder-setting">👤</view>
+    </button>
+    <view class="info-group">
+      <view class="info-row">
+        <text class="info-label">预订人</text>
+        <input class="info-input" type="nickname" placeholder="请输入预订人" value="{{userProfile.nickname}}" bindinput="onNicknameInput" />
+      </view>
+      <view class="info-row">
+        <text class="info-label">电话</text>
+        <input class="info-input" type="number" placeholder="请输入电话(选填)" value="{{userProfile.phone}}" bindinput="onPhoneInput" />
+      </view>
+    </view>
+  </view>
+  <button class="btn-save" bindtap="saveProfile">保存修改</button>
+  
+  <view class="section-title" style="margin-top: 40rpx;">其他</view>
   <view class="setting-item" bindtap="goHistory">
     <text class="setting-label">我的订单</text>
     <text class="setting-arrow">›</text>
@@ -11,9 +31,5 @@
   <view class="setting-item">
     <text class="setting-label">版本号</text>
     <text class="setting-value">{{version}}</text>
-  </view>
-  <view class="setting-item intro-item">
-    <text class="setting-label">介绍</text>
-    <text class="setting-value intro">馒头店预定小程序，方便快捷预订每日菜品.开发支持:贝塔 微信(yinbin.cc)</text>
   </view>
 </view>

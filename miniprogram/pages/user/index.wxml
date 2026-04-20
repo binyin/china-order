@@ -91,16 +91,16 @@
           </view>
         </button>
         <view class="nickname-wrapper">
-          <text class="input-label-center">昵称</text>
-          <input class="nickname-input-center" type="nickname" placeholder="请输入昵称" value="{{tempNickname}}" bindinput="onNicknameInput" />
+          <text class="input-label-center">预订人</text>
+          <input class="nickname-input-center" type="nickname" placeholder="请输入您的称呼" value="{{tempNickname}}" bindinput="onNicknameInput" />
         </view>
       </view>
       
       <!-- 订单确认区域 -->
       <view wx:if="{{orderSummary.length > 0}}">
         <view class="input-group">
-          <text class="input-label">取货人姓名</text>
-          <input class="apple-input" placeholder="请输入姓名" value="{{customerName}}" bindinput="onNameInput" />
+          <text class="input-label">电话</text>
+          <input class="apple-input" type="number" placeholder="请输入手机号(选填)" value="{{customerPhone}}" bindinput="onPhoneInput" />
         </view>
         <view class="summary-list">
           <view class="summary-item" wx:for="{{orderSummary}}" wx:key="name">

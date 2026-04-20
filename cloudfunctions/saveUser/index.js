@@ -4,7 +4,7 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
 exports.main = async (event, context) => {
-  const { nickname, avatarUrl } = event
+  const { nickname, avatarUrl, phone } = event
   const { OPENID } = cloud.getWXContext()
 
   if (!nickname) {
@@ -23,6 +23,7 @@ exports.main = async (event, context) => {
         data: {
           nickname,
           avatarUrl,
+          phone: phone || '',
           update_time: Date.now()
         }
       })
@@ -33,6 +34,7 @@ exports.main = async (event, context) => {
           _id: OPENID,
           nickname,
           avatarUrl,
+          phone: phone || '',
           create_time: Date.now()
         }
       })

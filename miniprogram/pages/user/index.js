@@ -13,6 +13,7 @@ Page({
     submittedOrders: [],
     showModal: false,
     customerName: '',
+    customerPhone: '',
     orderSummary: [],
     submitting: false,
     hasProfile: false,
@@ -275,15 +276,22 @@ loadMenu() {
     this.setData({ customerName: value })
   },
 
+  // 电话输入框变化
+  onPhoneInput(e) {
+    let value = (e.detail.value || '').replace(/[^\d]/g, '').slice(0, 11)
+    this.setData({ customerPhone: value })
+  },
+
   confirmOrder() {
     const userProfile = wx.getStorageSync('userProfile') || {}
     const tempNickname = this.data.tempNickname || ''
     const tempAvatarUrl = this.data.tempAvatarUrl || ''
     let name = (this.data.customerName || '').trim()
+    let phone = this.data.customerPhone || ''
 
     if (!this.data.hasProfile) {
       if (!tempNickname) {
-        wx.showToast({ title: '请输入昵称', icon: 'none' })
+        wx.showToast({ title: '请输入预订人', icon: 'none' })
         return
       }
       if (!tempAvatarUrl) {
@@ -294,7 +302,7 @@ loadMenu() {
 
     if (!name) {
       logger.warn(TAG + ':confirmOrder', { reason: '未输入姓名' })
-      wx.showToast({ title: '请输入您的姓名', icon: 'none' })
+      wx.showToast({ title: '请输入预订人', icon: 'none' })
       return
     }
 
@@ -309,7 +317,8 @@ loadMenu() {
 
     wx.setStorageSync('userProfile', { 
       nickname: nickname,
-      avatarUrl: avatarUrl 
+      avatarUrl: avatarUrl,
+      phone: phone
     })
     this.setData({ 
       hasProfile: true,
@@ -342,6 +351,7 @@ loadMenu() {
         items,
         total_price: parseFloat(this.data.totalPrice) || 0,
         customer_name: name,
+        customer_phone: phone,
         customer_nickname: (savedProfile.nickname || '').slice(0, 50),
         customer_avatar: savedProfile.avatarUrl || ''
       }
@@ -353,7 +363,8 @@ loadMenu() {
           name: 'saveUser',
           data: {
             nickname: savedProfile.nickname,
-            avatarUrl: savedProfile.avatarUrl
+            avatarUrl: savedProfile.avatarUrl,
+            phone: phone
           }
         }).catch(e => logger.error(TAG + ':saveUser', { error: e.message }))
         const menuList = this.data.menuList.map(i => ({ ...i, qty: 0 }))
@@ -541,12 +552,14 @@ loadMenu() {
     if (userProfile && userProfile.nickname) {
       this.setData({
         customerName: userProfile.nickname,
+        customerPhone: userProfile.phone || '',
         hasProfile: true
       })
       logger.info(TAG + ':checkAuthStatus', { fromStorage: true, nickname: userProfile.nickname })
     } else {
       this.setData({
         customerName: '',
+        customerPhone: '',
         hasProfile: false
       })
     }

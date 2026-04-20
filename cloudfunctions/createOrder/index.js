@@ -5,7 +5,7 @@ const db = cloud.database()
 const _ = db.command
 
 exports.main = async (event, context) => {
-  const { items, total_price, customer_name, customer_nickname, customer_avatar } = event
+  const { items, total_price, customer_name, customer_phone, customer_nickname, customer_avatar } = event
   const { OPENID } = cloud.getWXContext()
 
   if (!items || items.length === 0) {
@@ -88,6 +88,7 @@ exports.main = async (event, context) => {
 
     const orderData = {
       customer_name: customer_name,
+      customer_phone: customer_phone || '',
       customer_id: OPENID,
       customer_nickname: customer_nickname || '',
       customer_avatar: customer_avatar || '',
