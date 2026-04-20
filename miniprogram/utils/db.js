@@ -136,18 +136,25 @@ function cancelOrder(id) {
 }
 
 /**
- * 根据 menu_id 获取订单
+ * 获取当前用户的订单（调用云函数）
  */
 async function getMyOrders(date) {
   const todayStr = date || getTodayBJDateStr()
-  return db.collection('orders')
-    .where({
-      date: todayStr
+  return wx.cloud.callFunction({
+    name: 'getMyOrders',
+    data: { date: todayStr }
+  })
+    .then(res => {
+      if (res.result && res.result.success) {
+        return res.result.data || []
+      }
+      console.error('[getMyOrders] 云函数返回失败:', res.result)
+      return []
     })
-    .orderBy('create_time', 'desc')
-    .get()
-    .then(res => res.data)
-    .catch(() => [])
+    .catch(err => {
+      console.error('[getMyOrders] 调用失败:', err)
+      return []
+    })
 }
 
 /**

@@ -2,7 +2,13 @@
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
+const _ = db.command
 const MAX_LIMIT = 100
+
+function getTodayBJDate() {
+  const now = new Date(Date.now() + 8 * 3600 * 1000)
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+}
 
 exports.main = async (event, context) => {
   const { OPENID } = cloud.getWXContext()
@@ -11,37 +17,30 @@ exports.main = async (event, context) => {
     return { success: false, data: [], message: '无法获取用户身份' }
   }
 
+  const dateParam = event.date
+  const filterByDate = dateParam ? true : false
+  const targetDate = dateParam || getTodayBJDate()
+  console.log('[getMyOrders] dateParam:', dateParam, 'filterByDate:', filterByDate, 'OPENID:', OPENID)
+
   try {
-    // 先获取总数
-    const countRes = await db.collection('orders')
-      .where({ customer_id: OPENID })
-      .count()
-
-    const total = countRes.total
-    if (total === 0) {
-      return { success: true, data: [] }
+    const orderRes = await db.collection('orders')
+      .where({ 
+        customer_id: OPENID
+      })
+      .orderBy('create_time', 'desc')
+      .limit(MAX_LIMIT)
+      .get()
+    
+    let allData = orderRes.data || []
+    
+    if (filterByDate) {
+      allData = allData.filter(o => o.date === targetDate)
     }
-
-    // 分批获取所有数据
-    const batchTimes = Math.ceil(total / MAX_LIMIT)
-    const tasks = []
-    for (let i = 0; i < batchTimes; i++) {
-      const promise = db.collection('orders')
-        .where({ customer_id: OPENID })
-        .orderBy('date', 'desc')
-        .orderBy('create_time', 'desc')
-        .skip(i * MAX_LIMIT)
-        .limit(MAX_LIMIT)
-        .get()
-      tasks.push(promise)
-    }
-
-    const results = await Promise.all(tasks)
-    const data = results.reduce((acc, res) => acc.concat(res.data), [])
-
-    return { success: true, data }
+    
+    console.log('[getMyOrders] 找到订单:', allData.length, filterByDate ? `(日期${targetDate})` : '(全部)')
+    return { success: true, data: allData }
   } catch (err) {
-    console.error('获取用户订单失败', err)
-    return { success: false, data: [] }
+    console.error('[getMyOrders] error:', err)
+    return { success: false, data: [], message: err.message }
   }
 }
