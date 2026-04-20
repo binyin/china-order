@@ -242,11 +242,10 @@ loadMenu() {
     this.loadingOrders = true
     logger.info(TAG + ':loadMyOrders', { start: true })
     
-    getMyOrders().then(res => {
-      const orders = res.data || []
-      this.setData({ submittedOrders: orders })
+    getMyOrders().then(orders => {
+      this.setData({ submittedOrders: orders || [] })
       this.loadingOrders = false
-      logger.info(TAG + ':loadMyOrders', { success: true, count: orders.length })
+      logger.info(TAG + ':loadMyOrders', { success: true, count: orders?.length || 0 })
     }).catch((err) => {
       this.loadingOrders = false
       logger.error(TAG + ':loadMyOrders', { error: err.message || String(err) })
