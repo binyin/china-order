@@ -1,6 +1,6 @@
-<view class="container" wx:if="{{!loading}}">
-  <block wx:else>
-  <view class="header">
+<view class="container">
+  <block wx:if="{{!loading}}">
+    <view class="header">
     <view class="header-left">
       <view class="header-setting" bindtap="goSetting">☰</view>
     </view>
