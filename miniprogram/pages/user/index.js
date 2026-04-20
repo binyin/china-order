@@ -353,7 +353,7 @@ loadMenu() {
           data: {
             nickname: savedProfile.nickname,
             avatarUrl: savedProfile.avatarUrl,
-            phone: phone
+            phone: phone || null
           }
         }).catch(e => logger.error(TAG + ':saveUser', { error: e.message }))
         const menuList = this.data.menuList.map(i => ({ ...i, qty: 0 }))

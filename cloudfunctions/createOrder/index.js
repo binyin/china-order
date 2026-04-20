@@ -88,7 +88,6 @@ exports.main = async (event, context) => {
 
     const orderData = {
       customer_name: customer_name,
-      customer_phone: customer_phone || '',
       customer_id: OPENID,
       customer_nickname: customer_nickname || '',
       customer_avatar: customer_avatar || '',
@@ -101,6 +100,7 @@ exports.main = async (event, context) => {
       create_time: now.getTime(),
       create_time_str: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
     }
+    if (customer_phone) orderData.customer_phone = customer_phone
 
     const orderRes = await db.collection('orders').add({ data: orderData })
 

@@ -18,26 +18,22 @@ exports.main = async (event, context) => {
     }).get()
 
     if (existRes.data.length > 0) {
-      // 已存在，更新
-      await db.collection('users').doc(OPENID).update({
-        data: {
-          nickname,
-          avatarUrl,
-          phone: phone || '',
-          update_time: Date.now()
-        }
-      })
+      const updateData = {
+        nickname,
+        avatarUrl,
+        update_time: Date.now()
+      }
+      if (phone) updateData.phone = phone
+      await db.collection('users').doc(OPENID).update({ data: updateData })
     } else {
-      // 新增
-      await db.collection('users').add({
-        data: {
-          _id: OPENID,
-          nickname,
-          avatarUrl,
-          phone: phone || '',
-          create_time: Date.now()
-        }
-      })
+      const addData = {
+        _id: OPENID,
+        nickname,
+        avatarUrl,
+        create_time: Date.now()
+      }
+      if (phone) addData.phone = phone
+      await db.collection('users').add({ data: addData })
     }
 
     return { success: true }
