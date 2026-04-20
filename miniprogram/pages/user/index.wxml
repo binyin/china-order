@@ -1,10 +1,4 @@
 <view class="container" wx:if="{{!loading}}">
-  <view wx:if="{{needAuth}}" class="auth-wrapper">
-    <view class="auth-icon">🍞</view>
-    <view class="auth-title">欢迎使用馒头预定</view>
-    <view class="auth-desc">请先授权登录以继续</view>
-    <button class="btn-auth" bindtap="getUserInfo">微信授权登录</button>
-  </view>
   <block wx:else>
   <view class="header">
     <view class="header-left">
@@ -83,23 +77,48 @@
 <view class="apple-modal-mask" wx:if="{{showModal}}" bindtap="closeModal">
   <view class="apple-modal-box" catchtap>
     <view class="modal-header">
-      <text class="modal-title">{{orderSummary.length > 0 ? '确认订单' : '设置姓名'}}</text>
+      <text class="modal-title">{{orderSummary.length > 0 ? '确认订单' : '欢迎使用'}}</text>
+      <text class="modal-subtitle" wx:if="{{!hasProfile}}">请先完善您的取货信息</text>
     </view>
     <view class="modal-body">
-      <view class="input-group">
-        <text class="input-label">取货人姓名</text>
-        <input class="apple-input" placeholder="请输入姓名" value="{{customerName}}" bindinput="onNameInput" />
+      <!-- 授权区域 -->
+      <view wx:if="{{!hasProfile}}" class="auth-section">
+        <button class="avatar-btn-large" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+          <image wx:if="{{tempAvatarUrl}}" class="avatar-preview-large" src="{{tempAvatarUrl}}" mode="aspectFill" />
+          <view wx:else class="avatar-placeholder-large">
+            <text class="avatar-icon">👤</text>
+            <text class="avatar-tip">点击选择头像</text>
+          </view>
+        </button>
+        <view class="nickname-wrapper">
+          <text class="input-label-center">昵称</text>
+          <input class="nickname-input-center" type="nickname" placeholder="请输入昵称" value="{{tempNickname}}" bindinput="onNicknameInput" />
+        </view>
       </view>
-      <view class="summary-list" wx:if="{{orderSummary.length > 0}}">
-        <view class="summary-item" wx:for="{{orderSummary}}" wx:key="name">
-          <text>{{item.name}} x{{item.qty}}</text>
-          <text>¥{{item.subtotal}}</text>
+      
+      <!-- 订单确认区域 -->
+      <view wx:if="{{orderSummary.length > 0}}">
+        <view class="input-group">
+          <text class="input-label">取货人姓名</text>
+          <input class="apple-input" placeholder="请输入姓名" value="{{customerName}}" bindinput="onNameInput" />
+        </view>
+        <view class="summary-list">
+          <view class="summary-item" wx:for="{{orderSummary}}" wx:key="name">
+            <text class="summary-name">{{item.name}} x{{item.qty}}</text>
+            <text class="summary-price">¥{{item.subtotal}}</text>
+          </view>
+          <view class="summary-total">
+            <text>合计</text>
+            <text class="total-price">¥{{totalPrice}}</text>
+          </view>
         </view>
       </view>
     </view>
     <view class="modal-footer">
-      <button class="btn-modal-cancel" bindtap="closeModal">返回</button>
-      <button class="btn-modal-confirm" bindtap="{{orderSummary.length > 0 ? 'confirmOrder' : 'saveProfile'}}" loading="{{submitting}}">确定</button>
+      <button class="btn-modal-cancel" bindtap="closeModal">取消</button>
+      <button class="btn-modal-confirm {{submitting ? 'loading' : ''}}" bindtap="confirmOrder" loading="{{submitting}}">
+        {{submitting ? '提交中...' : (orderSummary.length > 0 ? '确认下单' : '保存信息')}}
+      </button>
     </view>
   </view>
 </view>

@@ -19,6 +19,8 @@ Page({
     needAuth: false,
     loadingOrders: false,
     dateTime: '',
+    tempNickname: '',
+    tempAvatarUrl: '',
     statusText: {
       pending: '待取货',
       completed: '已完成',
@@ -274,8 +276,21 @@ loadMenu() {
   },
 
   confirmOrder() {
-    let name = (this.data.customerName || '').trim()
     const userProfile = wx.getStorageSync('userProfile') || {}
+    const tempNickname = this.data.tempNickname || ''
+    const tempAvatarUrl = this.data.tempAvatarUrl || ''
+    let name = (this.data.customerName || '').trim()
+
+    if (!this.data.hasProfile) {
+      if (!tempNickname) {
+        wx.showToast({ title: '请输入昵称', icon: 'none' })
+        return
+      }
+      if (!tempAvatarUrl) {
+        wx.showToast({ title: '请选择头像', icon: 'none' })
+        return
+      }
+    }
 
     if (!name) {
       logger.warn(TAG + ':confirmOrder', { reason: '未输入姓名' })
@@ -289,8 +304,18 @@ loadMenu() {
       return
     }
 
-    wx.setStorageSync('userProfile', { ...userProfile, nickname: name })
-    this.setData({ hasProfile: true })
+    const nickname = tempNickname || userProfile.nickname || name
+    const avatarUrl = tempAvatarUrl || userProfile.avatarUrl || ''
+
+    wx.setStorageSync('userProfile', { 
+      nickname: nickname,
+      avatarUrl: avatarUrl 
+    })
+    this.setData({ 
+      hasProfile: true,
+      tempNickname: '',
+      tempAvatarUrl: ''
+    })
 
     const items = this.data.menuList
       .filter(i => i.qty > 0)
@@ -310,6 +335,7 @@ loadMenu() {
     this.setData({ submitting: true })
 
     const savedProfile = wx.getStorageSync('userProfile') || {}
+    
     wx.cloud.callFunction({
       name: 'createOrder',
       data: {
@@ -317,12 +343,19 @@ loadMenu() {
         total_price: parseFloat(this.data.totalPrice) || 0,
         customer_name: name,
         customer_nickname: (savedProfile.nickname || '').slice(0, 50),
-        customer_avatar: userProfile.avatarUrl || ''
+        customer_avatar: savedProfile.avatarUrl || ''
       }
     }).then(res => {
       this.setData({ submitting: false })
       const result = res.result
       if (result.success) {
+        wx.cloud.callFunction({
+          name: 'saveUser',
+          data: {
+            nickname: savedProfile.nickname,
+            avatarUrl: savedProfile.avatarUrl
+          }
+        }).catch(e => logger.error(TAG + ':saveUser', { error: e.message }))
         const menuList = this.data.menuList.map(i => ({ ...i, qty: 0 }))
         this.setData({ menuList, showModal: false })
         logger.info(TAG + ':confirmOrder', { success: true, orderId: result.orderId })
@@ -508,65 +541,76 @@ loadMenu() {
     if (userProfile && userProfile.nickname) {
       this.setData({
         customerName: userProfile.nickname,
-        hasProfile: true,
-        needAuth: false
+        hasProfile: true
       })
       logger.info(TAG + ':checkAuthStatus', { fromStorage: true, nickname: userProfile.nickname })
-      this.loadMenu()
-      this.loadMyOrders()
     } else {
-      this.setData({ 
-        needAuth: true,
-        loading: false 
+      this.setData({
+        customerName: '',
+        hasProfile: false
       })
     }
+    this.loadMenu()
+    this.loadMyOrders()
+  },
+
+  onChooseAvatar(e) {
+    const { avatarUrl } = e.detail
+    logger.info(TAG + ':onChooseAvatar', { avatarUrl: !!avatarUrl })
+    this.setData({ tempAvatarUrl: avatarUrl })
+  },
+
+  onNicknameInput(e) {
+    const nickname = (e.detail.value || '').trim()
+    this.setData({ tempNickname: nickname })
+  },
+
+  onAuthConfirm() {
+    const nickname = (this.data.tempNickname || '').trim()
+    const avatarUrl = this.data.tempAvatarUrl || ''
+    
+    if (!nickname) {
+      wx.showToast({ title: '请输入昵称', icon: 'none' })
+      return
+    }
+    if (!avatarUrl) {
+      wx.showToast({ title: '请选择头像', icon: 'none' })
+      return
+    }
+
+    logger.info(TAG + ':onAuthConfirm', { nickname, hasAvatar: !!avatarUrl })
+    
+    wx.setStorageSync('userProfile', { 
+      nickname: nickname,
+      avatarUrl: avatarUrl 
+    })
+    
+    this.setData({
+      customerName: nickname,
+      hasProfile: true,
+      needAuth: false
+    })
+
+    wx.cloud.callFunction({
+      name: 'saveUser',
+      data: { nickname, avatarUrl }
+    }).then(r => {
+      logger.info(TAG + ':saveUser', { success: r.result && r.result.success })
+    }).catch(e => {
+      logger.error(TAG + ':saveUser', { error: e.message })
+    })
+
+    this.loadMenu()
+    this.loadMyOrders()
   },
 
   getUserInfo() {
-    logger.info(TAG + ':getUserInfo', { get: true })
-    wx.getUserProfile({
-      desc: '用于显示您的昵称和头像',
-      success: res => {
-        const userInfo = res.userInfo
-        wx.setStorageSync('userProfile', { 
-          nickname: userInfo.nickName,
-          avatarUrl: userInfo.avatarUrl 
-        })
-        
-        this.setData({
-          customerName: userInfo.nickName,
-          hasProfile: true,
-          needAuth: false
-        })
-        
-        // 保存用户信息到数据库
-        wx.cloud.callFunction({
-          name: 'saveUser',
-          data: {
-            nickname: userInfo.nickName,
-            avatarUrl: userInfo.avatarUrl
-          }
-        }).then(r => {
-          logger.info(TAG + ':saveUser', { success: r.result && r.result.success })
-        }).catch(e => {
-          logger.error(TAG + ':saveUser', { error: e.message })
-        })
-        
-        logger.info(TAG + ':getUserInfo', { success: true, nickname: userInfo.nickName })
-        this.loadMenu()
-        this.loadMyOrders()
-      },
-      fail: err => {
-        logger.error(TAG + ':getUserInfo', { error: err.message || String(err) })
-        wx.showToast({ title: '获取用户信息失败', icon: 'none' })
-      }
-    })
+    logger.info(TAG + ':getUserInfo', { get: true, deprecated: true })
+    wx.showToast({ title: '请使用新版授权', icon: 'none' })
   },
 
-  // 授权成功回调
   onAuthSuccess(e) {
     if (e.detail.userInfo) {
-      // 用户同意授权
       this.getUserInfo()
     } else {
       wx.showToast({ 
@@ -577,7 +621,6 @@ loadMenu() {
     }
   },
 
-  // 修改昵称
   editProfile() {
     this.setData({ showModal: true, orderSummary: [] })
   },
