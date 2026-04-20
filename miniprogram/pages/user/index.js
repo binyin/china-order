@@ -286,8 +286,8 @@ loadMenu() {
     const userProfile = wx.getStorageSync('userProfile') || {}
     const tempNickname = this.data.tempNickname || ''
     const tempAvatarUrl = this.data.tempAvatarUrl || ''
-    let name = (this.data.customerName || '').trim()
-    let phone = this.data.customerPhone || ''
+    const name = (this.data.customerName || '').trim()
+    const phone = this.data.customerPhone || ''
 
     if (!this.data.hasProfile) {
       if (!tempNickname) {
@@ -298,18 +298,6 @@ loadMenu() {
         wx.showToast({ title: '请选择头像', icon: 'none' })
         return
       }
-    }
-
-    if (!name) {
-      logger.warn(TAG + ':confirmOrder', { reason: '未输入姓名' })
-      wx.showToast({ title: '请输入预订人', icon: 'none' })
-      return
-    }
-
-    name = name.replace(/[<>\'\"\\]/g, '').slice(0, 20)
-    if (name.length < 2) {
-      wx.showToast({ title: '姓名至少2个字', icon: 'none' })
-      return
     }
 
     const nickname = tempNickname || userProfile.nickname || name
@@ -339,7 +327,8 @@ loadMenu() {
       return
     }
 
-    logger.info(TAG + ':confirmOrder', { customer: name, itemCount: items.length, totalPrice: this.data.totalPrice })
+    const customerName = userProfile.nickname || nickname
+    logger.info(TAG + ':confirmOrder', { customer: customerName, itemCount: items.length, totalPrice: this.data.totalPrice })
 
     this.setData({ submitting: true })
 
@@ -350,7 +339,7 @@ loadMenu() {
       data: {
         items,
         total_price: parseFloat(this.data.totalPrice) || 0,
-        customer_name: name,
+        customer_name: customerName,
         customer_phone: phone,
         customer_nickname: (savedProfile.nickname || '').slice(0, 50),
         customer_avatar: savedProfile.avatarUrl || ''
