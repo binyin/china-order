@@ -11,10 +11,10 @@ function getCutoffDate(daysAgo) {
 
 exports.main = async (event, context) => {
   const menuDays = event.menuDays || 30
-  const orderDays = event.orderDays || 365
+  const orderDays = event.orderDays || -1  // -1 表示删除所有
 
   const menuCutoff = getCutoffDate(menuDays)
-  const orderCutoff = getCutoffDate(orderDays)
+  const orderCutoff = orderDays === -1 ? 'ALL' : getCutoffDate(orderDays)
 
   console.log(`[cleanupDb] 开始清理: menuCutoff=${menuCutoff}, orderCutoff=${orderCutoff}`)
 
@@ -38,11 +38,15 @@ exports.main = async (event, context) => {
     }
 
     // 清理过期订单（365天）
+    let orderQuery
+    if (orderDays === -1) {
+      orderQuery = db.collection('orders').where(_.command.exists(true))
+    } else {
+      orderQuery = db.collection('orders').where({ date: _.lt(orderCutoff) })
+    }
+    
     while (true) {
-      const orderRes = await db.collection('orders')
-        .where({ date: _.lt(orderCutoff) })
-        .limit(100)
-        .get()
+      const orderRes = await orderQuery.limit(100).get()
 
       if (orderRes.data.length === 0) break
 
