@@ -56,3 +56,25 @@
   - 菜单项: 36ced35f69e514f6003b0bdf1dd00e11 (已删除)
   - 订单: 2e3df17869e51559003ad01d69a27627 (已删除)
 - 结果: ALL PASSED!
+
+### 10:30 - 修复微信授权头像昵称问题
+- 问题: 用户授权后显示"微信用户"，头像为空
+- 根因: wx.getUserProfile 已废弃，返回固定值
+- 修复内容:
+  1. 修改 `miniprogram/pages/user/index.wxml` - 使用 chooseAvatar + nickname input
+  2. 修改 `miniprogram/pages/user/index.js` - 添加 onChooseAvatar/onNicknameInput/onAuthConfirm
+  3. 修改 `miniprogram/pages/user/index.wxss` - 添加样式
+  4. 修复订单创建时 customer_avatar 取值错误 (userProfile -> savedProfile)
+- 结果: 代码已修改，等待部署测试
+
+### 11:00 - 优化授权流程，体验更流畅
+- 改动:
+  1. 首次进入可直接浏览菜单，无需授权
+  2. 提交订单时才触发授权（懒授权）
+  3. 授权弹窗内直接选择头像+输入昵称，一气呵成
+  4. 已授权用户下次直接可用
+- 修改文件:
+  - miniprogram/pages/user/index.js - checkAuthStatus/confirmOrder
+  - miniprogram/pages/user/index.wxml - 移除独立授权页，合并到订单弹窗
+  - miniprogram/pages/user/index.wxss - 头像选择样式
+- 结果: 已更新
