@@ -37,10 +37,10 @@ exports.main = async (event, context) => {
       console.log(`[cleanupDb] 已删除菜单: ${menuDeleted}`)
     }
 
-    // 清理过期订单（365天）
+    // 清理所有订单
     let orderQuery
     if (orderDays === -1) {
-      orderQuery = db.collection('orders').where(_.command.exists(true))
+      orderQuery = db.collection('orders')
     } else {
       orderQuery = db.collection('orders').where({ date: _.lt(orderCutoff) })
     }
