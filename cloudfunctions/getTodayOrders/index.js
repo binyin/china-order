@@ -1,11 +1,13 @@
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
+const _ = db.command
 
 exports.main = async (event, context) => {
   const { date } = event
   
   const today = date || getBJDateStr()
+  console.log('[getTodayOrders] date:', today)
   
   try {
     // 获取今日最新菜单的 menu_id
@@ -15,6 +17,8 @@ exports.main = async (event, context) => {
       .orderBy('publish_time', 'desc')
       .limit(1)
       .get()
+    
+    console.log('[getTodayOrders] menuRes:', menuRes.data.length)
     
     if (menuRes.data.length > 0) {
       latestMenuId = menuRes.data[0].menu_id
@@ -34,17 +38,23 @@ exports.main = async (event, context) => {
       .orderBy('create_time', 'asc')
       .get()
     
+    console.log('[getTodayOrders] ordersRes:', ordersRes.data.length)
+    
     let orders = ordersRes.data
     
     // 关联 users 表获取头像
     if (orders.length > 0) {
       const openids = [...new Set(orders.map(o => o.customer_id).filter(Boolean))]
+      console.log('[getTodayOrders] openids:', openids)
+      
       if (openids.length > 0) {
         const userRes = await db.collection('users')
           .where({
-            _id: db.command.in(openids)
+            _id: _.in(openids)
           })
           .get()
+        
+        console.log('[getTodayOrders] userRes:', userRes.data.length)
         
         const userMap = {}
         userRes.data.forEach(u => {
