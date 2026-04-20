@@ -52,8 +52,13 @@ exports.main = async (event, context) => {
         })
         
         orders = orders.map(o => {
-          if (!o.customer_avatar && userMap[o.customer_id]) {
-            o.customer_avatar = userMap[o.customer_id].avatarUrl || ''
+          if (userMap[o.customer_id]) {
+            if (!o.customer_avatar) {
+              o.customer_avatar = userMap[o.customer_id].avatarUrl || ''
+            }
+            if (!o.customer_nickname) {
+              o.customer_nickname = userMap[o.customer_id].nickname || ''
+            }
           }
           return o
         })
