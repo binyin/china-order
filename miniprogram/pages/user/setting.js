@@ -24,6 +24,7 @@ Page({
 
   onChooseAvatar(e) {
     const { avatarUrl } = e.detail
+    console.log('[setting] onChooseAvatar:', { avatarUrl: avatarUrl ? 'has_value' : 'empty' })
     this.setData({ 
       'userProfile.avatarUrl': avatarUrl 
     })
@@ -45,6 +46,8 @@ Page({
   saveProfile() {
     const { nickname, avatarUrl, phone } = this.data.userProfile
     
+    console.log('[setting] saveProfile input:', { nickname, avatarUrl: avatarUrl ? 'has_value' : 'empty', phone })
+    
     if (!nickname || nickname.trim().length < 2) {
       wx.showToast({ title: '预订人至少2个字', icon: 'none' })
       return
@@ -55,14 +58,26 @@ Page({
       avatarUrl: avatarUrl,
       phone: phone
     })
+    
+    console.log('[setting] calling saveUser cloud function:', { nickname: nickname.trim(), avatarUrl: avatarUrl ? 'has_value' : 'empty' })
 
+    wx.showLoading({ title: '保存中...', mask: true })
+    
     wx.cloud.callFunction({
       name: 'saveUser',
       data: { nickname: nickname.trim(), avatarUrl, phone: phone || null }
     }).then(r => {
-      wx.showToast({ title: '保存成功', icon: 'success' })
+      wx.hideLoading()
+      console.log('[setting] saveUser result:', JSON.stringify(r))
+      if (r.result && r.result.success) {
+        wx.showToast({ title: '已保存到云端', icon: 'success' })
+      } else {
+        wx.showToast({ title: '保存失败: ' + (r.result?.message || ''), icon: 'none' })
+      }
     }).catch(e => {
-      wx.showToast({ title: '保存成功', icon: 'success' })
+      wx.hideLoading()
+      console.log('[setting] saveUser error:', e)
+      wx.showToast({ title: '保存失败', icon: 'none' })
     })
   },
 

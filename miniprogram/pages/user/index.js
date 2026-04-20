@@ -475,13 +475,15 @@ Page({
       hasProfile: true
     })
 
+    logger.info(TAG + ':onAuthConfirm calling saveUser:', { nickname, hasAvatar: !!avatarUrl })
+    
     wx.cloud.callFunction({
       name: 'saveUser',
       data: { nickname, avatarUrl }
     }).then(r => {
-      logger.info(TAG + ':saveUser', { success: r.result && r.result.success })
+      logger.info(TAG + ':saveUser result:', JSON.stringify(r))
     }).catch(e => {
-      logger.error(TAG + ':saveUser', { error: e.message })
+      logger.error(TAG + ':saveUser error:', e)
     })
 
     this.loadMenu()
