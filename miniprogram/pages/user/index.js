@@ -17,8 +17,6 @@ Page({
     orderSummary: [],
     submitting: false,
     hasProfile: false,
-    needAuth: false,
-    loadingOrders: false,
     dateTime: '',
     tempNickname: '',
     tempAvatarUrl: '',
@@ -74,7 +72,7 @@ Page({
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
   },
 
-loadMenu() {
+  loadMenu() {
     logger.info(TAG + ':loadMenu', { start: true })
     this.setData({ loading: true })
     const todayStr = this.getTodayStr()
@@ -140,7 +138,6 @@ loadMenu() {
   decrease(e) {
     const index = e.currentTarget.dataset.index
     const list = this.data.menuList
-    const item = list[index]
     if (item.disabled || !list[index].qty) {
       return
     }
@@ -270,13 +267,11 @@ loadMenu() {
     this.setData({ showModal: false })
   },
 
-  // 名字输入框变化
   onNameInput(e) {
     let value = (e.detail.value || '').replace(/[<>\'\"\\]/g, '').slice(0, 20)
     this.setData({ customerName: value })
   },
 
-  // 电话输入框变化
   onPhoneInput(e) {
     let value = (e.detail.value || '').replace(/[^\d]/g, '').slice(0, 11)
     this.setData({ customerPhone: value })
@@ -292,10 +287,6 @@ loadMenu() {
     if (!this.data.hasProfile) {
       if (!tempNickname) {
         wx.showToast({ title: '请输入预订人', icon: 'none' })
-        return
-      }
-      if (!tempAvatarUrl) {
-        wx.showToast({ title: '请选择头像', icon: 'none' })
         return
       }
     }
@@ -327,7 +318,6 @@ loadMenu() {
       return
     }
 
-    const customerName = userProfile.nickname || nickname
     logger.info(TAG + ':confirmOrder', { itemCount: items.length, totalPrice: this.data.totalPrice })
 
     this.setData({ submitting: true })
@@ -391,7 +381,7 @@ loadMenu() {
           icon: 'success',
           duration: 1500
         })
-        this.updateMenuStock(id)
+        this.loadMenu()
       } else {
         logger.warn(TAG + ':cancelOrder', { success: false, message: res.result.message })
         this.loadMyOrders()
@@ -405,108 +395,6 @@ loadMenu() {
     })
   },
 
-  cancelOrderItem(e) {
-    const { orderid, productid } = e.currentTarget.dataset
-    
-    logger.info(TAG + ':cancelOrderItem', { orderId: orderid, productId: productid })
-    
-    const orders = this.data.submittedOrders.map(order => {
-      if (order._id === orderid) {
-        const updatedItems = order.items.map(item => {
-          if (item.product_id === productid) {
-            return { ...item, item_status: 'cancelling' }
-          }
-          return item
-        })
-        return { ...order, items: updatedItems }
-      }
-      return order
-    })
-    
-    this.setData({ submittedOrders: orders })
-    
-    wx.cloud.callFunction({
-      name: 'cancelOrderItem',
-      data: { 
-        orderId: orderid, 
-        productId: productid 
-      }
-    }).then(res => {
-      if (res.result.success) {
-        wx.showToast({ 
-          title: '产品取消成功', 
-          icon: 'success',
-          duration: 1500
-        })
-        
-        const updatedOrders = this.data.submittedOrders.map(order => {
-          if (order._id === orderid) {
-            const items = order.items
-              .map(item => {
-                if (item.product_id === productid) {
-                  return { ...item, item_status: 'cancelled' }
-                }
-                return item
-              })
-              .filter(item => item.item_status !== 'cancelled')
-        
-            if (items.length === 0) {
-              return null
-            }
-            return { ...order, items }
-          }
-          return order
-        }).filter(order => order !== null)
-      
-        this.setData({ submittedOrders: updatedOrders })
-        logger.info(TAG + ':cancelOrderItem', { success: true, orderId: orderid, productId: productid })
-        this.updateMenuStock(orderid)
-      } else {
-        logger.warn(TAG + ':cancelOrderItem', { success: false, message: res.result.message })
-        this.loadMyOrders()
-        wx.showToast({ title: res.result.message || '取消失败', icon: 'none' })
-      }
-    }).catch((err) => {
-      logger.error(TAG + ':cancelOrderItem', { error: err.message || String(err) })
-      this.loadMyOrders()
-      wx.showToast({ title: '网络错误，请重试', icon: 'error' })
-    })
-  },
-
-  // 更新菜单库存（局部更新，避免整个页面重新加载）
-  updateMenuStock(orderId) {
-    // 这里可以调用一个专门的云函数来获取订单详情并更新库存
-    // 但为了简化，我们可以选择性地重新加载菜单数据
-    const { menuList } = this.data
-    
-    // 模拟更新：重新获取今日菜单，但使用更平滑的方式
-    getLatestMenu().then(res => {
-      const todayMenu = res.data
-      const updatedMenuList = menuList.map(menuItem => {
-        const todayItem = todayMenu.find(item => item._id === menuItem._id)
-        if (todayItem) {
-          return {
-            ...menuItem,
-            ordered: todayItem.ordered,
-            stock: todayItem.stock
-          }
-        }
-        return menuItem
-      })
-      
-      // 使用动画效果更新数据
-      this.setData({
-        menuList: updatedMenuList
-      })
-    }).catch(() => {
-      // 如果获取失败，可以延迟一小段时间后重新加载
-      setTimeout(() => {
-        this.loadMenu()
-      }, 500)
-    })
-  },
-
-  // 创建订单消失动画
   createOrderExitAnimation(orderId) {
     const animation = wx.createAnimation({
       duration: 300,
@@ -524,7 +412,6 @@ loadMenu() {
     
     this.setData({ submittedOrders: orders })
     
-    // 300ms后移除该订单
     setTimeout(() => {
       const filteredOrders = orders.filter(o => o._id !== orderId)
       this.setData({ submittedOrders: filteredOrders })
@@ -585,8 +472,7 @@ loadMenu() {
     
     this.setData({
       customerName: nickname,
-      hasProfile: true,
-      needAuth: false
+      hasProfile: true
     })
 
     wx.cloud.callFunction({
@@ -600,39 +486,6 @@ loadMenu() {
 
     this.loadMenu()
     this.loadMyOrders()
-  },
-
-  getUserInfo() {
-    logger.info(TAG + ':getUserInfo', { get: true, deprecated: true })
-    wx.showToast({ title: '请使用新版授权', icon: 'none' })
-  },
-
-  onAuthSuccess(e) {
-    if (e.detail.userInfo) {
-      this.getUserInfo()
-    } else {
-      wx.showToast({ 
-        title: '需要授权才能使用预定功能', 
-        icon: 'none',
-        duration: 2000
-      })
-    }
-  },
-
-  editProfile() {
-    this.setData({ showModal: true, orderSummary: [] })
-  },
-
-  // 保存昵称（从修改信息弹窗）
-  saveProfile() {
-    const name = this.data.customerName.trim()
-    if (!name) {
-      wx.showToast({ title: '请输入姓名', icon: 'none' })
-      return
-    }
-    wx.setStorageSync('userProfile', { nickname: name })
-    this.setData({ hasProfile: true, showModal: false })
-    wx.showToast({ title: '已保存', icon: 'success' })
   },
 
   goAdmin() {
