@@ -328,7 +328,7 @@ loadMenu() {
     }
 
     const customerName = userProfile.nickname || nickname
-    logger.info(TAG + ':confirmOrder', { customer: customerName, itemCount: items.length, totalPrice: this.data.totalPrice })
+    logger.info(TAG + ':confirmOrder', { itemCount: items.length, totalPrice: this.data.totalPrice })
 
     this.setData({ submitting: true })
 
@@ -338,11 +338,7 @@ loadMenu() {
       name: 'createOrder',
       data: {
         items,
-        total_price: parseFloat(this.data.totalPrice) || 0,
-        customer_name: customerName,
-        customer_phone: phone,
-        customer_nickname: (savedProfile.nickname || '').slice(0, 50),
-        customer_avatar: savedProfile.avatarUrl || ''
+        total_price: parseFloat(this.data.totalPrice) || 0
       }
     }).then(res => {
       this.setData({ submitting: false })
