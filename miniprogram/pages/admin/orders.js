@@ -17,6 +17,11 @@ Page({
     detailOrders: [],
     showDetail: false,
     today: '',
+    // 查询筛选
+    queryType: 'week',
+    queryDays: 7,
+    customStartDate: '',
+    customEndDate: '',
     // 实时监听
     orderWatcher: null,
     newOrderFlag: false,
@@ -57,8 +62,33 @@ Page({
     if (tab === 'verify') {
       this.loadVerifyData()
     } else {
-      this.loadDailyList()
+      this.loadDailyList(this.data.queryType, this.data.queryDays)
     }
+  },
+
+  onQueryTypeChange(e) {
+    const type = e.currentTarget.dataset.type
+    this.setData({ queryType: type })
+    if (type === 'custom') {
+      this.showDatePicker()
+    } else {
+      const daysMap = { day: 1, week: 7, month: 30 }
+      this.setData({ queryDays: daysMap[type] || 7 })
+      this.loadDailyList(type, daysMap[type] || 7)
+    }
+  },
+
+  showDatePicker() {
+    const that = this
+    wx.showActionSheet({
+      itemList: ['最近7天', '最近30天', '最近90天'],
+      success(res) {
+        const daysMap = [7, 30, 90]
+        const days = daysMap[res.tapIndex]
+        that.setData({ queryDays: days })
+        that.loadDailyList('custom', days)
+      }
+    })
   },
 
   // ========== 预定核销 ==========
@@ -301,8 +331,8 @@ Page({
 
   // ========== 历史订单 ==========
 
-  loadDailyList() {
-    getRecentOrders(30).then(res => {
+  loadDailyList(queryType = 'week', days = 7) {
+    getRecentOrders(days).then(res => {
       const orders = (res.data || []).sort((a, b) => (b.create_time || 0) - (a.create_time || 0))
       const dateMap = {}
       orders.forEach(o => {

@@ -89,32 +89,20 @@ async function getOrdersByDate(date) {
 }
 
 /**
- * 获取最近 N 天的订单（只返回关联最新菜单的订单）
+ * 获取最近 N 天的订单
  */
 async function getRecentOrders(days = 7) {
-  const dates = []
-  for (let i = 0; i < days; i++) {
-    const d = new Date()
-    d.setDate(d.getDate() - i)
-    const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-    dates.push(dateStr)
-  }
-
-  const orderPromises = dates.map(async (date) => {
-    const menuRes = await db.collection('orders')
-      .where({
-        date: date
-      })
-      .orderBy('create_time', 'desc')
-      .get()
-      .then(res => res.data)
-      .catch(() => [])
+  return wx.cloud.callFunction({
+    name: 'getRecentOrders',
+    data: { days: days }
+  }).then(res => {
+    if (res.result && res.result.success) {
+      return { data: res.result.data || [] }
+    }
+    return { data: [] }
+  }).catch(() => {
+    return { data: [] }
   })
-  
-  const orderResults = await Promise.all(orderPromises)
-  const allOrders = orderResults.reduce((acc, orders) => acc.concat(orders), [])
-  
-  return { data: allOrders }
 }
 
 /**

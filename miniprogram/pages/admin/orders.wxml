@@ -114,6 +114,14 @@
 
   <!-- ==================== 历史订单 ==================== -->
   <view wx:if="{{activeTab === 'history'}}">
+    <!-- 查询筛选 -->
+    <view class="query-bar">
+      <view class="query-item {{queryType === 'day' ? 'active' : ''}}" bindtap="onQueryTypeChange" data-type="day">天</view>
+      <view class="query-item {{queryType === 'week' ? 'active' : ''}}" bindtap="onQueryTypeChange" data-type="week">周</view>
+      <view class="query-item {{queryType === 'month' ? 'active' : ''}}" bindtap="onQueryTypeChange" data-type="month">月</view>
+      <view class="query-item {{queryType === 'custom' ? 'active' : ''}}" bindtap="onQueryTypeChange" data-type="custom">自定义</view>
+    </view>
+
     <!-- 1层：每日经营概况 -->
     <view wx:if="{{!showDetail}}">
       <view wx:if="{{dailyList.length === 0}}" class="empty-tip">暂无历史记录</view>
