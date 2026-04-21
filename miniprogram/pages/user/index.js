@@ -138,6 +138,7 @@ Page({
   decrease(e) {
     const index = e.currentTarget.dataset.index
     const list = this.data.menuList
+    const item = list[index]
     if (item.disabled || !list[index].qty) {
       return
     }
