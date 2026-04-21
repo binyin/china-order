@@ -55,6 +55,8 @@ exports.main = async (event, context) => {
           .get()
         
         console.log('[getTodayOrders] userRes:', userRes.data.length)
+        console.log('[getTodayOrders] allUsers:', JSON.stringify(userRes.data))
+        console.log('[getTodayOrders] userData:', JSON.stringify(userRes.data))
         
         const userMap = {}
         userRes.data.forEach(u => {
@@ -77,7 +79,8 @@ exports.main = async (event, context) => {
     
     return {
       success: true,
-      data: orders
+      data: orders,
+      users: userRes.data
     }
   } catch (err) {
     console.error('获取今日订单失败', err)

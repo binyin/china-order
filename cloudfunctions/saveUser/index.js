@@ -6,6 +6,8 @@ const db = cloud.database()
 exports.main = async (event, context) => {
   const { nickname, avatarUrl, phone } = event
   const { OPENID } = cloud.getWXContext()
+  
+  console.log('[saveUser] received:', { nickname, avatarUrl: avatarUrl ? 'has_value' : 'empty', phone, OPENID })
 
   if (!nickname) {
     return { success: false, message: '缺少用户信息' }
