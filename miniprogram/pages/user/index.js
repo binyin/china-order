@@ -1,5 +1,5 @@
 // pages/user/index.js
-const { getLatestMenu, getMyOrders } = require('../../utils/db')
+const { getLatestMenu, getMenuByDate, getMyOrders } = require('../../utils/db')
 const logger = require('../../utils/logger')
 
 const TAG = 'user:index'
@@ -20,6 +20,10 @@ Page({
     dateTime: '',
     tempNickname: '',
     tempAvatarUrl: '',
+    dateList: [],
+    selectedDate: '',
+    dateIndex: 3,
+    swiperCurrent: 3,
     statusText: {
       pending: '待取货',
       completed: '已完成',
@@ -34,8 +38,72 @@ Page({
       system: systemInfo,
       version: wx.envVersion
     })
-    this.setDateTime()
+    this.initDateList()
     this.checkAuthStatus()
+  },
+
+  initDateList() {
+    const dates = []
+    const today = new Date()
+    for (let i = -3; i <= 3; i++) {
+      const d = new Date(today.getTime() + i * 24 * 3600 * 1000)
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      const day = d.getDay()
+      const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+      const weekDay = weekDays[day]
+      let label = ''
+      if (i < 0) label = `${Math.abs(i)}天前`
+      else if (i === 0) label = '今天'
+      else if (i === 1) label = '明天'
+      else label = weekDay
+      dates.push({ date: dateStr, label, month: d.getMonth() + 1, day: d.getDate() })
+    }
+    const centerIndex = 3
+    this.setData({
+      dateList: dates,
+      selectedDate: dates[centerIndex].date,
+      dateIndex: centerIndex,
+      dateTime: this.formatDateDisplay(dates[centerIndex].date)
+    })
+    this.loadMenu()
+    this.loadMyOrders()
+  },
+
+  formatDateDisplay(dateStr) {
+    if (!dateStr) return ''
+    const parts = dateStr.split('-')
+    const month = parseInt(parts[1])
+    const day = parseInt(parts[2])
+    const d = new Date(dateStr)
+    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+    return `${month}月${day}日 ${weekDays[d.getDay()]}`
+  },
+
+  onDateSelect(e) {
+    const index = e.currentTarget.dataset.index
+    const date = this.data.dateList[index].date
+    this.setData({
+      selectedDate: date,
+      dateIndex: index,
+      dateTime: this.formatDateDisplay(date),
+      swiperCurrent: index
+    })
+    this.loadMenu()
+    this.loadMyOrders()
+  },
+
+  onDateSwipe(e) {
+    const newIndex = e.detail.current || e.detail.currentLow
+    if (newIndex !== undefined && newIndex !== this.data.dateIndex) {
+      const date = this.data.dateList[newIndex].date
+      this.setData({
+        selectedDate: date,
+        dateIndex: newIndex,
+        dateTime: this.formatDateDisplay(date)
+      })
+      this.loadMenu()
+      this.loadMyOrders()
+    }
   },
 
   setDateTime() {
@@ -73,19 +141,20 @@ Page({
   },
 
   loadMenu() {
-    logger.info(TAG + ':loadMenu', { start: true })
+    logger.info(TAG + ':loadMenu', { start: true, selectedDate: this.data.selectedDate })
     this.setData({ loading: true })
     const todayStr = this.getTodayStr()
-    return getLatestMenu().then(res => {
-      const list = res.data.map(item => ({ 
+    const targetDate = this.data.selectedDate || todayStr
+    return getMenuByDate(targetDate).then(res => {
+      const list = (res.data || []).map(item => ({ 
         ...item, 
         qty: 0,
         disabled: false
       }))
-      logger.info(TAG + ':loadMenu', { count: list.length, date: res.menuInfo?.date, today: todayStr })
+      logger.info(TAG + ':loadMenu', { count: list.length, date: res.menuInfo?.date, selected: targetDate })
       
       if (list.length > 0) {
-        const menuDate = res.menuInfo?.date || ''
+        const menuDate = targetDate
         const isExpired = menuDate < todayStr
         
         const processedList = list.map(item => ({
@@ -105,7 +174,7 @@ Page({
         
         this.calcTotal()
       } else {
-        this.setData({ menuList: [], dateTime: '', loading: false })
+        this.setData({ menuList: [], loading: false })
       }
     }).catch((err) => {
       this.setData({ loading: false })
@@ -241,12 +310,14 @@ Page({
   loadMyOrders() {
     if (this.loadingOrders) return
     this.loadingOrders = true
-    logger.info(TAG + ':loadMyOrders', { start: true })
+    const todayStr = this.getTodayStr()
+    const targetDate = this.data.selectedDate || todayStr
+    logger.info(TAG + ':loadMyOrders', { start: true, targetDate })
     
-    getMyOrders().then(orders => {
+    getMyOrders(targetDate).then(orders => {
       this.setData({ submittedOrders: orders || [] })
       this.loadingOrders = false
-      logger.info(TAG + ':loadMyOrders', { success: true, count: orders?.length || 0 })
+      logger.info(TAG + ':loadMyOrders', { success: true, count: orders?.length || 0, targetDate })
     }).catch((err) => {
       this.loadingOrders = false
       logger.error(TAG + ':loadMyOrders', { error: err.message || String(err) })
@@ -329,7 +400,8 @@ Page({
       name: 'createOrder',
       data: {
         items,
-        total_price: parseFloat(this.data.totalPrice) || 0
+        total_price: parseFloat(this.data.totalPrice) || 0,
+        date: this.data.selectedDate || this.getTodayStr()
       }
     }).then(res => {
       this.setData({ submitting: false })

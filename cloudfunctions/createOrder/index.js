@@ -5,53 +5,50 @@ const db = cloud.database()
 const _ = db.command
 
 exports.main = async (event, context) => {
-  const { items, total_price } = event
+  const { items, total_price, date } = event
   const { OPENID } = cloud.getWXContext()
 
   if (!items || items.length === 0) {
     return { success: false, message: '订单为空' }
   }
 
-  const today = getTodayBJDate()
+  const targetDate = date || getTodayBJDate()
   const now = new Date(Date.now() + 8 * 3600 * 1000)
 
   try {
-    // 获取今日菜单（新结构）
-    let latestMenu = null
+    let targetMenu = null
     try {
       const menuRes = await db.collection('active_menu')
         .where({
-          date: _.gte(today)
+          date: targetDate
         })
         .orderBy('publish_time', 'desc')
         .limit(1)
         .get()
       
       if (menuRes.data.length > 0) {
-        latestMenu = menuRes.data[0]
+        targetMenu = menuRes.data[0]
       }
     } catch (e) {
       console.warn('[createOrder] 获取菜单失败', e)
     }
 
-    if (!latestMenu) {
-      return { success: false, message: '今日未发布菜单' }
+    if (!targetMenu) {
+      return { success: false, message: `${targetDate} 未发布菜单` }
     }
 
-    // 从 items 数组获取产品ID列表
-    const menuProductIds = latestMenu.items || []
+    const menuProductIds = targetMenu.items || []
     if (menuProductIds.length === 0) {
-      return { success: false, message: '今日菜单为空' }
+      return { success: false, message: `${targetDate} 菜单为空` }
     }
 
-    // 从 orders 表实时计算每个产品的销量
-    const orderStats = await calcOrderStats(today)
+    const orderStats = await calcOrderStats(targetDate)
 
     // 验证库存
     const STOCK = 50
     for (const item of items) {
       if (!menuProductIds.includes(item.product_id)) {
-        return { success: false, message: `${item.name} 今日未上架` }
+        return { success: false, message: `${item.name} 当日未上架` }
       }
       const sold = orderStats[item.product_id] || 0
       const remaining = STOCK - sold
@@ -87,9 +84,9 @@ exports.main = async (event, context) => {
       items: orderItems,
       total_price: total_price,
       status: 'pending',
-      date: today,
-      menu_id: latestMenu.menu_id,
-      menu_publish_time: latestMenu.publish_time,
+      date: targetDate,
+      menu_id: targetMenu.menu_id,
+      menu_publish_time: targetMenu.publish_time,
       create_time: now.getTime(),
       create_time_str: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
     }

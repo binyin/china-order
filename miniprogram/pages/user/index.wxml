@@ -10,11 +10,23 @@
     </view>
   </view>
 
+  <view class="date-selector">
+    <swiper class="date-swiper" circular="{{false}}" previous-margin="60rpx" next-margin="60rpx" bindchange="onDateSwipe" current="{{swiperCurrent}}">
+      <swiper-item wx:for="{{dateList}}" wx:key="date">
+        <view class="date-item {{index === dateIndex ? 'active' : ''}}" bindtap="onDateSelect" data-index="{{index}}">
+          <text class="date-label">{{item.label}}</text>
+          <text class="date-day">{{item.day}}</text>
+          <text class="date-month">{{item.month}}月</text>
+        </view>
+      </swiper-item>
+    </swiper>
+  </view>
+
   <scroll-view scroll-y class="content-scroll">
     <view wx:if="{{menuList.length === 0}}" class="empty-tip">
       <view class="empty-icon">🍞</view>
-      <view>今日暂无预定品种</view>
-      <view class="empty-sub">请等待店主发布今日菜单</view>
+      <view>暂无预定品种</view>
+      <view class="empty-sub">该日尚未发布菜单</view>
     </view>
 
     <view class="menu-list">
