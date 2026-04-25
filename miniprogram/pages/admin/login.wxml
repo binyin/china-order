@@ -17,21 +17,29 @@
         value="{{username}}" 
         bindinput="onUsernameInput" 
         maxlength="11" 
-        adjust-position="{{false}}"
+        adjust-position="{{true}}"
       />
     </view>
 
     <view class="form-item">
       <view class="form-label">密码</view>
-      <input 
-        class="form-input" 
-        password 
-        placeholder="请输入密码" 
-        placeholder-class="placeholder-style"
-        value="{{password}}" 
-        bindinput="onPasswordInput" 
-        adjust-position="{{false}}"
-      />
+      <view class="password-wrap">
+        <input 
+          class="form-input password-input" 
+          password="{{!showPassword}}" 
+          placeholder="请输入密码" 
+          placeholder-class="placeholder-style"
+          value="{{password}}" 
+          bindinput="onPasswordInput" 
+          adjust-position="{{true}}"
+        />
+        <view class="toggle-password" bindtap="togglePassword">
+          <text class="eye-icon">{{showPassword ? '👁' : '👁‍🗨'}}</text>
+        </view>
+      </view>
+      <view class="password-hint" wx:if="{{password.length > 0}}">
+        <text class="hint-text">{{password.length}} 位</text>
+      </view>
     </view>
     
     <button 

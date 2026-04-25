@@ -5,7 +5,8 @@ Page({
   data: {
     username: '',
     password: '',
-    loading: false
+    loading: false,
+    showPassword: false
   },
 
   onLoad() {
@@ -21,6 +22,10 @@ Page({
 
   onPasswordInput(e) {
     this.setData({ password: e.detail.value })
+  },
+
+  togglePassword() {
+    this.setData({ showPassword: !this.data.showPassword })
   },
 
   doLogin() {
