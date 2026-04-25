@@ -99,6 +99,7 @@ Page({
       this.setData({
         selectedDate: date,
         dateIndex: newIndex,
+        swiperCurrent: newIndex,
         dateTime: this.formatDateDisplay(date)
       })
       this.loadMenu()
