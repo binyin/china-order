@@ -1,5 +1,5 @@
 // pages/user/index.js
-const { getLatestMenu, getMenuByDate, getMyOrders } = require('../../utils/db')
+const { getMenuByDate, getMyOrders } = require('../../utils/db')
 const logger = require('../../utils/logger')
 
 const TAG = 'user:index'
@@ -121,14 +121,7 @@ Page({
     }
   },
 
-  setDateTime() {
-    const now = new Date()
-    const month = now.getMonth() + 1
-    const day = now.getDate()
-    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    const weekDay = weekDays[now.getDay()]
-    this.setData({ dateTime: `${month}月${day}日 ${weekDay}` })
-  },
+  
 
   onShow() {
     const now = Date.now()
@@ -353,11 +346,6 @@ Page({
     this.setData({ showModal: false })
   },
 
-  onNameInput(e) {
-    let value = (e.detail.value || '').replace(/[<>\'\"\\]/g, '').slice(0, 20)
-    this.setData({ customerName: value })
-  },
-
   onPhoneInput(e) {
     let value = (e.detail.value || '').replace(/[^\d]/g, '').slice(0, 11)
     this.setData({ customerPhone: value })
@@ -535,46 +523,6 @@ Page({
   onNicknameInput(e) {
     const nickname = (e.detail.value || '').trim()
     this.setData({ tempNickname: nickname })
-  },
-
-  onAuthConfirm() {
-    const nickname = (this.data.tempNickname || '').trim()
-    const avatarUrl = this.data.tempAvatarUrl || ''
-    
-    if (!nickname) {
-      wx.showToast({ title: '请输入昵称', icon: 'none' })
-      return
-    }
-    if (!avatarUrl) {
-      wx.showToast({ title: '请选择头像', icon: 'none' })
-      return
-    }
-
-    logger.info(TAG + ':onAuthConfirm', { nickname, hasAvatar: !!avatarUrl })
-    
-    wx.setStorageSync('userProfile', { 
-      nickname: nickname,
-      avatarUrl: avatarUrl 
-    })
-    
-    this.setData({
-      customerName: nickname,
-      hasProfile: true
-    })
-
-    logger.info(TAG + ':onAuthConfirm calling saveUser:', { nickname, hasAvatar: !!avatarUrl })
-    
-    wx.cloud.callFunction({
-      name: 'saveUser',
-      data: { nickname, avatarUrl }
-    }).then(r => {
-      logger.info(TAG + ':saveUser result:', JSON.stringify(r))
-    }).catch(e => {
-      logger.error(TAG + ':saveUser error:', e)
-    })
-
-    this.loadMenu()
-    this.loadMyOrders()
   },
 
   toggleMorePopup() {
