@@ -5,6 +5,8 @@ const { getTodayOrders, getTodayMenu, getMenuByDate, getRecentOrders, updateOrde
 Page({
   data: {
     activeTab: 'verify',
+    topTab: 'date',
+    currentDateLabel: '',
     // 核销页数据
     menuStats: [],      // [{name, total, pending, customers:[{name,num}], expanded}]
     totalRevenue: '0.00',
@@ -25,6 +27,7 @@ Page({
     // 实时监听
     orderWatcher: null,
     newOrderFlag: false,
+    showSettings: false,
     statusText: {
       pending: '待取走',
       completed: '已取走',
@@ -34,6 +37,7 @@ Page({
 
   onLoad() {
     this.checkLogin()
+    this.loadCurrentMenuInfo()
   },
 
   onShow() {
@@ -56,11 +60,41 @@ Page({
     }
   },
 
+  async loadCurrentMenuInfo() {
+    try {
+      const dateStr = getBJDateStr()
+      const res = await getMenuByDate(dateStr)
+      if (res.menuInfo && res.menuInfo.publish_time) {
+        const publishTime = res.menuInfo.publish_time
+        const date = new Date(publishTime)
+        const month = date.getMonth() + 1
+        const day = date.getDate()
+        const hour = date.getHours()
+        const minute = date.getMinutes()
+        const label = `${month}月${day}日 ${hour}:${String(minute).padStart(2, '0')}`
+        this.setData({ currentDateLabel: label })
+      }
+    } catch (e) {
+      console.error('loadCurrentMenuInfo error', e)
+    }
+  },
+
+  switchTopTab(e) {
+    const tab = e.currentTarget.dataset.tab
+    this.setData({ topTab: tab, showSettings: false })
+    if (tab === 'settings') {
+      return
+    }
+    this.loadVerifyData()
+    this.startWatch()
+  },
+
   switchTab(e) {
     const tab = e.currentTarget.dataset.tab
     this.setData({ activeTab: tab, showDetail: false })
     if (tab === 'verify') {
       this.loadVerifyData()
+    } else if (tab === 'menu') {
     } else {
       this.loadDailyList(this.data.queryType, this.data.queryDays)
     }
@@ -271,55 +305,24 @@ Page({
     const db = wx.cloud.database()
     const today = getDateStr()
     
-    // 先同步获取最新发布时间，然后创建监听
-    this.getLatestPublishTimeAsync(today).then(latestPublishTime => {
-      console.log('[Admin:Orders] 开始监听，最新发布时间:', latestPublishTime)
-      
-      let query = { date: today }
-      if (latestPublishTime > 0) {
-        query.menu_publish_time = latestPublishTime
-      }
-      
-      const watcher = db.collection('orders')
-        .where(query)
-        .watch({
-          onChange: snapshot => {
-            if (snapshot.type === 'init') return
-            if (snapshot.type === 'replace' || snapshot.type === 'update') {
-              this.setData({ newOrderFlag: true })
-            }
-            this.loadVerifyData()
-          },
-          onError: err => {
-            console.error('订单监听断开，3秒后重连', err)
-            this.setData({ orderWatcher: null })
-            setTimeout(() => this.startWatch(), 3000)
+    const watcher = db.collection('orders')
+      .where({ date: today })
+      .watch({
+        onChange: snapshot => {
+          if (snapshot.type === 'init') return
+          if (snapshot.type === 'replace' || snapshot.type === 'update') {
+            this.setData({ newOrderFlag: true })
           }
-        })
+          this.loadVerifyData()
+        },
+        onError: err => {
+          console.error('订单监听断开，3秒后重连', err)
+          this.setData({ orderWatcher: null })
+          setTimeout(() => this.startWatch(), 3000)
+        }
+      })
 
-      this.setData({ orderWatcher: watcher })
-    }).catch(err => {
-      console.error('获取发布时间失败，使用默认监听', err)
-      // 降级：监听所有今日订单
-      const watcher = db.collection('orders')
-        .where({ date: today })
-        .watch({
-          onChange: snapshot => {
-            if (snapshot.type === 'init') return
-            if (snapshot.type === 'replace' || snapshot.type === 'update') {
-              this.setData({ newOrderFlag: true })
-            }
-            this.loadVerifyData()
-          },
-          onError: err => {
-            console.error('订单监听断开，3秒后重连', err)
-            this.setData({ orderWatcher: null })
-            setTimeout(() => this.startWatch(), 3000)
-          }
-        })
-      
-      this.setData({ orderWatcher: watcher })
-    })
+    this.setData({ orderWatcher: watcher })
   },
 
   stopWatch() {
@@ -414,15 +417,18 @@ Page({
     wx.navigateTo({ url: '/pages/admin/menu' })
   },
 
+  goHistory() {
+    this.setData({ topTab: 'date', activeTab: 'history', showSettings: false })
+    this.loadDailyList(this.data.queryType, this.data.queryDays)
+  },
+
+  toggleSettings() {
+    this.setData({ showSettings: false })
+    this.switchTopTab({ currentTarget: { dataset: { tab: 'settings' } } })
+    this.setData({ showSettings: true })
+  },
+
   showMenu() {
-    wx.showActionSheet({
-      itemList: ['退出登录'],
-      success: res => {
-        if (res.tapIndex === 0) {
-          app.globalData.adminInfo = null
-          wx.redirectTo({ url: '/pages/admin/login' })
-        }
-      }
-    })
+    this.setData({ showSettings: true })
   }
 })

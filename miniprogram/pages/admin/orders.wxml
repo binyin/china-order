@@ -1,22 +1,25 @@
 <!--pages/admin/orders.wxml-->
 <view class="container">
-  <!-- 顶部导航栏 -->
-  <view class="nav-bar">
-    <view class="nav-item {{activeTab === 'verify' ? 'active' : ''}}" bindtap="switchTab" data-tab="verify">预定核销</view>
-    <view class="nav-item {{activeTab === 'history' ? 'active' : ''}}" bindtap="switchTab" data-tab="history">历史订单</view>
-    <view class="nav-more" bindtap="showMenu">≡</view>
+  <!-- 一级导航：日期 + 设置 -->
+  <view class="top-nav">
+    <view class="top-item {{topTab === 'date' ? 'active' : ''}}" bindtap="switchTopTab" data-tab="date">
+      <text wx:if="{{currentDateLabel}}">{{currentDateLabel}}</text>
+      <text wx:else>今日</text>
+    </view>
+    <view class="top-item {{topTab === 'settings' ? 'active' : ''}}" bindtap="switchTopTab" data-tab="settings">设置</view>
   </view>
 
-  <!-- 快捷导航 -->
-  <view class="quick-nav">
-    <view class="quick-btn" bindtap="goProducts">产品池</view>
-    <view class="quick-btn" bindtap="goMenu">发布菜单</view>
-    <view class="new-order-tip" wx:if="{{newOrderFlag}}">新订单!</view>
+  <!-- 日期页：二级导航 -->
+  <view class="sub-nav" wx:if="{{topTab === 'date'}}">
+    <view class="sub-item {{activeTab === 'verify' ? 'active' : ''}}" bindtap="switchTab" data-tab="verify">预定核销</view>
+    <view class="sub-item {{activeTab === 'menu' ? 'active' : ''}}" bindtap="switchTab" data-tab="menu">菜单</view>
   </view>
+
+  <!-- 新订单提示 -->
+  <view class="new-order-tip" wx:if="{{newOrderFlag && topTab === 'date'}}">新订单!</view>
 
   <!-- ==================== 预定核销 ==================== -->
-  <view wx:if="{{activeTab === 'verify'}}">
-
+  <view wx:if="{{topTab === 'date' && activeTab === 'verify'}}">
     <!-- 区域1：动态看板 -->
     <view class="dashboard">
       <view class="dashboard-title">今日看板</view>
@@ -112,8 +115,32 @@
     </view>
   </view>
 
-  <!-- ==================== 历史订单 ==================== -->
-  <view wx:if="{{activeTab === 'history'}}">
+  <!-- ==================== 菜单 ==================== -->
+  <view wx:if="{{topTab === 'date' && activeTab === 'menu'}}">
+    <view class="menu-section">
+      <view class="menu-publish-btn" bindtap="goMenu">发布菜单</view>
+    </view>
+  </view>
+
+  <!-- ==================== 设置 ==================== -->
+  <view wx:if="{{topTab === 'settings'}}">
+    <view class="settings-list">
+      <view class="settings-item" bindtap="goProducts">
+        <text class="settings-label">产品池</text>
+        <text class="settings-arrow">→</text>
+      </view>
+      <view class="settings-item" bindtap="goHistory">
+        <text class="settings-label">历史订单</text>
+        <text class="settings-arrow">→</text>
+      </view>
+      <view class="settings-item logout" bindtap="showMenu">
+        <text class="settings-label">退出登录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 历史订单（内嵌） ==================== -->
+  <view wx:if="{{topTab === 'date' && activeTab === 'history'}}">
     <!-- 查询筛选 -->
     <view class="query-bar">
       <view class="query-item {{queryType === 'day' ? 'active' : ''}}" bindtap="onQueryTypeChange" data-type="day">天</view>

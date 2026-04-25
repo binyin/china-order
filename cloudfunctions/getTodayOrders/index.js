@@ -10,39 +10,26 @@ exports.main = async (event, context) => {
   console.log('[getTodayOrders] date:', today)
   
   try {
-    // 获取今日最新菜单的 menu_id
-    let latestMenuId = null
     const menuRes = await db.collection('active_menu')
       .where({ date: today })
       .orderBy('publish_time', 'desc')
       .limit(1)
       .get()
     
-    console.log('[getTodayOrders] menuRes:', menuRes.data.length)
-    
-    if (menuRes.data.length > 0) {
-      latestMenuId = menuRes.data[0].menu_id
-    }
-    
-    // 如果没有发布菜单，返回空
-    if (!latestMenuId) {
+    if (menuRes.data.length === 0) {
       return { success: true, data: [], message: '今日未发布菜单' }
     }
     
-    // 使用 menu_id 查询订单
     const ordersRes = await db.collection('orders')
-      .where({
-        date: today,
-        menu_id: latestMenuId
-      })
+      .where({ date: today })
       .orderBy('create_time', 'asc')
       .get()
     
     console.log('[getTodayOrders] ordersRes:', ordersRes.data.length)
     
     let orders = ordersRes.data
+    let userData = []
     
-    // 关联 users 表获取头像
     if (orders.length > 0) {
       const openids = [...new Set(orders.map(o => o.customer_id).filter(Boolean))]
       console.log('[getTodayOrders] openids:', openids)
@@ -55,8 +42,7 @@ exports.main = async (event, context) => {
           .get()
         
         console.log('[getTodayOrders] userRes:', userRes.data.length)
-        console.log('[getTodayOrders] allUsers:', JSON.stringify(userRes.data))
-        console.log('[getTodayOrders] userData:', JSON.stringify(userRes.data))
+        userData = userRes.data
         
         const userMap = {}
         userRes.data.forEach(u => {
@@ -80,7 +66,7 @@ exports.main = async (event, context) => {
     return {
       success: true,
       data: orders,
-      users: userRes.data
+      users: userData
     }
   } catch (err) {
     console.error('获取今日订单失败', err)

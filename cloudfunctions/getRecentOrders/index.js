@@ -1,4 +1,3 @@
-// 云函数：获取最近N天的订单（优化版本）
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
@@ -15,12 +14,14 @@ exports.main = async (event, context) => {
       queryDateStart = startDate
       queryDateEnd = endDate
     } else {
-      // 计算开始日期（默认最近N天）
-      queryDateStart = getDateStr(new Date(Date.now() - days * 24 * 60 * 60 * 1000))
-      queryDateEnd = getDateStr(new Date())
+      const now = new Date()
+      const bjTime = new Date(now.getTime() + 8 * 3600 * 1000)
+      queryDateEnd = getDateStr(bjTime)
+      const startTime = new Date(bjTime.getTime() - days * 24 * 60 * 60 * 1000)
+      queryDateStart = getDateStr(startTime)
     }
     
-    // 直接查询日期范围内的所有订单（不再要求 menu_id 关联）
+    // 直接查询日期范围内的所有订单
     const orderRes = await db.collection('orders')
       .where({
         date: _.gte(queryDateStart).lte(queryDateEnd)

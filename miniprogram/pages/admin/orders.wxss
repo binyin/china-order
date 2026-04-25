@@ -6,7 +6,7 @@
 }
 
 /* 导航栏 */
-.nav-bar {
+.top-nav {
   display: flex;
   background: #fff;
   border-bottom: 1rpx solid #e5e5ea;
@@ -15,6 +15,47 @@
   position: sticky;
   top: 0;
   z-index: 100;
+}
+.top-item {
+  flex: 1;
+  text-align: center;
+  font-size: 32rpx;
+  color: #86868b;
+  padding: 28rpx 0;
+  font-weight: 500;
+}
+.top-item.active {
+  color: #000000;
+  font-weight: 600;
+}
+.sub-nav {
+  display: flex;
+  background: #fff;
+  border-bottom: 1rpx solid #e5e5ea;
+  padding: 0 24rpx;
+}
+.sub-item {
+  flex: 1;
+  text-align: center;
+  font-size: 30rpx;
+  color: #86868b;
+  padding: 20rpx 0;
+  position: relative;
+}
+.sub-item.active {
+  color: #000000;
+  font-weight: 600;
+}
+.sub-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48rpx;
+  height: 6rpx;
+  background: #000000;
+  border-radius: 3rpx;
 }
 
 /* 查询筛选 */
@@ -92,8 +133,51 @@
   font-size: 24rpx; 
   font-weight: 600;
   animation: blink 1s ease-in-out infinite;
+  text-align: center;
 }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+/* 菜单页面 */
+.menu-section {
+  padding: 24rpx;
+}
+.menu-publish-btn {
+  background: #000;
+  color: #fff;
+  text-align: center;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  font-size: 32rpx;
+}
+
+/* 设置页面 */
+.settings-list {
+  background: #fff;
+  margin: 24rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.settings-item:last-child {
+  border-bottom: none;
+}
+.settings-label {
+  font-size: 32rpx;
+  color: #222;
+}
+.settings-arrow {
+  color: #bbb;
+  font-size: 32rpx;
+}
+.settings-item.logout .settings-label {
+  color: #ff3b30;
+}
 
  /* 日期选择器 */
  .date-selector {
