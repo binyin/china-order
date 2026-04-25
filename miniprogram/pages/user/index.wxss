@@ -12,11 +12,11 @@ page {
   height: 100vh;
 }
 
-/* 顶部导航 */
-.header {
+/* 顶部区域 */
+.top-area {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
-  padding: 60rpx 30rpx 20rpx;
+  padding: 60rpx 30rpx 10rpx;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -24,101 +24,83 @@ page {
   z-index: 10;
 }
 
-.week-view {
-  width: 80%;
+.header-left {
+  width: 30%;
 }
 
-.more-icon {
-  width: 20%;
+.date-display {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+.header-right {
+  width: 70%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
 }
 
-.more-icon .icon {
-  font-size: 48rpx;
+.menu-icon {
+  font-size: 40rpx;
   color: #666;
   padding: 10rpx;
 }
 
-.header-title {
-  font-size: 34rpx;
-  font-weight: 600;
-  color: #000;
-}
-
-.header-admin {
-  font-size: 24rpx;
-  color: var(--apple-blue);
-  font-weight: 500;
-}
-
 /* 日期选择器 */
-.date-selector {
-   background: #fff;
-   padding: 20rpx 0;
-   border-bottom: 1rpx solid #eee;
-}
-
 .date-swiper {
-   height: 140rpx;
+  height: 120rpx;
+  background: #fff;
 }
 
 .date-item {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   justify-content: center;
-   height: 100%;
-   transition: all 0.3s ease;
-   /* Base opacity for non-active items */
-   opacity: 0.3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  transition: all 0.3s ease;
+  opacity: 0.3;
 }
 
 .date-item.active {
-   opacity: 1;
-   transform: scale(1.15);
+  opacity: 1;
+  transform: scale(1.15);
 }
 
-/* Adjacent dates (previous and next day) */
 .date-item.prev,
 .date-item.next {
-   opacity: 0.6;
-}
-
-/* Hover/swiper feedback */
-.date-item:hover {
-   opacity: 0.5;
+  opacity: 0.6;
 }
 
 .date-label {
-   font-size: 24rpx;
-   color: #666;
-   font-weight: 500;
+  font-size: 22rpx;
+  color: #666;
+  font-weight: 500;
 }
 
 .date-item.active .date-label {
-   color: #ff9500;
-   font-weight: 600;
+  color: #ff9500;
+  font-weight: 600;
 }
 
 .date-day {
-   font-size: 48rpx;
-   font-weight: 700;
-   color: #333;
-   line-height: 1.2;
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.2;
 }
 
 .date-item.active .date-day {
-   color: #000;
+  color: #000;
 }
 
-.date-month {
-   font-size: 20rpx;
-   color: #999;
+.date-weekday {
+  font-size: 18rpx;
+  color: #999;
 }
 
-/* 列表滚动区 */
+/* 内容滚动区 */
 .content-scroll {
   flex: 1;
   overflow-y: scroll;

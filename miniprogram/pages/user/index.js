@@ -6,7 +6,6 @@ const TAG = 'user:index'
 
 Page({
   data: {
-    loading: true,
     menuList: [],
     totalPrice: '0.00',
     hasSelected: false,
@@ -17,7 +16,6 @@ Page({
     orderSummary: [],
     submitting: false,
     hasProfile: false,
-    dateTime: '',
     tempNickname: '',
     tempAvatarUrl: '',
     dateList: [],
@@ -25,6 +23,7 @@ Page({
     dateIndex: 3,
     swiperCurrent: 3,
     showMorePopup: false,
+    formatDate: '',
     statusText: {
       pending: '待取货',
       completed: '已完成',
@@ -46,12 +45,11 @@ Page({
   initDateList() {
     const dates = []
     const today = new Date()
+    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
     for (let i = -3; i <= 3; i++) {
       const d = new Date(today.getTime() + i * 24 * 3600 * 1000)
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-      const day = d.getDay()
-      const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-      const weekDay = weekDays[day]
+      const weekday = weekDays[d.getDay()]
       let label = ''
       let className = ''
       if (i < 0) {
@@ -64,9 +62,9 @@ Page({
         label = '明天'
         className = 'next'
       } else {
-        label = weekDay
+        label = weekday
       }
-      dates.push({ date: dateStr, label, month: d.getMonth() + 1, day: d.getDate(), className })
+      dates.push({ date: dateStr, label, day: d.getDate(), weekday, className })
     }
     const centerIndex = 3
     this.setData({
@@ -74,81 +72,13 @@ Page({
       selectedDate: dates[centerIndex].date,
       dateIndex: centerIndex,
       swiperCurrent: centerIndex,
-      dateTime: this.formatDateDisplay(dates[centerIndex].date)
+      formatDate: dates[centerIndex].weekday
     })
     this.loadMenu()
     this.loadMyOrders()
   },
 
-  formatDateDisplay(dateStr) {
-    if (!dateStr) return ''
-    const parts = dateStr.split('-')
-    const month = parseInt(parts[1])
-    const day = parseInt(parts[2])
-    const d = new Date(dateStr)
-    const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    return `${month}月${day}日 ${weekDays[d.getDay()]}`
-  },
-
-  onDateSelect(e) {
-    const index = e.currentTarget.dataset.index
-    const date = this.data.dateList[index].date
-    this.setData({
-      selectedDate: date,
-      dateIndex: index,
-      dateTime: this.formatDateDisplay(date),
-      swiperCurrent: index
-    })
-    this.loadMenu()
-    this.loadMyOrders()
-  },
-
-  onDateSwipe(e) {
-    const newIndex = e.detail.current || e.detail.currentLow
-    if (newIndex !== undefined && newIndex !== this.data.dateIndex) {
-      const date = this.data.dateList[newIndex].date
-      // Avoid duplicate trigger
-      if (date !== this.data.selectedDate) {
-        this.setData({
-          selectedDate: date,
-          dateIndex: newIndex,
-          swiperCurrent: newIndex,
-          dateTime: this.formatDateDisplay(date)
-        })
-        this.loadMenu()
-        this.loadMyOrders()
-      }
-    }
-  },
-
-  
-
-  onShow() {
-    const now = Date.now()
-    const isFromPreview = this._lastHideTime && (now - this._lastHideTime) < 2000
-    logger.info(TAG + ':onShow', { time: new Date().toISOString(), isFromPreview, lastHide: this._lastHideTime })
-    
-    if (isFromPreview) {
-      this._lastHideTime = null
-      return
-    }
-    
-    this.checkAuthStatus()
-    this.loadMenu()
-    this.loadMyOrders()
-  },
-
-  onHide() {
-    this._lastHideTime = Date.now()
-    logger.info(TAG + ':onHide', { time: new Date().toISOString() })
-  },
-
-  getTodayStr() {
-    const now = new Date()
-    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
-  },
-
-  loadMenu() {
+loadMenu() {
     logger.info(TAG + ':loadMenu', { start: true, selectedDate: this.data.selectedDate })
     this.setData({ loading: true })
     const todayStr = this.getTodayStr()

@@ -1,95 +1,96 @@
 <view class="container">
-  <block wx:if="{{!loading}}">
-    <!-- Header: week view (80%) + more icon (20%) -->
-    <view class="header">
-      <view class="week-view">
-        <swiper class="date-swiper" circular="{{false}}" previous-margin="60rpx" next-margin="60rpx" bindchange="onDateSwipe" current="{{swiperCurrent}}">
-          <swiper-item wx:for="{{dateList}}" wx:key="date">
-            <view class="date-item {{item.className === 'prev' ? 'prev' : item.className === 'next' ? 'next' : (index === dateIndex ? 'active' : '')}}" bindtap="onDateSelect" data-index="{{index}}">
-              <text class="date-label">{{item.label}}</text>
-              <text class="date-day">{{item.day}}</text>
-              <text class="date-month">{{item.month}}月</text>
+  <view class="top-area">
+    <view class="header-left">
+      <text class="date-display">{{formatDate}}</text>
+    </view>
+    <view class="header-right" bindtap="toggleMorePopup">
+      <text class="menu-icon">☰</text>
+    </view>
+  </view>
+
+  <!-- 日期选择器 -->
+  <swiper class="date-swiper" circular="{{false}}" previous-margin="60rpx" next-margin="60rpx" bindchange="onDateSwipe" current="{{swiperCurrent}}">
+    <swiper-item wx:for="{{dateList}}" wx:key="date">
+      <view class="date-item {{item.className === 'prev' ? 'prev' : item.className === 'next' ? 'next' : (index === dateIndex ? 'active' : '')}}" bindtap="onDateSelect" data-index="{{index}}">
+        <text class="date-label">{{item.label}}</text>
+        <text class="date-day">{{item.day}}</text>
+        <text class="date-weekday">{{item.weekday}}</text>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- 更多弹窗 -->
+  <view wx:if="{{showMorePopup}}" class="popup-mask" bindtap="closeMorePopup">
+    <view class="popup-menu">
+      <view class="popup-item" bindtap="goSetting">
+        <text class="popup-text">设置</text>
+      </view>
+      <view class="popup-item" bindtap="goAdmin">
+        <text class="popup-text">店长登录</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 内容区域 -->
+  <scroll-view scroll-y class="content-scroll">
+    <view wx:if="{{menuList.length === 0}}" class="empty-tip">
+      <view class="empty-icon">🍞</view>
+      <view>暂无预定品种</view>
+      <view class="empty-sub">该日尚未发布菜单</view>
+    </view>
+
+    <view class="menu-list">
+      <view class="menu-item" wx:for="{{menuList}}" wx:key="_id">
+        <image wx:if="{{item.image_url}}" class="item-img" src="{{item.image_url}}" mode="aspectFill" bindtap="previewImage" data-url="{{item.image_url}}" binderror="onImageError" data-index="{{index}}" />
+        <view wx:if="{{!item.image_url}}" class="item-img item-img-placeholder" />
+        <view class="item-left">
+          <text class="item-name">{{item.name}}</text>
+          <text class="item-price">¥{{item.price}}</text>
+        </view>
+        <view class="item-right">
+          <view class="counter-btn minus {{item.disabled ? 'disabled' : ''}}" bindtap="decrease" data-index="{{index}}">－</view>
+          <text class="counter-num {{item.disabled ? 'disabled' : ''}}" bindtap="editQty" data-index="{{index}}">{{item.qty || 0}}</text>
+          <view class="counter-btn plus {{item.disabled ? 'disabled' : ''}}" bindtap="increase" data-index="{{index}}">＋</view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:if="{{submittedOrders.length > 0}}" class="submitted-section">
+      <view class="section-title">我的预定</view>
+      <view class="order-card {{item.status === 'cancelled' ? 'cancelled' : ''}}" wx:for="{{submittedOrders}}" wx:key="_id">
+        <view class="order-header">
+          <text class="order-user">{{item.customer_name}}</text>
+          <text class="status-tag tag-{{item.status}}">{{statusText[item.status]}}</text>
+        </view>
+        <view class="order-content">
+          <view class="prod-item" wx:for="{{item.items}}" wx:for-item="prod" wx:key="product_id">
+            <image class="prod-img" src="{{prod.image_url}}" mode="aspectFill" wx:if="{{prod.image_url}}" />
+            <view class="prod-info">
+              <text class="prod-name">{{prod.name}}</text>
+              <text class="prod-qty">× {{prod.num}}</text>
             </view>
-          </swiper-item>
-        </swiper>
-      </view>
-      <view class="more-icon" bindtap="toggleMorePopup">
-        <text class="icon">⋯</text>
-      </view>
-    </view>
-
-    <!-- More popup -->
-    <view wx:if="{{showMorePopup}}" class="popup-mask" bindtap="closeMorePopup">
-      <view class="popup-menu">
-        <view class="popup-item" bindtap="goSetting">
-          <text class="popup-text">设置</text>
+          </view>
         </view>
-        <view class="popup-item" bindtap="goAdmin">
-          <text class="popup-text">店长登录</text>
+        <view class="order-footer">
+          <text class="order-price">¥{{item.total_price}}</text>
+          <button class="btn-cancel-small" bindtap="cancelOrder" data-id="{{item._id}}" wx:if="{{item.status === 'pending'}}">取消预定</button>
         </view>
       </view>
     </view>
+    
+    <view style="height: 200rpx;"></view>
+  </scroll-view>
 
-    <scroll-view scroll-y class="content-scroll">
-      <view wx:if="{{menuList.length === 0}}" class="empty-tip">
-        <view class="empty-icon">🍞</view>
-        <view>暂无预定品种</view>
-        <view class="empty-sub">该日尚未发布菜单</view>
+  <view class="floating-bar {{hasSelected ? 'active' : ''}}">
+    <view class="bar-content">
+      <view class="price-info">
+        <text class="bar-label">合计</text>
+        <text class="bar-amount">¥{{totalPrice}}</text>
       </view>
-
-      <view class="menu-list">
-        <view class="menu-item" wx:for="{{menuList}}" wx:key="_id">
-          <image wx:if="{{item.image_url}}" class="item-img" src="{{item.image_url}}" mode="aspectFill" bindtap="previewImage" data-url="{{item.image_url}}" binderror="onImageError" data-index="{{index}}" />
-          <view wx:if="{{!item.image_url}}" class="item-img item-img-placeholder" />
-          <view class="item-left">
-            <text class="item-name">{{item.name}}</text>
-            <text class="item-price">¥{{item.price}}</text>
-          </view>
-          <view class="item-right">
-            <view class="counter-btn minus {{item.disabled ? 'disabled' : ''}}" bindtap="decrease" data-index="{{index}}">－</view>
-            <text class="counter-num {{item.disabled ? 'disabled' : ''}}" bindtap="editQty" data-index="{{index}}">{{item.qty || 0}}</text>
-            <view class="counter-btn plus {{item.disabled ? 'disabled' : ''}}" bindtap="increase" data-index="{{index}}">＋</view>
-          </view>
-        </view>
+      <view class="bar-actions">
+        <text class="bar-clear" bindtap="cancelAllItems">清空</text>
+        <button class="btn-primary-apple" bindtap="submitOrder">提交订单</button>
       </view>
-
-      <view wx:if="{{submittedOrders.length > 0}}" class="submitted-section">
-        <view class="section-title">我的预定</view>
-        <view class="order-card {{item.status === 'cancelled' ? 'cancelled' : ''}}" wx:for="{{submittedOrders}}" wx:key="_id">
-          <view class="order-header">
-            <text class="order-user">{{item.customer_name}}</text>
-            <text class="status-tag tag-{{item.status}}">{{statusText[item.status]}}</text>
-          </view>
-          <view class="order-content">
-            <view class="prod-item" wx:for="{{item.items}}" wx:for-item="prod" wx:key="product_id">
-              <image class="prod-img" src="{{prod.image_url}}" mode="aspectFill" wx:if="{{prod.image_url}}" />
-              <view class="prod-info">
-                <text class="prod-name">{{prod.name}}</text>
-                <text class="prod-qty">× {{prod.num}}</text>
-              </view>
-            </view>
-          </view>
-          <view class="order-footer">
-            <text class="order-price">¥{{item.total_price}}</text>
-            <button class="btn-cancel-small" bindtap="cancelOrder" data-id="{{item._id}}" wx:if="{{item.status === 'pending'}}">取消预定</button>
-          </view>
-        </view>
-      </view>
-      
-      <view style="height: 200rpx;"></view>
-    </scroll-view>
-  </block>
-</view>
-
-<view class="floating-bar {{hasSelected ? 'active' : ''}}">
-  <view class="bar-content">
-    <view class="price-info">
-      <text class="bar-label">合计</text>
-      <text class="bar-amount">¥{{totalPrice}}</text>
-    </view>
-    <view class="bar-actions">
-      <text class="bar-clear" bindtap="cancelAllItems">清空</text>
-      <button class="btn-primary-apple" bindtap="submitOrder">提交订单</button>
     </view>
   </view>
 </view>
