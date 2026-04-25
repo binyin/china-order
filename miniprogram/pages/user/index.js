@@ -24,6 +24,7 @@ Page({
     selectedDate: '',
     dateIndex: 3,
     swiperCurrent: 3,
+    showMorePopup: false,
     statusText: {
       pending: '待取货',
       completed: '已完成',
@@ -72,6 +73,7 @@ Page({
       dateList: dates,
       selectedDate: dates[centerIndex].date,
       dateIndex: centerIndex,
+      swiperCurrent: centerIndex,
       dateTime: this.formatDateDisplay(dates[centerIndex].date)
     })
     this.loadMenu()
@@ -573,6 +575,14 @@ Page({
 
     this.loadMenu()
     this.loadMyOrders()
+  },
+
+  toggleMorePopup() {
+    this.setData({ showMorePopup: !this.data.showMorePopup })
+  },
+
+  closeMorePopup() {
+    this.setData({ showMorePopup: false })
   },
 
   goAdmin() {

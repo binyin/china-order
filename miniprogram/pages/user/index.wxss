@@ -16,12 +16,29 @@ page {
 .header {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
-  padding: 60rpx 40rpx 20rpx;
+  padding: 60rpx 30rpx 20rpx;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-bottom: 1rpx solid #d1d1d6;
   z-index: 10;
+}
+
+.week-view {
+  width: 80%;
+}
+
+.more-icon {
+  width: 20%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.more-icon .icon {
+  font-size: 48rpx;
+  color: #666;
+  padding: 10rpx;
 }
 
 .header-title {
@@ -597,4 +614,39 @@ page {
 
 .profile-setup {
   display: none;
+}
+
+/* 更多弹窗 */
+.popup-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding-top: 180rpx;
+  padding-right: 20rpx;
+}
+
+.popup-menu {
+  background: #fff;
+  border-radius: 20rpx;
+  min-width: 280rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.15);
+  overflow: hidden;
+}
+
+.popup-item {
+  padding: 32rpx 40rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.popup-item:last-child {
+  border-bottom: none;
+}
+
+.popup-text {
+  font-size: 30rpx;
+  color: #333;
 }
