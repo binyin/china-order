@@ -23,6 +23,7 @@ Page({
     dateIndex: 3,
     swiperCurrent: 3,
     showMorePopup: false,
+    showDatePicker: false,
     formatDate: '',
     statusText: {
       pending: '待取货',
@@ -461,6 +462,32 @@ loadMenu() {
 
   closeMorePopup() {
     this.setData({ showMorePopup: false })
+  },
+
+  toggleDatePicker() {
+    this.setData({ showDatePicker: !this.data.showDatePicker })
+  },
+
+  onDateSelect(e) {
+    const index = e.currentTarget.dataset.index
+    const item = this.data.dateList[index]
+    if (item.date === this.data.selectedDate) {
+      this.setData({ showDatePicker: false })
+      return
+    }
+    this.setData({ selectedDate: item.date, dateIndex: index, swiperCurrent: index, formatDate: item.label + ' ' + item.day + '日', showDatePicker: false })
+    this.loadMenu()
+    this.loadMyOrders()
+  },
+
+  onDateSwipe(e) {
+    const newIndex = e.detail.current
+    if (newIndex === undefined || newIndex === this.data.dateIndex) return
+    const item = this.data.dateList[newIndex]
+    if (item.date === this.data.selectedDate) return
+    this.setData({ selectedDate: item.date, dateIndex: newIndex, swiperCurrent: newIndex, formatDate: item.label + ' ' + item.day + '日' })
+    this.loadMenu()
+    this.loadMyOrders()
   },
 
   goAdmin() {

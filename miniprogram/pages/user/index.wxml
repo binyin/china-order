@@ -1,25 +1,27 @@
 <view class="container">
-  <view class="top-area">
-    <view class="header-left">
-      <text class="date-display">{{formatDate}}</text>
+  <view class="top-bar">
+    <view class="date-trigger" bindtap="toggleDatePicker">
+      <text class="date-trigger-text">{{formatDate}}</text>
+      <text class="date-trigger-icon {{showDatePicker ? 'expanded' : ''}}">›</text>
     </view>
-    <view class="header-right" bindtap="toggleMorePopup">
-      <text class="menu-icon">☰</text>
+    <view class="settings-btn" bindtap="toggleMorePopup">
+      <view class="settings-circle">
+        <text class="settings-icon">⚙</text>
+      </view>
     </view>
   </view>
 
-  <!-- 日期选择器 -->
-  <swiper class="date-swiper" circular="{{false}}" previous-margin="60rpx" next-margin="60rpx" bindchange="onDateSwipe" current="{{swiperCurrent}}">
-    <swiper-item wx:for="{{dateList}}" wx:key="date">
-      <view class="date-item {{item.className === 'prev' ? 'prev' : item.className === 'next' ? 'next' : (index === dateIndex ? 'active' : '')}}" bindtap="onDateSelect" data-index="{{index}}">
-        <text class="date-label">{{item.label}}</text>
-        <text class="date-day">{{item.day}}</text>
-        <text class="date-weekday">{{item.weekday}}</text>
+  <view class="date-picker-wrap {{showDatePicker ? 'show' : ''}}">
+    <scroll-view class="date-picker" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="date-picker-inner">
+        <view wx:for="{{dateList}}" wx:key="date" class="date-pick-item {{item.date === selectedDate ? 'active' : ''}}" bindtap="onDateSelect" data-index="{{index}}">
+          <text class="date-pick-week">{{item.label}}</text>
+          <text class="date-pick-day">{{item.day}}</text>
+        </view>
       </view>
-    </swiper-item>
-  </swiper>
+    </scroll-view>
+  </view>
 
-  <!-- 更多弹窗 -->
   <view wx:if="{{showMorePopup}}" class="popup-mask" bindtap="closeMorePopup">
     <view class="popup-menu">
       <view class="popup-item" bindtap="goSetting">
@@ -31,7 +33,6 @@
     </view>
   </view>
 
-  <!-- 内容区域 -->
   <scroll-view scroll-y class="content-scroll">
     <view wx:if="{{menuList.length === 0}}" class="empty-tip">
       <view class="empty-icon">🍞</view>
