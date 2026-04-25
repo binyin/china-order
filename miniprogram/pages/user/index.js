@@ -43,6 +43,12 @@ Page({
     this.checkAuthStatus()
   },
 
+  onShow() {
+    this.checkAuthStatus()
+    this.loadMenu()
+    this.loadMyOrders()
+  },
+
   initDateList() {
     const dates = []
     const today = new Date()
@@ -81,7 +87,6 @@ Page({
 
 loadMenu() {
     logger.info(TAG + ':loadMenu', { start: true, selectedDate: this.data.selectedDate })
-    this.setData({ loading: true })
     const todayStr = this.getTodayStr()
     const targetDate = this.data.selectedDate || todayStr
     return getMenuByDate(targetDate).then(res => {
@@ -93,32 +98,19 @@ loadMenu() {
       logger.info(TAG + ':loadMenu', { count: list.length, date: res.menuInfo?.date, selected: targetDate })
       
       if (list.length > 0) {
-        const menuDate = targetDate
-        const isExpired = menuDate < todayStr
-        
+        const isExpired = targetDate < todayStr
         const processedList = list.map(item => ({
           ...item,
           disabled: isExpired
         }))
-        
-        const dateParts = menuDate.split('-')
-        const month = parseInt(dateParts[1])
-        const day = parseInt(dateParts[2])
-        
-        this.setData({ 
-          dateTime: isExpired ? `${month}月${day}日(已过期)` : `${month}月${day}日`,
-          menuList: processedList,
-          loading: false
-        })
-        
+        this.setData({ menuList: processedList })
         this.calcTotal()
       } else {
-        this.setData({ menuList: [], loading: false })
+        this.setData({ menuList: [] })
       }
     }).catch((err) => {
-      this.setData({ loading: false })
+      this.setData({ menuList: [] })
       logger.error(TAG + ':loadMenu', { error: err.message || String(err) })
-      wx.showToast({ title: '加载失败', icon: 'error' })
     })
   },
 
@@ -441,8 +433,6 @@ loadMenu() {
         hasProfile: false
       })
     }
-    this.loadMenu()
-    this.loadMyOrders()
   },
 
   onChooseAvatar(e) {
