@@ -117,6 +117,7 @@ Page({
   },
 
   goMenu() {
+    this.setData({ showSettings: false })
     wx.navigateTo({ url: '/pages/admin/menu' })
   },
 
@@ -127,11 +128,6 @@ Page({
   },
 
   async loadCurrentMenuInfo() {
-    try {
-      const dateStr = getBJDateStr()
-      const res = await getMenuByDate(dateStr)
-      if (res.menuInfo && res.menuInfo.publish_time) {
-        const publishTime = res.menuInfo.publish_time
         const date = new Date(publishTime)
         const month = date.getMonth() + 1
         const day = date.getDate()
@@ -471,27 +467,6 @@ Page({
       console.error('调用获取最新菜单时间失败', err)
       return 0
     }
-  },
-
-  // ========== 导航 ==========
-
-  goProducts() {
-    wx.navigateTo({ url: '/pages/admin/products' })
-  },
-
-  goMenu() {
-    wx.navigateTo({ url: '/pages/admin/menu' })
-  },
-
-  goHistory() {
-    this.setData({ topTab: 'date', activeTab: 'history', showSettings: false })
-    this.loadDailyList(this.data.queryType, this.data.queryDays)
-  },
-
-  toggleSettings() {
-    this.setData({ showSettings: false })
-    this.switchTopTab({ currentTarget: { dataset: { tab: 'settings' } } })
-    this.setData({ showSettings: true })
   },
 
   showMenu() {
