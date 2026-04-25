@@ -1,28 +1,36 @@
 <view class="container">
   <block wx:if="{{!loading}}">
+    <!-- Header: week view (80%) + more icon (20%) -->
     <view class="header">
-    <view class="header-left">
-      <view class="header-setting" bindtap="goSetting">☰</view>
+      <view class="week-view">
+        <swiper class="date-swiper" circular="{{false}}" previous-margin="60rpx" next-margin="60rpx" bindchange="onDateSwipe" current="{{swiperCurrent}}">
+          <swiper-item wx:for="{{dateList}}" wx:key="date">
+            <view class="date-item {{item.className === 'prev' ? 'prev' : item.className === 'next' ? 'next' : (index === dateIndex ? 'active' : '')}}" bindtap="onDateSelect" data-index="{{index}}">
+              <text class="date-label">{{item.label}}</text>
+              <text class="date-day">{{item.day}}</text>
+              <text class="date-month">{{item.month}}月</text>
+            </view>
+          </swiper-item>
+        </swiper>
+      </view>
+      <view class="more-icon" bindtap="toggleMorePopup">
+        <text class="icon">⋮</text>
+      </view>
     </view>
-    <view class="header-title">{{dateTime || '馒头预定'}}</view>
-    <view class="header-right">
-      <view class="header-admin" bindtap="goAdmin">店主入口</view>
-    </view>
-  </view>
 
-  <view class="date-selector">
-    <swiper class="date-swiper" circular="{{false}}" previous-margin="60rpx" next-margin="60rpx" bindchange="onDateSwipe" current="{{swiperCurrent}}">
-<swiper-item wx:for="{{dateList}}" wx:key="date">
-         <view class="date-item {{item.className === 'prev' ? 'prev' : item.className === 'next' ? 'next' : (index === dateIndex ? 'active' : '')}}" bindtap="onDateSelect" data-index="{{index}}">
-          <text class="date-label">{{item.label}}</text>
-          <text class="date-day">{{item.day}}</text>
-          <text class="date-month">{{item.month}}月</text>
+    <!-- More popup -->
+    <view wx:if="{{showMorePopup}}" class="popup-mask" bindtap="closeMorePopup">
+      <view class="popup-menu">
+        <view class="popup-item" bindtap="goSetting">
+          <text class="popup-text">设置</text>
         </view>
-      </swiper-item>
-    </swiper>
-  </view>
+        <view class="popup-item" bindtap="goAdmin">
+          <text class="popup-text">店长登录</text>
+        </view>
+      </view>
+    </view>
 
-  <scroll-view scroll-y class="content-scroll">
+  </block>
     <view wx:if="{{menuList.length === 0}}" class="empty-tip">
       <view class="empty-icon">🍞</view>
       <view>暂无预定品种</view>
