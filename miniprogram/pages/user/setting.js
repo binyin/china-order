@@ -1,7 +1,7 @@
 // pages/user/setting.js
 Page({
   data: {
-    version: '1.1.0.20260417',
+    version: '1.4.3.20260426',
     userProfile: {
       nickname: '',
       avatarUrl: '',
