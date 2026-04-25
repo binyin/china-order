@@ -310,14 +310,13 @@ Page({
   loadMyOrders() {
     if (this.loadingOrders) return
     this.loadingOrders = true
-    const todayStr = this.getTodayStr()
-    const targetDate = this.data.selectedDate || todayStr
-    logger.info(TAG + ':loadMyOrders', { start: true, targetDate })
+    const selectedDate = this.data.selectedDate || this.getTodayStr()
+    logger.info(TAG + ':loadMyOrders', { start: true, selectedDate })
     
-    getMyOrders(targetDate).then(orders => {
+    getMyOrders(selectedDate).then(orders => {
       this.setData({ submittedOrders: orders || [] })
       this.loadingOrders = false
-      logger.info(TAG + ':loadMyOrders', { success: true, count: orders?.length || 0, targetDate })
+      logger.info(TAG + ':loadMyOrders', { success: true, count: orders?.length || 0, selectedDate })
     }).catch((err) => {
       this.loadingOrders = false
       logger.error(TAG + ':loadMyOrders', { error: err.message || String(err) })
