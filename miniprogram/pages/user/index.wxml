@@ -12,8 +12,8 @@
 
   <view class="date-selector">
     <swiper class="date-swiper" circular="{{false}}" previous-margin="60rpx" next-margin="60rpx" bindchange="onDateSwipe" current="{{swiperCurrent}}">
-      <swiper-item wx:for="{{dateList}}" wx:key="date">
-        <view class="date-item {{index === dateIndex ? 'active' : ''}}" bindtap="onDateSelect" data-index="{{index}}">
+<swiper-item wx:for="{{dateList}}" wx:key="date">
+         <view class="date-item {{item.className === 'prev' ? 'prev' : item.className === 'next' ? 'next' : (index === dateIndex ? 'active' : '')}}" bindtap="onDateSelect" data-index="{{index}}">
           <text class="date-label">{{item.label}}</text>
           <text class="date-day">{{item.day}}</text>
           <text class="date-month">{{item.month}}月</text>

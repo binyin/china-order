@@ -52,11 +52,20 @@ Page({
       const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
       const weekDay = weekDays[day]
       let label = ''
-      if (i < 0) label = `${Math.abs(i)}天前`
-      else if (i === 0) label = '今天'
-      else if (i === 1) label = '明天'
-      else label = weekDay
-      dates.push({ date: dateStr, label, month: d.getMonth() + 1, day: d.getDate() })
+      let className = ''
+      if (i < 0) {
+        label = `${Math.abs(i)}天前`
+        className = 'prev'
+      } else if (i === 0) {
+        label = '今天'
+        className = 'active'
+      } else if (i === 1) {
+        label = '明天'
+        className = 'next'
+      } else {
+        label = weekDay
+      }
+      dates.push({ date: dateStr, label, month: d.getMonth() + 1, day: d.getDate(), className })
     }
     const centerIndex = 3
     this.setData({
