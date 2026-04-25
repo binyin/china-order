@@ -1,6 +1,6 @@
 // pages/admin/orders.js
 const app = getApp()
-const { getTodayOrders, getTodayMenu, getMenuByDate, getRecentOrders, updateOrderStatus, getDateStr } = require('../../utils/db')
+const { getTodayOrders, getTodayMenu, getMenuByDate, getRecentOrders, updateOrderStatus, getDateStr, getBJDateStr } = require('../../utils/db')
 
 Page({
   data: {
@@ -95,7 +95,7 @@ Page({
 
   async loadVerifyData() {
     try {
-      const targetDate = getDateStr()
+      const targetDate = getBJDateStr()
       const [menuRes, orderRes] = await Promise.all([
         getMenuByDate(targetDate),
         getTodayOrders(targetDate)
