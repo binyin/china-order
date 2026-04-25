@@ -1,30 +1,45 @@
 <!--pages/admin/orders.wxml-->
 <view class="container">
-  <!-- 一级导航：日期 + 设置 -->
-  <view class="top-nav">
-    <view class="top-item {{topTab === 'date' ? 'active' : ''}}" bindtap="switchTopTab" data-tab="date">
-      <text wx:if="{{currentDateLabel}}">{{currentDateLabel}}</text>
-      <text wx:else>今日</text>
+  <!-- 顶部导航栏 - 复用用户端设计 -->
+  <view class="top-bar">
+    <view class="date-trigger" bindtap="toggleDatePicker">
+      <text class="date-trigger-text">{{currentDateLabel}}</text>
+      <text class="date-trigger-icon {{showDatePicker ? 'expanded' : ''}}">›</text>
     </view>
-    <view class="top-item {{topTab === 'settings' ? 'active' : ''}}" bindtap="switchTopTab" data-tab="settings">设置</view>
+    <view class="settings-btn" bindtap="showMenu">
+      <view class="settings-circle">
+        <text class="settings-icon">⚙</text>
+      </view>
+    </view>
   </view>
 
-  <!-- 日期页：二级导航 -->
-  <view class="sub-nav" wx:if="{{topTab === 'date'}}">
-    <view class="sub-item {{activeTab === 'verify' ? 'active' : ''}}" bindtap="switchTab" data-tab="verify">预定核销</view>
-    <view class="sub-item {{activeTab === 'menu' ? 'active' : ''}}" bindtap="switchTab" data-tab="menu">菜单</view>
+  <!-- 日期选择器 -->
+  <view class="date-picker-wrap {{showDatePicker ? 'show' : ''}}">
+    <scroll-view class="date-picker" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="date-picker-inner">
+        <view wx:for="{{dateList}}" wx:key="date" class="date-pick-item {{item.date === currentDate ? 'active' : ''}}" bindtap="onDateSelect" data-date="{{item.date}}">
+          <text class="date-pick-week">{{item.label}}</text>
+          <text class="date-pick-day">{{item.day}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 二级导航 -->
+  <view class="sub-nav">
+    <view class="sub-item {{subTab === 'verify' ? 'active' : ''}}" bindtap="switchSubTab" data-tab="verify">预定核销</view>
+    <view class="sub-item {{subTab === 'menu' ? 'active' : ''}}" bindtap="switchSubTab" data-tab="menu">菜单管理</view>
   </view>
 
   <!-- 新订单提示 -->
-  <view class="new-order-tip" wx:if="{{newOrderFlag && topTab === 'date'}}">新订单!</view>
+  <view class="new-order-tip" wx:if="{{newOrderFlag}}">新订单!</view>
 
   <!-- ==================== 预定核销 ==================== -->
-  <view wx:if="{{topTab === 'date' && activeTab === 'verify'}}">
+  <view wx:if="{{subTab === 'verify'}}">
     <!-- 区域1：动态看板 -->
     <view class="dashboard">
       <view class="dashboard-title">今日看板</view>
 
-      <!-- 营收汇总 - 精简版 -->
       <view class="revenue-row">
         <view class="revenue-item">
           <view class="revenue-num">{{totalRevenue}}</view>
@@ -37,7 +52,6 @@
         </view>
       </view>
 
-      <!-- 各品类统计 - 直接显示预定人 -->
       <view class="stats-list">
         <view wx:for="{{menuStats}}" wx:key="name" class="stat-card">
           <view class="stat-header">
@@ -64,8 +78,7 @@
 
       <view wx:if="{{pendingOrders.length === 0}}" class="empty-inline">暂无待处理订单</view>
       <view class="customer-list">
-        <view class="customer-card"
-              wx:for="{{pendingOrders}}" wx:key="_id">
+        <view class="customer-card" wx:for="{{pendingOrders}}" wx:key="_id">
           <view class="customer-header">
             <image class="customer-avatar" src="{{item.customer_avatar}}" mode="aspectFill" wx:if="{{item.customer_avatar}}"></image>
             <view class="customer-avatar-placeholder" wx:else>?</view>
@@ -87,12 +100,10 @@
         </view>
       </view>
 
-      <!-- 已处理区域 -->
       <view wx:if="{{historyOrders.length > 0}}" class="history-section">
         <view class="section-title grey">已处理 ({{historyOrders.length}})</view>
         <view class="customer-list">
-          <view class="customer-card handled {{item.status === 'cancelled' ? 'cancelled' : ''}}"
-                wx:for="{{historyOrders}}" wx:key="_id">
+          <view class="customer-card handled {{item.status === 'cancelled' ? 'cancelled' : ''}}" wx:for="{{historyOrders}}" wx:key="_id">
             <view class="customer-header">
               <view class="customer-name dimmed">
                 <text wx:if="{{item.create_time_str}}" class="order-time-badge grey-badge">{{item.create_time_str}}</text>
@@ -115,79 +126,28 @@
     </view>
   </view>
 
-  <!-- ==================== 菜单 ==================== -->
-  <view wx:if="{{topTab === 'date' && activeTab === 'menu'}}">
-    <view class="menu-section">
-      <view class="menu-publish-btn" bindtap="goMenu">发布菜单</view>
-    </view>
-  </view>
-
-  <!-- ==================== 设置 ==================== -->
-  <view wx:if="{{topTab === 'settings'}}">
-    <view class="settings-list">
-      <view class="settings-item" bindtap="goProducts">
-        <text class="settings-label">产品池</text>
-        <text class="settings-arrow">→</text>
-      </view>
-      <view class="settings-item" bindtap="goHistory">
-        <text class="settings-label">历史订单</text>
-        <text class="settings-arrow">→</text>
-      </view>
-      <view class="settings-item logout" bindtap="showMenu">
-        <text class="settings-label">退出登录</text>
+  <!-- ==================== 菜单管理 ==================== -->
+  <view wx:if="{{subTab === 'menu'}}">
+    <view class="menu-manage-section">
+      <view class="menu-manage-btn" bindtap="goMenu">
+        <text class="menu-icon">📋</text>
+        <text class="menu-text">发布/管理菜单</text>
+        <text class="menu-arrow">›</text>
       </view>
     </view>
   </view>
 
-  <!-- ==================== 历史订单（内嵌） ==================== -->
-  <view wx:if="{{topTab === 'date' && activeTab === 'history'}}">
-    <!-- 查询筛选 -->
-    <view class="query-bar">
-      <view class="query-item {{queryType === 'day' ? 'active' : ''}}" bindtap="onQueryTypeChange" data-type="day">天</view>
-      <view class="query-item {{queryType === 'week' ? 'active' : ''}}" bindtap="onQueryTypeChange" data-type="week">周</view>
-      <view class="query-item {{queryType === 'month' ? 'active' : ''}}" bindtap="onQueryTypeChange" data-type="month">月</view>
-      <view class="query-item {{queryType === 'custom' ? 'active' : ''}}" bindtap="onQueryTypeChange" data-type="custom">自定义</view>
-    </view>
-
-    <!-- 1层：每日经营概况 -->
-    <view wx:if="{{!showDetail}}">
-      <view wx:if="{{dailyList.length === 0}}" class="empty-tip">暂无历史记录</view>
-      <view class="daily-list">
-        <view class="daily-card card" wx:for="{{dailyList}}" wx:key="date" bindtap="openDetail" data-index="{{index}}">
-          <view class="daily-header">
-            <view class="daily-date">{{item.date}}</view>
-            <view class="daily-revenue">¥{{item.totalRevenue}}</view>
-          </view>
-          <view class="daily-products">{{item.customerNames}}</view>
-          <view class="daily-stats">
-            <text class="stat-badge pending">{{item.pendingCount}} 待取</text>
-            <text class="stat-badge completed">{{item.completedCount}} 已取</text>
-          </view>
-        </view>
+  <!-- 设置弹窗 -->
+  <view wx:if="{{showSettings}}" class="popup-mask" bindtap="closeSettings">
+    <view class="popup-menu" catchtap>
+      <view class="popup-item" bindtap="goProducts">
+        <text class="popup-text">产品池</text>
       </view>
-    </view>
-
-    <!-- 2层：订单详情 -->
-    <view wx:if="{{showDetail}}">
-      <view class="detail-header">
-        <view class="detail-back" bindtap="backToList">← 返回</view>
-        <view class="detail-date">{{detailDate}}</view>
+      <view class="popup-item" bindtap="goHistory">
+        <text class="popup-text">历史订单</text>
       </view>
-      <view wx:if="{{detailOrders.length === 0}}" class="empty-tip">该日无订单</view>
-      <view class="order-list">
-        <view class="order-card card {{item.status === 'cancelled' ? 'cancelled' : ''}}"
-              wx:for="{{detailOrders}}" wx:key="_id">
-          <view class="order-header">
-            <text class="order-name">{{item.customer_name}}</text>
-            <text class="tag-{{item.status}}">{{statusText[item.status]}}</text>
-          </view>
-          <view class="order-items">
-            <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="order-item-tag">{{prod.name}}×{{prod.num}}</text>
-          </view>
-          <view class="order-footer">
-            <view class="order-price">¥{{item.total_price}}</view>
-          </view>
-        </view>
+      <view class="popup-item logout" bindtap="doLogout">
+        <text class="popup-text">退出登录</text>
       </view>
     </view>
   </view>

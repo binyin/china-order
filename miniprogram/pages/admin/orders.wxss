@@ -1,39 +1,132 @@
-/* pages/admin/orders.wxss */
+/* pages/admin/orders.wxss - 复用用户端设计 */
+page {
+  background-color: #f2f2f7;
+}
+
 .container {
   min-height: 100vh;
   background: #F5F5F7;
   padding-bottom: 60rpx;
 }
 
-/* 导航栏 */
-.top-nav {
-  display: flex;
+/* 顶部导航栏 - iOS风格 */
+.top-bar {
   background: #fff;
-  border-bottom: 1rpx solid #e5e5ea;
-  padding: 0 24rpx;
+  padding: 60rpx 40rpx 30rpx;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  box-shadow: 0 4rpx 10rpx rgba(0,0,0,0.02);
+  position: relative;
+  z-index: 10;
 }
-.top-item {
-  flex: 1;
-  text-align: center;
-  font-size: 32rpx;
-  color: #86868b;
-  padding: 28rpx 0;
-  font-weight: 500;
+
+.date-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
 }
-.top-item.active {
-  color: #000000;
+
+.date-trigger-text {
+  font-size: 36rpx;
   font-weight: 600;
+  color: #000;
 }
+
+.date-trigger-icon {
+  font-size: 32rpx;
+  color: #999;
+  transition: transform 0.2s ease;
+}
+
+.date-trigger-icon.expanded {
+  transform: rotate(90deg);
+}
+
+.settings-btn {
+  display: flex;
+  align-items: center;
+}
+
+.settings-circle {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  border: 1rpx solid #e5e5ea;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-icon {
+  font-size: 28rpx;
+  color: #666;
+}
+
+/* 日期选择器 */
+.date-picker-wrap {
+  background: #fff;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.25s ease;
+}
+
+.date-picker-wrap.show {
+  height: 140rpx;
+}
+
+.date-picker {
+  height: 140rpx;
+  white-space: nowrap;
+}
+
+.date-picker-inner {
+  display: inline-flex;
+  padding: 0 30rpx;
+  gap: 20rpx;
+}
+
+.date-pick-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 80rpx;
+  height: 120rpx;
+  border-radius: 16rpx;
+  padding: 10rpx 16rpx;
+}
+
+.date-pick-item.active {
+  background: #000;
+}
+
+.date-pick-week {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 4rpx;
+}
+
+.date-pick-day {
+  font-size: 36rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.date-pick-item.active .date-pick-week,
+.date-pick-item.active .date-pick-day {
+  color: #fff;
+}
+
+/* 二级导航 */
 .sub-nav {
   display: flex;
   background: #fff;
   border-bottom: 1rpx solid #e5e5ea;
   padding: 0 24rpx;
 }
+
 .sub-item {
   flex: 1;
   text-align: center;
@@ -42,10 +135,12 @@
   padding: 20rpx 0;
   position: relative;
 }
+
 .sub-item.active {
   color: #000000;
   font-weight: 600;
 }
+
 .sub-item.active::after {
   content: '';
   position: absolute;
@@ -56,6 +151,76 @@
   height: 6rpx;
   background: #000000;
   border-radius: 3rpx;
+}
+
+/* 设置弹窗 */
+.popup-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 100rpx;
+  padding-right: 40rpx;
+}
+
+.popup-menu {
+  background: #fff;
+  border-radius: 24rpx;
+  width: 280rpx;
+  overflow: hidden;
+}
+
+.popup-item {
+  padding: 32rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.popup-item:last-child {
+  border-bottom: none;
+}
+
+.popup-text {
+  font-size: 32rpx;
+  color: #222;
+}
+
+.popup-item.logout .popup-text {
+  color: #ff3b30;
+}
+
+/* 菜单管理 */
+.menu-manage-section {
+  padding: 24rpx;
+}
+
+.menu-manage-btn {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.menu-icon {
+  font-size: 40rpx;
+  margin-right: 16rpx;
+}
+
+.menu-text {
+  font-size: 32rpx;
+  color: #222;
+  flex: 1;
+}
+
+.menu-arrow {
+  font-size: 32rpx;
+  color: #bbb;
 }
 
 /* 查询筛选 */

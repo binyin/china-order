@@ -37,9 +37,6 @@
           <text class="eye-icon">{{showPassword ? '👁' : '👁‍🗨'}}</text>
         </view>
       </view>
-      <view class="password-hint" wx:if="{{password.length > 0}}">
-        <text class="hint-text">{{password.length}} 位</text>
-      </view>
     </view>
     
     <button 

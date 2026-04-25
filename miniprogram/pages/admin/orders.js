@@ -4,26 +4,17 @@ const { getTodayOrders, getTodayMenu, getMenuByDate, getRecentOrders, updateOrde
 
 Page({
   data: {
-    activeTab: 'verify',
-    topTab: 'date',
+    subTab: 'verify',
+    currentDate: '',
     currentDateLabel: '',
+    showDatePicker: false,
+    dateList: [],
     // 核销页数据
-    menuStats: [],      // [{name, total, pending, customers:[{name,num}], expanded}]
+    menuStats: [],
     totalRevenue: '0.00',
     actualRevenue: '0.00',
     pendingOrders: [],
     historyOrders: [],
-    // 历史订单页数据
-    dailyList: [],
-    detailDate: '',
-    detailOrders: [],
-    showDetail: false,
-    today: '',
-    // 查询筛选
-    queryType: 'week',
-    queryDays: 7,
-    customStartDate: '',
-    customEndDate: '',
     // 实时监听
     orderWatcher: null,
     newOrderFlag: false,
@@ -37,6 +28,7 @@ Page({
 
   onLoad() {
     this.checkLogin()
+    this.initDateList()
     this.loadCurrentMenuInfo()
   },
 
@@ -58,6 +50,80 @@ Page({
     if (!app.globalData.adminInfo) {
       wx.redirectTo({ url: '/pages/admin/login' })
     }
+  },
+
+  initDateList() {
+    const today = new Date()
+    const bjTime = new Date(today.getTime() + 8 * 3600 * 1000)
+    const list = []
+    const weekdays = ['周日', '周一', '周二', '周 三', '周四', '周五', '周六']
+    
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(bjTime.getTime() + i * 24 * 60 * 60 * 1000)
+      const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      list.push({
+        date: dateStr,
+        label: i === 0 ? '今天' : i === 1 ? '明天' : weekdays[d.getDay()],
+        day: `${d.getMonth() + 1}月${d.getDate()}日`
+      })
+    }
+    
+    this.setData({
+      dateList: list,
+      currentDate: list[0].date,
+      currentDateLabel: list[0].day
+    })
+  },
+
+  toggleDatePicker() {
+    this.setData({ showDatePicker: !this.data.showDatePicker })
+  },
+
+  onDateSelect(e) {
+    const date = e.currentTarget.dataset.date
+    const item = this.data.dateList.find(d => d.date === date)
+    this.setData({
+      currentDate: date,
+      currentDateLabel: item ? item.day : date,
+      showDatePicker: false
+    })
+    this.loadVerifyData()
+  },
+
+  switchSubTab(e) {
+    const tab = e.currentTarget.dataset.tab
+    this.setData({ subTab: tab })
+    if (tab === 'verify') {
+      this.loadVerifyData()
+    }
+  },
+
+  showMenu() {
+    this.setData({ showSettings: true })
+  },
+
+  closeSettings() {
+    this.setData({ showSettings: false })
+  },
+
+  goProducts() {
+    this.setData({ showSettings: false })
+    wx.navigateTo({ url: '/pages/admin/products' })
+  },
+
+  goHistory() {
+    this.setData({ showSettings: false })
+    wx.navigateTo({ url: '/pages/user/history' })
+  },
+
+  goMenu() {
+    wx.navigateTo({ url: '/pages/admin/menu' })
+  },
+
+  doLogout() {
+    this.setData({ showSettings: false })
+    app.globalData.adminInfo = null
+    wx.redirectTo({ url: '/pages/admin/login' })
   },
 
   async loadCurrentMenuInfo() {
@@ -128,8 +194,8 @@ Page({
   // ========== 预定核销 ==========
 
   async loadVerifyData() {
+    const targetDate = this.data.currentDate || getBJDateStr()
     try {
-      const targetDate = getBJDateStr()
       const [menuRes, orderRes] = await Promise.all([
         getMenuByDate(targetDate),
         getTodayOrders(targetDate)
@@ -303,7 +369,7 @@ Page({
     if (this.data.orderWatcher) return
 
     const db = wx.cloud.database()
-    const today = getDateStr()
+    const today = this.data.currentDate || getBJDateStr()
     
     const watcher = db.collection('orders')
       .where({ date: today })
