@@ -1,6 +1,6 @@
 <!--pages/admin/orders.wxml-->
 <view class="container">
-  <!-- 顶部导航栏 - 复用用户端设计 -->
+  <!-- 顶部导航栏 -->
   <view class="top-bar">
     <view class="date-trigger" bindtap="toggleDatePicker">
       <text class="date-trigger-text">{{currentDateLabel}}</text>
@@ -25,114 +25,78 @@
     </scroll-view>
   </view>
 
-  <!-- 二级导航 -->
-  <view class="sub-nav">
-    <view class="sub-item {{subTab === 'verify' ? 'active' : ''}}" bindtap="switchSubTab" data-tab="verify">预定核销</view>
-    <view class="sub-item {{subTab === 'menu' ? 'active' : ''}}" bindtap="switchSubTab" data-tab="menu">菜单管理</view>
-  </view>
-
   <!-- 新订单提示 -->
   <view class="new-order-tip" wx:if="{{newOrderFlag}}">新订单!</view>
 
-  <!-- ==================== 预定核销 ==================== -->
-  <view wx:if="{{subTab === 'verify'}}">
-    <!-- 区域1：动态看板 -->
-    <view class="dashboard">
-      <view class="dashboard-title">今日看板</view>
+  <!-- 营收卡片 -->
+  <view class="revenue-card">
+    <view class="revenue-item">
+      <view class="revenue-num">{{totalRevenue}}</view>
+      <view class="revenue-label">预计</view>
+    </view>
+    <view class="revenue-divider"></view>
+    <view class="revenue-item">
+      <view class="revenue-num actual">{{actualRevenue}}</view>
+      <view class="revenue-label">实收</view>
+    </view>
+  </view>
 
-      <view class="revenue-row">
-        <view class="revenue-item">
-          <view class="revenue-num">{{totalRevenue}}</view>
-          <view class="revenue-label">预计</view>
-        </view>
-        <view class="revenue-divider"></view>
-        <view class="revenue-item">
-          <view class="revenue-num actual">{{actualRevenue}}</view>
-          <view class="revenue-label">实收</view>
+  <!-- 品类统计 -->
+  <view class="stats-list">
+    <view wx:for="{{menuStats}}" wx:key="name" class="stat-card">
+      <view class="stat-header">
+        <text class="stat-name">{{item.name}}</text>
+        <view class="stat-badges">
+          <text class="badge-total">{{item.total}}</text>
+          <text class="badge-pending" wx:if="{{item.pending > 0}}">待{{item.pending}}</text>
         </view>
       </view>
-
-      <view class="stats-list">
-        <view wx:for="{{menuStats}}" wx:key="name" class="stat-card">
-          <view class="stat-header">
-            <text class="stat-name">{{item.name}}</text>
-            <view class="stat-badges">
-              <text class="badge-total">总订 {{item.total}}</text>
-              <text class="badge-pending">待取 {{item.pending}}</text>
-            </view>
-          </view>
-          <view wx:if="{{item.customers.length > 0}}" class="stat-customers">
-            <text wx:for="{{item.customers}}" wx:for-item="c" wx:key="orderId" class="customer-tag">
-              {{c.name}}×{{c.num}}
-            </text>
-          </view>
-          <view wx:if="{{item.customers.length === 0}}" class="stat-empty">暂无预定</view>
-        </view>
-        <view wx:if="{{menuStats.length === 0}}" class="stats-empty">暂无数据</view>
+      <view wx:if="{{item.customers.length > 0}}" class="stat-customers">
+        <text wx:for="{{item.customers}}" wx:for-item="c" wx:key="orderId" class="customer-tag">{{c.name}}×{{c.num}}</text>
       </view>
     </view>
+    <view wx:if="{{menuStats.length === 0}}" class="stats-empty">暂无预定</view>
+  </view>
 
-    <!-- 区域2：客户清单 -->
-    <view class="customer-section">
-      <view class="section-title">待处理 ({{pendingOrders.length}})</view>
-
-      <view wx:if="{{pendingOrders.length === 0}}" class="empty-inline">暂无待处理订单</view>
-      <view class="customer-list">
-        <view class="customer-card" wx:for="{{pendingOrders}}" wx:key="_id">
-          <view class="customer-header">
-            <image class="customer-avatar" src="{{item.customer_avatar}}" mode="aspectFill" wx:if="{{item.customer_avatar}}"></image>
-            <view class="customer-avatar-placeholder" wx:else>?</view>
-            <view class="customer-name">
-              <text wx:if="{{item.create_time_str}}" class="order-time-badge">{{item.create_time_str}}</text>
-              {{item.customer_nickname || item.customer_name}}
-            </view>
-          </view>
-          <view class="customer-items">
-            <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="customer-item-tag">{{prod.name}}×{{prod.num}}</text>
-          </view>
-          <view class="customer-footer">
-            <view class="customer-price">¥{{item.total_price}}</view>
-            <view class="customer-actions">
-              <button class="btn-verify" bindtap="verifyOrder" data-id="{{item._id}}">取走</button>
-              <button class="btn-cancel-order" bindtap="cancelOrder" data-id="{{item._id}}">取消</button>
-            </view>
-          </view>
+  <!-- 待处理订单 -->
+  <view class="order-section" wx:if="{{pendingOrders.length > 0}}">
+    <view class="section-title">待处理 <text class="count-badge">{{pendingOrders.length}}</text></view>
+    <view class="order-list">
+      <view class="order-card" wx:for="{{pendingOrders}}" wx:key="_id">
+        <view class="order-top">
+          <text class="order-name">{{item.customer_nickname || item.customer_name}}</text>
+          <text class="order-time">{{item.create_time_str}}</text>
         </view>
-      </view>
-
-      <view wx:if="{{historyOrders.length > 0}}" class="history-section">
-        <view class="section-title grey">已处理 ({{historyOrders.length}})</view>
-        <view class="customer-list">
-          <view class="customer-card handled {{item.status === 'cancelled' ? 'cancelled' : ''}}" wx:for="{{historyOrders}}" wx:key="_id">
-            <view class="customer-header">
-              <view class="customer-name dimmed">
-                <text wx:if="{{item.create_time_str}}" class="order-time-badge grey-badge">{{item.create_time_str}}</text>
-                {{item.customer_name}}
-              </view>
-              <text class="tag-{{item.status}}">{{statusText[item.status]}}</text>
-            </view>
-            <view class="customer-items dimmed">
-              <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="customer-item-tag">{{prod.name}}×{{prod.num}}</text>
-            </view>
-            <view class="customer-footer">
-              <view class="customer-price dimmed">¥{{item.total_price}}</view>
-              <view class="customer-actions">
-                <button class="btn-undo" bindtap="undoAction" data-id="{{item._id}}" data-status="{{item.status}}">撤销</button>
-              </view>
-            </view>
+        <view class="order-items">
+          <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="item-tag">{{prod.name}}×{{prod.num}}</text>
+        </view>
+        <view class="order-bottom">
+          <text class="order-price">¥{{item.total_price}}</text>
+          <view class="order-btns">
+            <button class="btn-take" bindtap="verifyOrder" data-id="{{item._id}}">取走</button>
+            <button class="btn-cancel" bindtap="cancelOrder" data-id="{{item._id}}">取消</button>
           </view>
         </view>
       </view>
     </view>
   </view>
 
-  <!-- ==================== 菜单管理 ==================== -->
-  <view wx:if="{{subTab === 'menu'}}">
-    <view class="menu-manage-section">
-      <view class="menu-manage-btn" bindtap="goMenu">
-        <text class="menu-icon">📋</text>
-        <text class="menu-text">发布/管理菜单</text>
-        <text class="menu-arrow">›</text>
+  <!-- 已处理订单 -->
+  <view class="order-section" wx:if="{{historyOrders.length > 0}}">
+    <view class="section-title done">已处理 <text class="count-badge done">{{historyOrders.length}}</text></view>
+    <view class="order-list">
+      <view class="order-card done" wx:for="{{historyOrders}}" wx:key="_id">
+        <view class="order-top">
+          <text class="order-name dimmed">{{item.customer_name}}</text>
+          <text class="tag-{{item.status}}">{{statusText[item.status]}}</text>
+        </view>
+        <view class="order-items dimmed">
+          <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="item-tag">{{prod.name}}×{{prod.num}}</text>
+        </view>
+        <view class="order-bottom">
+          <text class="order-price dimmed">¥{{item.total_price}}</text>
+          <button class="btn-undo" bindtap="undoAction" data-id="{{item._id}}" data-status="{{item.status}}">撤销</button>
+        </view>
       </view>
     </view>
   </view>
@@ -140,6 +104,9 @@
   <!-- 设置弹窗 -->
   <view wx:if="{{showSettings}}" class="popup-mask" bindtap="closeSettings">
     <view class="popup-menu" catchtap>
+      <view class="popup-item" bindtap="goMenu">
+        <text class="popup-text">菜单管理</text>
+      </view>
       <view class="popup-item" bindtap="goProducts">
         <text class="popup-text">产品池</text>
       </view>
