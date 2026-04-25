@@ -46,6 +46,9 @@
         <view wx:if="{{!item.image_url}}" class="item-img item-img-placeholder" />
         <view class="item-left">
           <text class="item-name">{{item.name}}</text>
+          <view class="item-tags" wx:if="{{item.tags && item.tags.length > 0}}">
+            <text class="tag-pill" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="{{tag}}">{{tag}}</text>
+          </view>
           <text class="item-price">¥{{item.price}}</text>
         </view>
         <view class="item-right">
@@ -92,6 +95,17 @@
         <text class="bar-clear" bindtap="cancelAllItems">清空</text>
         <button class="btn-primary-apple" bindtap="submitOrder">提交订单</button>
       </view>
+    </view>
+  </view>
+</view>
+
+<view class="qty-modal-mask" wx:if="{{showQtyModal}}" bindtap="closeQtyModal">
+  <view class="qty-modal-box" catchtap>
+    <text class="qty-modal-title">输入数量</text>
+    <input class="qty-modal-input" type="number" focus="{{true}}" value="{{editQtyValue}}" bindinput="onQtyInput" placeholder="1-50" maxlength="2" />
+    <view class="qty-modal-btns">
+      <button class="qty-btn-cancel" bindtap="closeQtyModal">取消</button>
+      <button class="qty-btn-confirm" bindtap="confirmQtyEdit">确定</button>
     </view>
   </view>
 </view>

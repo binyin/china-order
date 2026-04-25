@@ -143,6 +143,31 @@ page {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.06);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.menu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, #ff9500, #ff6a00, #ff9500);
+  border-radius: 20rpx 20rpx 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.menu-item:hover::before,
+.menu-item:active::before {
+  opacity: 1;
+}
+
+.menu-item:active {
+  transform: scale(0.98);
   box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
 }
 
@@ -153,6 +178,8 @@ page {
   margin-right: 24rpx;
   background-color: #f5f5f5;
   flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+  border: 4rpx solid #fff;
 }
 
 .item-img-placeholder {
@@ -178,12 +205,33 @@ page {
   flex-direction: column;
 }
 
+.item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin: 8rpx 0;
+}
+
+.tag-pill {
+  display: inline-block;
+  font-size: 20rpx;
+  color: #ff9500;
+  background: linear-gradient(135deg, #fff7e6 0%, #fff3d9 100%);
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid rgba(255, 149, 0, 0.2);
+  letter-spacing: 2rpx;
+  font-weight: 500;
+  box-shadow: 0 2rpx 8rpx rgba(255, 149, 0, 0.08);
+}
+
 .item-price {
   font-size: 28rpx;
-  font-weight: 500;
-  color: #666;
-  margin-top: 6rpx;
+  font-weight: 600;
+  color: #ff7b00;
+  margin-top: 4rpx;
   display: block;
+  text-shadow: 0 1rpx 2rpx rgba(255, 123, 0, 0.1);
 }
 
 .item-right {
@@ -204,14 +252,21 @@ page {
 }
 
 .counter-btn.plus {
-  background: var(--apple-orange);
+  background: linear-gradient(135deg, #ff9500 0%, #ff7b00 100%);
   color: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(255,149,0,0.3);
+  box-shadow: 0 4rpx 16rpx rgba(255,149,0,0.35);
+  transition: all 0.2s ease;
+}
+
+.counter-btn.plus:active {
+  transform: scale(0.9);
+  box-shadow: 0 2rpx 8rpx rgba(255,149,0,0.25);
 }
 
 .counter-btn.minus {
-  background: #f2f2f7;
+  background: linear-gradient(135deg, #fff7e6 0%, #fff3d9 100%);
   color: var(--apple-orange);
+  border: 1rpx solid rgba(255, 149, 0, 0.2);
 }
 
 .counter-num {
@@ -729,6 +784,31 @@ page {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.06);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.menu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, #ff9500, #ff6a00, #ff9500);
+  border-radius: 20rpx 20rpx 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.menu-item:hover::before,
+.menu-item:active::before {
+  opacity: 1;
+}
+
+.menu-item:active {
+  transform: scale(0.98);
   box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
 }
 
@@ -739,6 +819,8 @@ page {
   margin-right: 24rpx;
   background-color: #f5f5f5;
   flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.08);
+  border: 4rpx solid #fff;
 }
 
 .item-img-placeholder {
@@ -764,12 +846,33 @@ page {
   flex-direction: column;
 }
 
+.item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin: 8rpx 0;
+}
+
+.tag-pill {
+  display: inline-block;
+  font-size: 20rpx;
+  color: #ff9500;
+  background: linear-gradient(135deg, #fff7e6 0%, #fff3d9 100%);
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid rgba(255, 149, 0, 0.2);
+  letter-spacing: 2rpx;
+  font-weight: 500;
+  box-shadow: 0 2rpx 8rpx rgba(255, 149, 0, 0.08);
+}
+
 .item-price {
   font-size: 28rpx;
-  font-weight: 500;
-  color: #666;
-  margin-top: 6rpx;
+  font-weight: 600;
+  color: #ff7b00;
+  margin-top: 4rpx;
   display: block;
+  text-shadow: 0 1rpx 2rpx rgba(255, 123, 0, 0.1);
 }
 
 .item-right {
@@ -790,14 +893,21 @@ page {
 }
 
 .counter-btn.plus {
-  background: var(--apple-orange);
+  background: linear-gradient(135deg, #ff9500 0%, #ff7b00 100%);
   color: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(255,149,0,0.3);
+  box-shadow: 0 4rpx 16rpx rgba(255,149,0,0.35);
+  transition: all 0.2s ease;
+}
+
+.counter-btn.plus:active {
+  transform: scale(0.9);
+  box-shadow: 0 2rpx 8rpx rgba(255,149,0,0.25);
 }
 
 .counter-btn.minus {
-  background: #f2f2f7;
+  background: linear-gradient(135deg, #fff7e6 0%, #fff3d9 100%);
   color: var(--apple-orange);
+  border: 1rpx solid rgba(255, 149, 0, 0.2);
 }
 
 .counter-num {

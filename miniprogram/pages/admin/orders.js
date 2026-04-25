@@ -128,14 +128,18 @@ Page({
   },
 
   async loadCurrentMenuInfo() {
-        const date = new Date(publishTime)
-        const month = date.getMonth() + 1
-        const day = date.getDate()
-        const hour = date.getHours()
-        const minute = date.getMinutes()
-        const label = `${month}月${day}日 ${hour}:${String(minute).padStart(2, '0')}`
-        this.setData({ currentDateLabel: label })
-      }
+    try {
+      const targetDate = this.data.currentDate || getBJDateStr()
+      const res = await getMenuByDate(targetDate)
+      const publishTime = res.menuInfo?.publish_time
+      if (!publishTime) return
+      const date = new Date(publishTime)
+      const month = date.getMonth() + 1
+      const day = date.getDate()
+      const hour = date.getHours()
+      const minute = date.getMinutes()
+      const label = `${month}月${day}日 ${hour}:${String(minute).padStart(2, '0')}发布`
+      this.setData({ currentDateLabel: label })
     } catch (e) {
       console.error('loadCurrentMenuInfo error', e)
     }

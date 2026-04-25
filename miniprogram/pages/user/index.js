@@ -25,6 +25,9 @@ Page({
     showMorePopup: false,
     showDatePicker: false,
     formatDate: '',
+    showQtyModal: false,
+    editQtyIndex: 0,
+    editQtyValue: '',
     statusText: {
       pending: '待取货',
       completed: '已完成',
@@ -95,10 +98,14 @@ this.loadMenu()
     const todayStr = this.getTodayStr()
     const targetDate = this.data.selectedDate || todayStr
     return getMenuByDate(targetDate).then(res => {
-      const list = (res.data || []).map(item => ({ 
+      const defaultTags = ['手工', '现蒸', '招牌', '推荐']
+      const list = (res.data || []).map((item, index) => ({ 
         ...item, 
         qty: 0,
-        disabled: false
+        disabled: false,
+        tags: item.tags && item.tags.length > 0 
+          ? item.tags 
+          : [defaultTags[index % defaultTags.length]]
       }))
       logger.info(TAG + ':loadMenu', { count: list.length, date: res.menuInfo?.date, selected: targetDate })
       
@@ -157,38 +164,35 @@ this.loadMenu()
     const index = e.currentTarget.dataset.index
     const list = this.data.menuList
     const item = list[index]
-    if (item.disabled) {
+    if (item.disabled) return
+    this.setData({
+      showQtyModal: true,
+      editQtyIndex: index,
+      editQtyValue: String(item.qty || 0)
+    })
+  },
+
+  onQtyInput(e) {
+    const value = (e.detail.value || '').replace(/[^\d]/g, '').slice(0, 2)
+    this.setData({ editQtyValue: value })
+  },
+
+  confirmQtyEdit() {
+    const list = this.data.menuList
+    const index = this.data.editQtyIndex
+    const inputQty = parseInt(this.data.editQtyValue) || 0
+    const maxQty = this.MAX_ORDER_QTY
+    if (inputQty < 0 || inputQty > maxQty) {
+      wx.showToast({ title: `超出范围(0-${maxQty})`, icon: 'none' })
       return
     }
-    const currentQty = item.qty || 0
-    wx.showModal({
-      title: '输入数量',
-      editable: true,
-      placeholderText: '请输入1-50的数字',
-      content: String(currentQty),
-      success: (res) => {
-        if (res.confirm) {
-          const content = (res.content || '').trim()
-          const inputQty = parseInt(content)
-          const maxQty = this.MAX_ORDER_QTY
-          
-          if (content === '' || isNaN(inputQty)) {
-            wx.showToast({ title: '请输入有效数字', icon: 'none' })
-            return
-          }
-          
-          if (inputQty < 0 || inputQty > maxQty) {
-            wx.showToast({ title: `超出范围(0-${maxQty})`, icon: 'none' })
-            return
-          }
-          
-          list[index].qty = inputQty
-          this.setData({ menuList: list })
-          logger.info(TAG + ':editQty', { index, qty: inputQty })
-          this.calcTotal()
-        }
-      }
-    })
+    list[index].qty = inputQty
+    this.setData({ menuList: list, showQtyModal: false })
+    this.calcTotal()
+  },
+
+  closeQtyModal() {
+    this.setData({ showQtyModal: false })
   },
 
   previewImage(e) {
