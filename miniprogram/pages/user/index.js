@@ -96,14 +96,17 @@ Page({
     const newIndex = e.detail.current || e.detail.currentLow
     if (newIndex !== undefined && newIndex !== this.data.dateIndex) {
       const date = this.data.dateList[newIndex].date
-      this.setData({
-        selectedDate: date,
-        dateIndex: newIndex,
-        swiperCurrent: newIndex,
-        dateTime: this.formatDateDisplay(date)
-      })
-      this.loadMenu()
-      this.loadMyOrders()
+      // Avoid duplicate trigger
+      if (date !== this.data.selectedDate) {
+        this.setData({
+          selectedDate: date,
+          dateIndex: newIndex,
+          swiperCurrent: newIndex,
+          dateTime: this.formatDateDisplay(date)
+        })
+        this.loadMenu()
+        this.loadMyOrders()
+      }
     }
   },
 
