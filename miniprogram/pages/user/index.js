@@ -81,11 +81,16 @@ Page({
       swiperCurrent: centerIndex,
       formatDate: dates[centerIndex].weekday
     })
-    this.loadMenu()
+this.loadMenu()
     this.loadMyOrders()
   },
 
-loadMenu() {
+  getTodayStr() {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  },
+
+  loadMenu() {
     logger.info(TAG + ':loadMenu', { start: true, selectedDate: this.data.selectedDate })
     const todayStr = this.getTodayStr()
     const targetDate = this.data.selectedDate || todayStr
