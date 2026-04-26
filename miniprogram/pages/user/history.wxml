@@ -41,6 +41,7 @@
         </view>
         <view class="order-footer">
           <text class="order-price">¥{{item.total_price}}</text>
+          <text class="delete-btn" catchtap="deleteOrder" data-id="{{item._id}}" wx:if="{{item.status !== 'hidden'}}">删除</text>
         </view>
       </view>
     </view>

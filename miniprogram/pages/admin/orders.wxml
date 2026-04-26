@@ -118,4 +118,29 @@
       </view>
     </view>
   </view>
+
+  <!-- 历史订单详情弹窗 -->
+  <view wx:if="{{showDetail}}" class="popup-mask" bindtap="backToList">
+    <view class="detail-popup" catchtap>
+      <view class="detail-header">
+        <text class="detail-title">{{detailDate}}</text>
+        <text class="detail-count">共{{detailOrders.length}}单</text>
+      </view>
+      <scroll-view scroll-y class="detail-list">
+        <view class="detail-item" wx:for="{{detailOrders}}" wx:key="_id">
+          <view class="detail-item-top">
+            <text class="detail-name">{{item.customer_nickname || item.customer_name}}</text>
+            <text class="tag-{{item.status}}">{{statusText[item.status]}}</text>
+          </view>
+          <view class="detail-items">
+            <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="item-tag">{{prod.name}}×{{prod.num}}</text>
+          </view>
+          <view class="detail-item-bottom">
+            <text class="detail-price">¥{{item.total_price}}</text>
+            <button class="btn-delete" catchtap="deleteOrder" data-id="{{item._id}}" wx:if="{{item.status !== 'pending'}}">删除</button>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
 </view>

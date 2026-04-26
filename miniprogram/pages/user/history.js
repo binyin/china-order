@@ -1,17 +1,18 @@
 // pages/user/history.js
-const { getMyOrders } = require('../../utils/db')
+const { getMyOrders, hideOrder } = require('../../utils/db')
 
 Page({
   data: {
     loading: true,
-    dailyList: [],     // 1层：按日期聚合的经营概况
-    showDetail: false, // 是否显示2层
-    detailDate: '',    // 当前查看的日期
-    detailOrders: [],  // 2层：该日期的订单列表
+    dailyList: [],
+    showDetail: false,
+    detailDate: '',
+    detailOrders: [],
     statusText: {
       pending: '待取货',
       completed: '已完成',
-      cancelled: '已取消'
+      cancelled: '已取消',
+      hidden: '已删除'
     }
   },
 
@@ -79,5 +80,29 @@ Page({
   // 返回1层
   backToList() {
     this.setData({ showDetail: false })
+  },
+
+  deleteOrder(e) {
+    const id = e.currentTarget.dataset.id
+    
+    wx.showModal({
+      title: '确认删除',
+      content: '确认删除该订单?',
+      confirmText: '删除',
+      success: (res) => {
+        if (res.confirm) {
+          wx.showLoading({ title: '处理中', mask: true })
+          
+          hideOrder(id).then(() => {
+            wx.hideLoading()
+            wx.showToast({ title: '已删除', icon: 'success' })
+            this.loadOrders()
+          }).catch(() => {
+            wx.hideLoading()
+            wx.showToast({ title: '删除失败', icon: 'error' })
+          })
+        }
+      }
+    })
   }
 })

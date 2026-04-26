@@ -78,6 +78,7 @@
         <view class="order-footer">
           <text class="order-price">¥{{item.total_price}}</text>
           <button class="btn-cancel-small" bindtap="cancelOrder" data-id="{{item._id}}" wx:if="{{item.status === 'pending'}}">取消预定</button>
+          <button class="btn-delete-small" bindtap="hideOrder" data-id="{{item._id}}" wx:if="{{item.status !== 'pending'}}">删除</button>
         </view>
       </view>
     </view>

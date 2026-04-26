@@ -21,7 +21,7 @@ exports.main = async (event, context) => {
       queryDateStart = getDateStr(startTime)
     }
     
-    // 直接查询日期范围内的所有订单
+    // 直接查询日期范围内的所有订单（管理员看得到全部订单，包括hidden）
     const orderRes = await db.collection('orders')
       .where({
         date: _.gte(queryDateStart).lte(queryDateEnd)

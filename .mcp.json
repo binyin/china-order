@@ -8,11 +8,9 @@
       "env": {
         "INTEGRATION_IDE": "CloudBaseCLI"
       }
-    }
-  },
-  "mcp": {
+    },
     "github": {
-      "type": "remote",
+      "type": "http",
       "url": "https://api.githubcopilot.com/mcp/"
     }
   }

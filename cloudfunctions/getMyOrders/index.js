@@ -33,6 +33,9 @@ exports.main = async (event, context) => {
     
     let allData = orderRes.data || []
     
+    // 过滤用户已删除的订单
+    allData = allData.filter(o => o.status !== 'hidden')
+    
     if (filterByDate) {
       allData = allData.filter(o => o.date === targetDate)
     }

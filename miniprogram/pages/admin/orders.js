@@ -1,6 +1,6 @@
 // pages/admin/orders.js
 const app = getApp()
-const { getTodayOrders, getTodayMenu, getMenuByDate, getRecentOrders, updateOrderStatus, getDateStr, getBJDateStr } = require('../../utils/db')
+const { getTodayOrders, getTodayMenu, getMenuByDate, getRecentOrders, updateOrderStatus, getDateStr, getBJDateStr, deleteOrder } = require('../../utils/db')
 
 Page({
   data: {
@@ -125,6 +125,31 @@ Page({
     this.setData({ showSettings: false })
     app.globalData.adminInfo = null
     wx.redirectTo({ url: '/pages/admin/login' })
+  },
+
+  // 删除订单（真删除）
+  deleteOrder(e) {
+    const id = e.currentTarget.dataset.id
+    
+    wx.showModal({
+      title: '确认删除',
+      content: '删除后订单将永久移除',
+      confirmText: '删除',
+      success: (res) => {
+        if (res.confirm) {
+          wx.showLoading({ title: '处理中', mask: true })
+          
+          deleteOrder(id).then(() => {
+            wx.hideLoading()
+            wx.showToast({ title: '已删除', icon: 'success' })
+            this.loadDailyList(this.data.queryType, this.data.queryDays)
+          }).catch(() => {
+            wx.hideLoading()
+            wx.showToast({ title: '删除失败', icon: 'error' })
+          })
+        }
+      }
+    })
   },
 
   async loadCurrentMenuInfo() {

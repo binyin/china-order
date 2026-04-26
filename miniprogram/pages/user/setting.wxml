@@ -27,9 +27,10 @@
   <view class="setting-item" style="align-items: flex-start;">
     <text class="setting-label">开发者</text>
     <view class="dev-intro-box">
-      <text class="dev-name">贝塔 (yinbin.cc)</text>
+      <text class="dev-name">贝塔</text>
+      <text class="dev-desc">微信号:yinbin.cc</text>
       <text class="dev-desc">专注 AI + 小程序开发</text>
-      <text class="dev-promo">限时免费为您开发小程序</text>
+      <text class="dev-desc">限时免费为您开发小程序</text>
     </view>
   </view>
   <view class="setting-item">

@@ -1,5 +1,5 @@
 // pages/user/index.js
-const { getMenuByDate, getMyOrders } = require('../../utils/db')
+const { getMenuByDate, getMyOrders, hideOrder } = require('../../utils/db')
 const logger = require('../../utils/logger')
 
 const TAG = 'user:index'
@@ -399,6 +399,30 @@ this.loadMenu()
       logger.error(TAG + ':cancelOrder', { error: err.message || String(err) })
       this.loadMyOrders()
       wx.showToast({ title: '取消失败', icon: 'error' })
+    })
+  },
+
+  hideOrder(e) {
+    const id = e.currentTarget.dataset.id
+    
+    wx.showModal({
+      title: '确认删除',
+      content: '确认删除该订单?',
+      confirmText: '删除',
+      success: (res) => {
+        if (res.confirm) {
+          wx.showLoading({ title: '处理中', mask: true })
+          
+          hideOrder(id).then(() => {
+            wx.hideLoading()
+            wx.showToast({ title: '已删除', icon: 'success' })
+            this.loadMyOrders()
+          }).catch(() => {
+            wx.hideLoading()
+            wx.showToast({ title: '删除失败', icon: 'error' })
+          })
+        }
+      }
     })
   },
 

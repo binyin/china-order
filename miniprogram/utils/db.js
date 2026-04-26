@@ -271,6 +271,22 @@ function getLatestMenu() {
     })
 }
 
+/**
+ * 隐藏订单（用户端删除，显示状态）
+ */
+function hideOrder(orderId) {
+  return db.collection('orders').doc(orderId).update({
+    data: { status: 'hidden' }
+  })
+}
+
+/**
+ * 删除订单（店长端真删除）
+ */
+function deleteOrder(orderId) {
+  return db.collection('orders').doc(orderId).remove()
+}
+
 module.exports = {
   db,
   _,
@@ -285,6 +301,8 @@ module.exports = {
   getRecentOrders,
   updateOrderStatus,
   cancelOrder,
+  hideOrder,
+  deleteOrder,
   getMyOrders,
   getMenuHistory,
   getDateStr,

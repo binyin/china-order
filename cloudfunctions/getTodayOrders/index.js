@@ -9,25 +9,15 @@ exports.main = async (event, context) => {
   const today = date || getBJDateStr()
   console.log('[getTodayOrders] date:', today)
   
-  try {
-    const menuRes = await db.collection('active_menu')
-      .where({ date: today })
-      .orderBy('publish_time', 'desc')
-      .limit(1)
-      .get()
-    
-    if (menuRes.data.length === 0) {
-      return { success: true, data: [], message: '今日未发布菜单' }
-    }
-    
+try {
     const ordersRes = await db.collection('orders')
       .where({ date: today })
       .orderBy('create_time', 'asc')
       .get()
     
-    console.log('[getTodayOrders] ordersRes:', ordersRes.data.length)
-    
     let orders = ordersRes.data
+    // 过滤hidden状态(用户删除的订单不显示)
+    orders = orders.filter(o => o.status !== 'hidden')
     let userData = []
     
     if (orders.length > 0) {
