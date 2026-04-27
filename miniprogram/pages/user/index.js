@@ -18,6 +18,9 @@ Page({
     hasProfile: false,
     tempNickname: '',
     tempAvatarUrl: '',
+    orderMode: 'order',
+    showContactModal: false,
+    contactPhone: '13126983890',
     dateList: [],
     selectedDate: '',
     dateIndex: 3,
@@ -50,6 +53,19 @@ Page({
     this.checkAuthStatus()
     this.loadMenu()
     this.loadMyOrders()
+    this.loadOrderMode()
+  },
+
+  loadOrderMode() {
+    wx.cloud.callFunction({
+      name: 'getSystemConfig',
+      data: { key: 'order_mode' }
+    }).then(res => {
+      const mode = res.result?.value || 'order'
+      this.setData({ orderMode: mode })
+    }).catch(() => {
+      this.setData({ orderMode: 'order' })
+    })
   },
 
   initDateList() {
@@ -129,6 +145,10 @@ this.loadMenu()
   MAX_ORDER_QTY: 50,
 
   increase(e) {
+    if (this.data.orderMode === 'browse') {
+      this.setData({ showContactModal: true })
+      return
+    }
     const index = e.currentTarget.dataset.index
     const list = this.data.menuList
     const item = list[index]
@@ -148,6 +168,7 @@ this.loadMenu()
   },
 
   decrease(e) {
+    if (this.data.orderMode === 'browse') return
     const index = e.currentTarget.dataset.index
     const list = this.data.menuList
     const item = list[index]
@@ -517,11 +538,21 @@ this.loadMenu()
     wx.navigateTo({ url: '/pages/admin/login' })
   },
 
-  goHistory() {
+goHistory() {
     wx.navigateTo({ url: '/pages/user/history' })
   },
 
   goSetting() {
     wx.navigateTo({ url: '/pages/user/setting' })
+  },
+
+  closeContactModal() {
+    this.setData({ showContactModal: false })
+  },
+
+  makeCall() {
+    wx.makePhoneCall({
+      phoneNumber: this.data.contactPhone
+    })
   }
 })

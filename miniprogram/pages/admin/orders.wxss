@@ -43,6 +43,10 @@ page {
   transform: rotate(90deg);
 }
 
+.mode-switch {
+  transform: scale(0.8);
+}
+
 .settings-btn {
   display: flex;
   align-items: center;

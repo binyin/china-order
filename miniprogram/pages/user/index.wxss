@@ -1426,7 +1426,6 @@ page {
 }
 
 .qty-btn-confirm {
-  flex: 1;
   height: 88rpx;
   background: linear-gradient(135deg, #ff9500 0%, #ff6a00 100%);
   color: #fff;
@@ -1435,4 +1434,37 @@ page {
   font-weight: 600;
   line-height: 88rpx;
   box-shadow: 0 6rpx 20rpx rgba(255,149,0,0.35);
+}
+
+.contact-phone-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+  padding: 40rpx;
+}
+
+.contact-label {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.contact-phone {
+  font-size: 56rpx;
+  color: #333;
+  font-weight: 700;
+  letter-spacing: 4rpx;
+}
+
+.contact-btn {
+  width: 120rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  font-weight: 600;
+  border-radius: 30rpx;
+  background: linear-gradient(135deg, #ff9500 0%, #ff7b00 100%);
+  color: #fff;
 }

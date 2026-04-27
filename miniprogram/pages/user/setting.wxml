@@ -8,8 +8,8 @@
     </button>
     <view class="info-group">
       <view class="info-row">
-        <text class="info-label">预订人</text>
-        <input class="info-input" type="nickname" placeholder="请输入预订人" value="{{userProfile.nickname}}" bindinput="onNicknameInput" />
+        <text class="info-label">姓名</text>
+        <input class="info-input" type="nickname" placeholder="请输入姓名" value="{{userProfile.nickname}}" bindinput="onNicknameInput" />
       </view>
       <view class="info-row">
         <text class="info-label">电话</text>

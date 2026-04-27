@@ -49,17 +49,20 @@
           <view class="item-tags" wx:if="{{item.tags && item.tags.length > 0}}">
             <text class="tag-pill" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="{{tag}}">{{tag}}</text>
           </view>
-          <text class="item-price">¥{{item.price}}</text>
+          <text class="item-price" wx:if="{{orderMode === 'order'}}">¥{{item.price}}</text>
         </view>
-        <view class="item-right">
+        <view class="item-right" wx:if="{{orderMode === 'order'}}">
           <view class="counter-btn minus {{item.disabled ? 'disabled' : ''}}" bindtap="decrease" data-index="{{index}}">－</view>
           <text class="counter-num {{item.disabled ? 'disabled' : ''}}" bindtap="editQty" data-index="{{index}}">{{item.qty || 0}}</text>
           <view class="counter-btn plus {{item.disabled ? 'disabled' : ''}}" bindtap="increase" data-index="{{index}}">＋</view>
         </view>
+        <view class="item-right" wx:if="{{orderMode === 'browse'}}">
+          <view class="contact-btn" bindtap="increase" data-index="{{index}}">联系我</view>
+        </view>
       </view>
     </view>
 
-    <view wx:if="{{submittedOrders.length > 0}}" class="submitted-section">
+    <view wx:if="{{submittedOrders.length > 0 && orderMode === 'order'}}" class="submitted-section">
       <view class="section-title">我的预定</view>
       <view class="order-card {{item.status === 'cancelled' ? 'cancelled' : ''}}" wx:for="{{submittedOrders}}" wx:key="_id">
         <view class="order-header">
@@ -86,7 +89,7 @@
     <view style="height: 200rpx;"></view>
   </scroll-view>
 
-  <view class="floating-bar {{hasSelected ? 'active' : ''}}">
+  <view class="floating-bar {{hasSelected ? 'active' : ''}}" wx:if="{{orderMode === 'order'}}">
     <view class="bar-content">
       <view class="price-info">
         <text class="bar-label">合计</text>
@@ -94,7 +97,14 @@
       </view>
       <view class="bar-actions">
         <text class="bar-clear" bindtap="cancelAllItems">清空</text>
-        <button class="btn-primary-apple" bindtap="submitOrder">提交订单</button>
+        <button class="btn-primary-apple" bindtap="submitOrder">提交</button>
+      </view>
+    </view>
+  </view>
+  <view class="floating-bar active" wx:if="{{orderMode === 'browse'}}">
+    <view class="bar-content">
+      <view class="bar-actions" style="justify-content: center; width: 100%;">
+        <button class="btn-primary-apple" bindtap="setData({showContactModal:true})">联系我</button>
       </view>
     </view>
   </view>
@@ -114,7 +124,7 @@
 <view class="apple-modal-mask" wx:if="{{showModal}}" bindtap="closeModal">
   <view class="apple-modal-box" catchtap>
     <view class="modal-header">
-      <text class="modal-title">{{orderSummary.length > 0 ? '确认订单' : '欢迎使用'}}</text>
+      <text class="modal-title">{{orderSummary.length > 0 ? '确认' : '欢迎使用'}}</text>
       <text class="modal-subtitle" wx:if="{{!hasProfile}}">请先完善您的取货信息</text>
     </view>
     <view class="modal-body">
@@ -127,7 +137,7 @@
           </view>
         </button>
         <view class="nickname-wrapper">
-          <text class="input-label-center">预订人</text>
+          <text class="input-label-center">姓名</text>
           <input class="nickname-input-center" type="nickname" placeholder="请输入您的称呼" value="{{tempNickname}}" bindinput="onNicknameInput" />
         </view>
       </view>
@@ -154,6 +164,24 @@
       <button class="btn-modal-confirm {{submitting ? 'loading' : ''}}" bindtap="confirmOrder" loading="{{submitting}}">
         {{submitting ? '提交中...' : (orderSummary.length > 0 ? '确认下单' : '保存信息')}}
       </button>
+    </view>
+  </view>
+</view>
+
+<view class="apple-modal-mask" wx:if="{{showContactModal}}" bindtap="closeContactModal">
+  <view class="apple-modal-box" catchtap>
+    <view class="modal-header">
+      <text class="modal-title">联系我们</text>
+    </view>
+    <view class="modal-body">
+      <view class="contact-phone-wrap">
+        <text class="contact-label">电话</text>
+        <text class="contact-phone">{{contactPhone}}</text>
+      </view>
+    </view>
+    <view class="modal-footer">
+      <button class="btn-modal-cancel" bindtap="closeContactModal">关闭</button>
+      <button class="btn-modal-confirm" bindtap="makeCall">拨打</button>
     </view>
   </view>
 </view>

@@ -19,6 +19,7 @@ Page({
     orderWatcher: null,
     newOrderFlag: false,
     showSettings: false,
+    orderMode: 'order',
     statusText: {
       pending: '待取走',
       completed: '已取走',
@@ -30,6 +31,39 @@ Page({
     this.checkLogin()
     this.initDateList()
     this.loadCurrentMenuInfo()
+    this.loadOrderMode()
+  },
+
+  loadOrderMode() {
+    wx.cloud.callFunction({
+      name: 'getSystemConfig',
+      data: { key: 'order_mode' }
+    }).then(res => {
+      const mode = res.result?.value || 'order'
+      this.setData({ orderMode: mode })
+    }).catch(() => {
+      this.setData({ orderMode: 'order' })
+    })
+  },
+
+  toggleOrderMode() {
+    const newMode = this.data.orderMode === 'order' ? 'browse' : 'order'
+    this.setData({ orderMode: newMode })
+    wx.showLoading({ title: '保存中...', mask: true })
+    wx.cloud.callFunction({
+      name: 'setSystemConfig',
+      data: { key: 'order_mode', value: newMode }
+    }).then(r => {
+      wx.hideLoading()
+      if (r.result && r.result.success) {
+        wx.showToast({ title: newMode === 'order' ? '预定模式' : '浏览模式', icon: 'success' })
+      } else {
+        wx.showToast({ title: '保存失败', icon: 'none' })
+      }
+}).catch(() => {
+      wx.hideLoading()
+      wx.showToast({ title: '保存失败', icon: 'none' })
+    })
   },
 
   onShow() {
