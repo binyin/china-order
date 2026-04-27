@@ -20,6 +20,7 @@ Page({
     newOrderFlag: false,
     showSettings: false,
     orderMode: 'order',
+    menuClickCount: 0,
     statusText: {
       pending: '待取走',
       completed: '已取走',
@@ -151,7 +152,14 @@ Page({
   },
 
   goMenu() {
-    this.setData({ showSettings: false })
+    const count = this.data.menuClickCount + 1
+    this.setData({ 
+      showSettings: false,
+      menuClickCount: count
+    })
+    if (count >= 5) {
+      this.setData({ menuClickCount: 0 })
+    }
     wx.navigateTo({ url: '/pages/admin/menu' })
   },
 
