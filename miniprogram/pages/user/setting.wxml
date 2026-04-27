@@ -20,6 +20,10 @@
   <button class="btn-save" bindtap="saveProfile">保存修改</button>
   
   <view class="section-title" style="margin-top: 40rpx;">其他</view>
+  <view class="setting-item" bindtap="goHistory">
+    <text class="setting-label">历史订单</text>
+    <text class="setting-arrow">›</text>
+  </view>
   <view class="setting-item" style="align-items: flex-start;">
     <text class="setting-label">开发者</text>
     <view class="dev-intro-box">
