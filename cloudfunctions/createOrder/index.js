@@ -91,13 +91,30 @@ exports.main = async (event, context) => {
       create_time_str: `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
     }
 
-    const orderRes = await db.collection('orders').add({ data: orderData })
+const orderRes = await db.collection('orders').add({ data: orderData })
 
-    return {
-      success: true,
-      data: { orderId: orderRes._id }
-    }
+await db.collection('user_logs').add({ data: {
+  user_id: OPENID,
+  action: 'create_order',
+  result: 'success',
+  details: { orderId: orderRes._id, total_price, itemCount: items.length, date: targetDate },
+  create_time: now.getTime()
+}})
+
+return {
+  success: true,
+  data: { orderId: orderRes._id }
+}
   } catch (err) {
+    try {
+      await db.collection('user_logs').add({ data: {
+        user_id: OPENID,
+        action: 'create_order',
+        result: 'failed',
+        details: { error: err.message },
+        create_time: Date.now()
+      }})
+    } catch (e) {}
     console.error('[createOrder] 创建订单失败', err)
     return { success: false, message: '创建订单失败，请重试' }
   }

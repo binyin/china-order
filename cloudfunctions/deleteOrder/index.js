@@ -11,16 +11,40 @@ exports.main = async (event, context) => {
 
   try {
     let deletedCount = 0
+    const deletedOrders = []
 
     for (const orderId of orderIds) {
+      const orderDoc = await db.collection('orders').doc(orderId).get()
       const res = await db.collection('orders').doc(orderId).remove()
       if (res.deleted > 0) {
         deletedCount++
+        if (orderDoc.data) {
+          deletedOrders.push({ orderId, customer_id: orderDoc.data.customer_id, date: orderDoc.data.date })
+        }
       }
+    }
+
+    for (const order of deletedOrders) {
+      await db.collection('user_logs').add({ data: {
+        user_id: order.customer_id,
+        action: 'delete_order',
+        result: 'success',
+        details: { orderId: order.orderId, date: order.date },
+        create_time: Date.now()
+      }})
     }
 
     return { success: true, deletedCount }
   } catch (err) {
+    try {
+      await db.collection('user_logs').add({ data: {
+        user_id: '',
+        action: 'delete_order',
+        result: 'failed',
+        details: { error: err.message },
+        create_time: Date.now()
+      }})
+    } catch (e) {}
     console.error('[deleteOrder] error:', err)
     return { success: false, message: '删除失败' }
   }

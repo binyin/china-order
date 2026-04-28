@@ -1,0 +1,9 @@
+{
+  "name": "logUserAction",
+  "version": "1.0.0",
+  "description": "记录用户操作日志",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

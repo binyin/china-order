@@ -1,3 +1,4 @@
 {"customer_name": "康忠杰★", "items": [{"name": "青团(芽菜肉)", "num": 1}, {"name": "青团(豆沙)", "num": 1}], "status": "pending", "date": "2026-04-08", "create_time": "2026-04-08", "total_price": 6.0}
 {"customer_name": "@799", "items": [{"name": "青团(豆沙)", "num": 2}, {"name": "青团(芽菜肉)", "num": 2}, {"name": "青团(咸蛋黄肉松)", "num": 2}], "status": "pending", "date": "2026-04-08", "create_time": "2026-04-08", "total_price": 24.0}
 {"customer_name": "敏姐", "items": [{"name": "南瓜馒头", "num": 1}, {"name": "芽菜肉包", "num": 2}, {"name": "香菇肉包", "num": 1}, {"name": "菠菜豆沙包", "num": 2}], "status": "completed", "date": "2026-04-08", "create_time": "2026-04-08", "total_price": 14.0}
+

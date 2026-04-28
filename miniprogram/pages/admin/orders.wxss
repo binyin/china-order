@@ -237,6 +237,7 @@ page {
 .order-list {}
 .order-card { background: #fff; border-radius: 16rpx; padding: 24rpx; margin-bottom: 16rpx; }
 .order-card.done { opacity: 0.6; }
+.order-id { font-size: 22rpx; color: #999; font-family: monospace; margin-bottom: 8rpx; }
 .order-top { display: flex; justify-content: space-between; margin-bottom: 12rpx; }
 .order-name { font-size: 32rpx; font-weight: 600; color: #222; }
 .order-name.dimmed { color: #999; }
