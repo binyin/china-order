@@ -62,7 +62,7 @@
       </view>
     </view>
 
-    <view wx:if="{{submittedOrders.length > 0 && orderMode === 'order'}}" class="submitted-section">
+    <view wx:if="{{submittedOrders.length > 0}}" class="submitted-section">
       <view class="section-title">我的预定</view>
       <view class="order-card {{item.status === 'cancelled' ? 'cancelled' : ''}}" wx:for="{{submittedOrders}}" wx:key="_id">
         <view class="order-header">
