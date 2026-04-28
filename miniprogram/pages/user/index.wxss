@@ -286,6 +286,7 @@ page {
 .submitted-section {
   padding: 20rpx 30rpx;
 }
+.order-id { font-size: 22rpx; color: #999; font-family: monospace; margin-bottom: 8rpx; }
 
 .section-title {
   font-size: 38rpx;

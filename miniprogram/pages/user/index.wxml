@@ -65,6 +65,7 @@
     <view wx:if="{{submittedOrders.length > 0 && orderMode === 'order'}}" class="submitted-section">
       <view class="section-title">我的预定</view>
       <view class="order-card {{item.status === 'cancelled' ? 'cancelled' : ''}}" wx:for="{{submittedOrders}}" wx:key="_id">
+        <view class="order-id">#{{item._id}}</view>
         <view class="order-header">
           <text class="order-user">{{item.customer_name}}</text>
           <text class="status-tag tag-{{item.status}}">{{statusText[item.status]}}</text>

@@ -83,6 +83,7 @@
   padding: 20rpx 24rpx;
   transition: opacity 0.3s;
 }
+.order-id { font-size: 22rpx; color: #999; font-family: monospace; margin-bottom: 8rpx; }
 .order-card.cancelled {
   opacity: 0.5;
 }
