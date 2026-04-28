@@ -1,6 +1,6 @@
 // pages/admin/history.js
 const app = getApp()
-const { getAdminOrderHistory, getDateStr, getBJDateStr } = require('../../utils/db')
+const { getAdminOrderHistory } = require('../../utils/db')
 
 Page({
   data: {
