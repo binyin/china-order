@@ -56,44 +56,6 @@ function getMenuByDate(date) {
     })
 }
 
-function getLatestMenu() {
-  return db.collection('active_menu')
-    .orderBy('publish_time', 'desc')
-    .limit(1)
-    .get()
-    .then(async res => {
-      if (res.data.length > 0) {
-        const menu = res.data[0]
-        const productIds = menu.items || []
-        let productMap = {}
-        if (productIds.length > 0) {
-          const batchTimes = Math.ceil(productIds.length / 20)
-          const tasks = []
-          for (let i = 0; i < batchTimes; i++) {
-            const ids = productIds.slice(i * 20, (i + 1) * 20)
-            tasks.push(db.collection('products').where({ _id: _.in(ids) }).get())
-          }
-          const results = await Promise.all(tasks)
-          results.forEach(r => {
-            r.data.forEach(p => {
-              productMap[p._id] = { name: p.name, price: p.price, unit: p.unit, image_url: p.image_url }
-            })
-          })
-        }
-        const list = (menu.items || []).map(pid => ({
-          _id: pid,
-          product_id: pid,
-          date: menu.date,
-          stock: 50,
-          ...productMap[pid],
-          qty: 0
-        }))
-        return { data: list, menuInfo: { date: menu.date, publish_time: menu.publish_time } }
-      }
-      return { data: [] }
-    })
-}
-
 async function getAllProducts() {
   const countRes = await db.collection('products').count()
   const total = countRes.total
@@ -201,7 +163,6 @@ module.exports = {
   db,
   _,
   getMenuByDate,
-  getLatestMenu,
   getAllProducts,
   addProduct,
   updateProduct,
