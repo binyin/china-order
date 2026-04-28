@@ -62,21 +62,20 @@
   <view class="order-section" wx:if="{{pendingOrders.length > 0}}">
     <view class="section-title">待处理 <text class="count-badge">{{pendingOrders.length}}</text></view>
     <view class="order-list">
-      <view class="order-card" wx:for="{{pendingOrders}}" wx:key="_id">
-        <view class="order-id">#{{item._id}}</view>
-        <view class="order-top">
-          <text class="order-name">{{item.customer_nickname || item.customer_name}}</text>
-          <text class="order-time">{{item.create_time_str}}</text>
-        </view>
-        <view class="order-items">
-          <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="item-tag">{{prod.name}}×{{prod.num}}</text>
-        </view>
-        <view class="order-bottom">
-          <text class="order-price">¥{{item.total_price}}</text>
-          <view class="order-btns">
-            <button class="btn-take" bindtap="verifyOrder" data-id="{{item._id}}">取走</button>
-            <button class="btn-cancel" bindtap="cancelOrder" data-id="{{item._id}}">取消</button>
+      <view class="order-capsule" wx:for="{{pendingOrders}}" wx:key="_id">
+        <view class="capsule-header">
+          <view class="capsule-user">
+            <image class="capsule-avatar" src="{{item.customer_avatar}}" mode="aspectFill" wx:if="{{item.customer_avatar}}"/>
+            <text class="capsule-name">{{item.customer_nickname || item.customer_name}}</text>
           </view>
+          <text class="capsule-total">¥{{item.total_price}}</text>
+        </view>
+        <view class="capsule-items">
+          <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="customer-tag">{{item.customer_nickname || item.customer_name}}×{{prod.num}}</text>
+        </view>
+        <view class="capsule-btns">
+          <button class="btn-take" bindtap="verifyOrder" data-id="{{item._id}}">取走</button>
+          <button class="btn-cancel" bindtap="cancelOrder" data-id="{{item._id}}">取消</button>
         </view>
       </view>
     </view>
