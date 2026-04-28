@@ -276,11 +276,12 @@ this.loadMenu()
     const selectedDate = this.data.selectedDate || this.getTodayStr()
     console.log('[user:index:loadMyOrders] start, date:', selectedDate)
     
-    getUserTodayOrder(selectedDate).then(orders => {
-      const orderCount = orders?.length || 0
-      this.setData({ submittedOrders: orders || [] })
+    getUserTodayOrder(selectedDate).then(res => {
+      const orders = res.data || []
+      const orderCount = orders.length
+      this.setData({ submittedOrders: orders })
       this.loadingOrders = false
-      console.log('[user:index:loadMyOrders] success, count:', orderCount, 'date:', selectedDate, 'orders:', orders ? orders.map(o => ({id: o._id, status: o.status, items: o.items?.length})) : 'empty')
+      console.log('[user:index:loadMyOrders] success, count:', orderCount, 'date:', selectedDate, 'orders:', orders.length > 0 ? orders.map(o => ({id: o._id, status: o.status, items: o.items?.length})) : 'empty')
     }).catch((err) => {
       this.loadingOrders = false
       console.log('[user:index:loadMyOrders] error:', err.message || String(err))

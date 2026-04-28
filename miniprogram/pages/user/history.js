@@ -27,9 +27,10 @@ Page({
   loadOrders() {
     this.setData({ loading: true })
     console.log('[user:history:loadOrders] start')
-    getUserOrderHistory().then(orders => {
-      console.log('[user:history:loadOrders] success, count:', orders?.length || 0)
-      const validOrders = (orders || []).filter(o => o.status !== 'cancelled')
+    getUserOrderHistory().then(res => {
+      const orders = res.data || []
+      console.log('[user:history:loadOrders] success, count:', orders.length)
+      const validOrders = orders.filter(o => o.status !== 'cancelled')
       // 按日期聚合
       const dateMap = {}
       validOrders.forEach(o => {
