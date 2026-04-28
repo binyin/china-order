@@ -62,8 +62,10 @@ Page({
       data: { key: 'order_mode' }
     }).then(res => {
       const mode = res.result?.value || 'order'
+      console.log('[user:index] orderMode:', mode)
       this.setData({ orderMode: mode })
-    }).catch(() => {
+    }).catch(e => {
+      console.log('[user:index] orderMode error:', e.message)
       this.setData({ orderMode: 'order' })
     })
   },
@@ -272,15 +274,16 @@ this.loadMenu()
     if (this.loadingOrders) return
     this.loadingOrders = true
     const selectedDate = this.data.selectedDate || this.getTodayStr()
-    logger.info(TAG + ':loadMyOrders', { start: true, selectedDate })
+    console.log('[user:index:loadMyOrders] start, date:', selectedDate)
     
     getMyOrders(selectedDate).then(orders => {
+      const orderCount = orders?.length || 0
       this.setData({ submittedOrders: orders || [] })
       this.loadingOrders = false
-      logger.info(TAG + ':loadMyOrders', { success: true, count: orders?.length || 0, selectedDate })
+      console.log('[user:index:loadMyOrders] success, count:', orderCount, 'date:', selectedDate)
     }).catch((err) => {
       this.loadingOrders = false
-      logger.error(TAG + ':loadMyOrders', { error: err.message || String(err) })
+      console.log('[user:index:loadMyOrders] error:', err.message || String(err))
     })
   },
 
@@ -345,7 +348,7 @@ this.loadMenu()
       return
     }
 
-    logger.info(TAG + ':confirmOrder', { itemCount: items.length, totalPrice: this.data.totalPrice })
+    console.log('[user:index:confirmOrder] submitting, items:', items.length, 'total:', this.data.totalPrice)
 
     this.setData({ submitting: true })
 
@@ -391,7 +394,7 @@ this.loadMenu()
   cancelOrder(e) {
     const id = e.currentTarget.dataset.id
     
-    logger.info(TAG + ':cancelOrder', { orderId: id })
+    console.log('[user:index:cancelOrder] orderId:', id)
     this.createOrderExitAnimation(id)
     
     wx.showLoading({ title: '处理中', mask: true })

@@ -26,7 +26,9 @@ Page({
 
   loadOrders() {
     this.setData({ loading: true })
+    console.log('[user:history:loadOrders] start')
     getUserOrderHistory().then(orders => {
+      console.log('[user:history:loadOrders] success, count:', orders?.length || 0)
       const validOrders = (orders || []).filter(o => o.status !== 'cancelled')
       // 按日期聚合
       const dateMap = {}
@@ -84,6 +86,7 @@ Page({
 
   deleteOrder(e) {
     const id = e.currentTarget.dataset.id
+    console.log('[user:history:deleteOrder] orderId:', id)
     
     wx.showModal({
       title: '确认删除',
@@ -95,10 +98,12 @@ Page({
           
           hideOrder(id).then(() => {
             wx.hideLoading()
+            console.log('[user:history:deleteOrder] success, orderId:', id)
             wx.showToast({ title: '已删除', icon: 'success' })
             this.loadOrders()
           }).catch(() => {
             wx.hideLoading()
+            console.log('[user:history:deleteOrder] failed, orderId:', id)
             wx.showToast({ title: '删除失败', icon: 'error' })
           })
         }
