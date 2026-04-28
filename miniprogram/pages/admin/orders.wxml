@@ -51,7 +51,9 @@
         </view>
       </view>
       <view wx:if="{{item.customers.length > 0}}" class="stat-customers">
-        <text wx:for="{{item.customers}}" wx:for-item="c" wx:key="orderId" class="customer-tag">{{c.name}}×{{c.num}}</text>
+        <text wx:for="{{item.customers}}" wx:for-item="c" wx:key="orderId" class="customer-item">
+          <text class="at-symbol">@</text>{{c.name}}({{c.num}})<text wx:if="{{index < item.customers.length - 1}}" class="separator">、</text>
+        </text>
       </view>
     </view>
     <view wx:if="{{menuStats.length === 0}}" class="stats-empty">暂无预定</view>

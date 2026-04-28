@@ -223,8 +223,10 @@ page {
 .badge-total, .badge-pending { font-size: 22rpx; padding: 4rpx 12rpx; border-radius: 8rpx; }
 .badge-total { background: #f5f5f5; color: #666; }
 .badge-pending { background: #FFF3CD; color: #B8860B; }
-.stat-customers { display: flex; flex-wrap: wrap; gap: 8rpx; margin-top: 8rpx; }
-.customer-tag { font-size: 24rpx; background: #f5f5f5; padding: 6rpx 14rpx; border-radius: 20rpx; color: #555; }
+.stat-customers { display: flex; flex-wrap: wrap; align-items: center; line-height: 1.8; margin-top: 8rpx; }
+.customer-item { font-size: 28rpx; color: #333; }
+.at-symbol { color: #007AFF; font-weight: 500; }
+.separator { color: #ccc; margin: 0 2rpx; }
 .stats-empty { text-align: center; color: #999; padding: 40rpx; }
 
 /* 订单区域 */
