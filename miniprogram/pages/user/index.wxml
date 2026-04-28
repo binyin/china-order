@@ -24,9 +24,6 @@
 
   <view wx:if="{{showMorePopup}}" class="popup-mask" bindtap="closeMorePopup">
     <view class="popup-menu">
-      <view class="popup-item" bindtap="goHistory" wx:if="{{orderMode === 'order'}}">
-        <text class="popup-text">历史订单</text>
-      </view>
       <view class="popup-item" bindtap="goSetting">
         <text class="popup-text">设置</text>
       </view>

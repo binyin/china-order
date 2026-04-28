@@ -6,15 +6,30 @@ Page({
       nickname: '',
       avatarUrl: '',
       phone: ''
-    }
+    },
+    orderMode: 'order'
   },
 
   onLoad() {
     this.loadProfile()
+    this.loadOrderMode()
   },
 
   onShow() {
     this.loadProfile()
+    this.loadOrderMode()
+  },
+
+  loadOrderMode() {
+    wx.cloud.callFunction({
+      name: 'getSystemConfig',
+      data: { key: 'order_mode' }
+    }).then(res => {
+      const mode = res.result?.value || 'order'
+      this.setData({ orderMode: mode })
+    }).catch(() => {
+      this.setData({ orderMode: 'order' })
+    })
   },
 
   loadProfile() {
