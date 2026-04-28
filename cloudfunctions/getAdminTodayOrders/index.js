@@ -15,7 +15,7 @@ exports.main = async (event, context) => {
       .get()
 
     let orders = ordersRes.data
-    orders = orders.filter(o => o.status !== 'hidden' && o.status !== 'cancelled')
+    orders = orders.filter(o => o.status !== 'hidden')
 
     if (orders.length > 0) {
       const openids = [...new Set(orders.map(o => o.customer_id).filter(Boolean))]
