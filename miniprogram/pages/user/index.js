@@ -20,7 +20,7 @@ Page({
     tempAvatarUrl: '',
     orderMode: 'order',
     showContactModal: false,
-    contactPhone: '13126983890',
+    contactPhone: '13126984550',
     dateList: [],
     selectedDate: '',
     dateIndex: 3,
