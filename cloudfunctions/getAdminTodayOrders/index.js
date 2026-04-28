@@ -5,40 +5,31 @@ const _ = db.command
 
 exports.main = async (event, context) => {
   const { date } = event
-  
-  const today = date || getBJDateStr()
-  console.log('[getTodayOrders] date:', today)
-  
-try {
+  const targetDate = date || getBJDateStr()
+  console.log('[getAdminTodayOrders] date:', targetDate)
+
+  try {
     const ordersRes = await db.collection('orders')
-      .where({ date: today })
+      .where({ date: targetDate })
       .orderBy('create_time', 'asc')
       .get()
-    
+
     let orders = ordersRes.data
-    // 过滤hidden状态(用户删除的订单不显示)
     orders = orders.filter(o => o.status !== 'hidden')
-    let userData = []
-    
+
     if (orders.length > 0) {
       const openids = [...new Set(orders.map(o => o.customer_id).filter(Boolean))]
-      console.log('[getTodayOrders] openids:', openids)
-      
+
       if (openids.length > 0) {
         const userRes = await db.collection('users')
-          .where({
-            _id: _.in(openids)
-          })
+          .where({ _id: _.in(openids) })
           .get()
-        
-        console.log('[getTodayOrders] userRes:', userRes.data.length)
-        userData = userRes.data
-        
+
         const userMap = {}
         userRes.data.forEach(u => {
           userMap[u._id] = u
         })
-        
+
         orders = orders.map(o => {
           if (userMap[o.customer_id]) {
             if (!o.customer_avatar) {
@@ -52,14 +43,10 @@ try {
         })
       }
     }
-    
-    return {
-      success: true,
-      data: orders,
-      users: userData
-    }
+
+    return { success: true, data: orders }
   } catch (err) {
-    console.error('获取今日订单失败', err)
+    console.error('[getAdminTodayOrders] error:', err)
     return { success: false, message: '获取失败' }
   }
 }

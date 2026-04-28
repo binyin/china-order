@@ -1,0 +1,11 @@
+{
+  "name": "getUserOrderHistory",
+  "version": "1.0.0",
+  "description": "获取用户历史订单（90天内）",
+  "main": "index.js",
+  "author": "Orange",
+  "license": "MIT",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "getAdminOrderHistory",
+  "version": "1.0.0",
+  "description": "管理员获取历史订单（支持日期范围和用户过滤）",
+  "main": "index.js",
+  "author": "Orange",
+  "license": "MIT",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

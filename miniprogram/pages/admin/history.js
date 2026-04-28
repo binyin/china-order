@@ -1,6 +1,6 @@
 // pages/admin/history.js
 const app = getApp()
-const { getRecentOrders, getDateStr, getBJDateStr } = require('../../utils/db')
+const { getAdminOrderHistory, getDateStr, getBJDateStr } = require('../../utils/db')
 
 Page({
   data: {
@@ -128,7 +128,7 @@ Page({
 
   // 加载按日/周/月视图数据（指定日期范围）
   loadDailyDataByRange(startDate, endDate) {
-    getRecentOrders(0, startDate, endDate).then(res => {
+    getAdminOrderHistory(0, startDate, endDate).then(res => {
       const orders = (res.data || []).sort((a, b) => (b.create_time || 0) - (a.create_time || 0))
       if (this.data.viewMode === 'day') {
         this.processDailyData(orders)
@@ -144,7 +144,7 @@ Page({
 
   // 加载按用户视图数据（指定日期范围）
   loadCustomerDataByRange(startDate, endDate) {
-    getRecentOrders(0, startDate, endDate).then(res => {
+    getAdminOrderHistory(0, startDate, endDate).then(res => {
       const orders = (res.data || [])
       this.processCustomerData(orders)
     }).catch(() => {
@@ -154,7 +154,7 @@ Page({
 
   // 加载按日/周/月视图数据
   loadDailyData(days) {
-    getRecentOrders(days).then(res => {
+    getAdminOrderHistory(days).then(res => {
       const orders = (res.data || []).sort((a, b) => (b.create_time || 0) - (a.create_time || 0))
       
       if (this.data.viewMode === 'day') {
@@ -296,7 +296,7 @@ Page({
 
   // 加载按用户视图数据
   loadCustomerData(days) {
-    getRecentOrders(days).then(res => {
+    getAdminOrderHistory(days).then(res => {
       const orders = (res.data || [])
       
       // 按用户聚合

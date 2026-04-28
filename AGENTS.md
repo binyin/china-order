@@ -22,12 +22,13 @@ miniprogram/
 └── images/
 
 cloudfunctions/
-├── getTodayOrders/     # 获取今日订单
-├── getRecentOrders/   # 店长查看历史订单 (支持自定义日期)
-├── getMyOrders/     # 用户查看自己订单 (限制90天)
-├── createOrder/      # 创建订单
-├── publishMenu/      # 发布菜单
-├── cancelOrder/     # 取消订单
+├── getUserTodayOrder/      # 用户-当日订单
+├── getUserOrderHistory/    # 用户-历史订单(90天)
+├── getAdminTodayOrders/    # 管理员-当日订单
+├── getAdminOrderHistory/   # 管理员-历史订单(日期+用户过滤)
+├── createOrder/            # 创建订单
+├── publishMenu/           # 发布菜单
+├── cancelOrder/           # 取消订单
 └── ...其他云函数
 ```
 
@@ -45,12 +46,12 @@ cloudfunctions/
 
 ## 页面与云函数对应
 
-| 页面 | 云函数 | 备注 |
-|------|-------|------|
+| 页面 | 云函数 | 功能 |
+|------|--------|------|
 | 用户首页 | `createOrder` | 下单 |
-| 用户历史 | `getMyOrders` | 仅看90天内 |
-| 店长核销 | `getTodayOrders` | 当日订单 |
-| 店长历史 | `getRecentOrders` | 支持自定义日期 |
+| 用户历史 | `getUserOrderHistory` | 仅看自己90天内 |
+| 店长核销 | `getAdminTodayOrders` | 当日所有订单 |
+| 店长历史 | `getAdminOrderHistory` | 所有+日期过滤+用户过滤 |
 
 ---
 
@@ -59,7 +60,7 @@ cloudfunctions/
 | 集合 | 用途 |
 |------|------|
 | `products` | 产品模板库 |
-| `active_menu` | 今日菜单 |
+| `active_menu` | 发布菜单 |
 | `orders` | 订单记录 |
 | `configs` | 店长账号 |
 | `users` | 用户信息 |
@@ -80,7 +81,7 @@ tcb fn deploy <functionName>
 ## 已安装工具
 
 1. `tcb` - CloudBase CLI (操作腾讯云)
-2. `wechatdevtool` - 微信开发者工具别名
+2. `cli` - 微信开发者工具别名
 
 ---
 

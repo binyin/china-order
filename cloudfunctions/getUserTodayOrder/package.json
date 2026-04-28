@@ -1,0 +1,11 @@
+{
+  "name": "getUserTodayOrder",
+  "version": "1.0.0",
+  "description": "获取用户当日订单",
+  "main": "index.js",
+  "author": "Orange",
+  "license": "MIT",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

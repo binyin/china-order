@@ -1,0 +1,11 @@
+{
+  "name": "getAdminTodayOrders",
+  "version": "1.0.0",
+  "description": "管理员获取当日所有用户订单",
+  "main": "index.js",
+  "author": "Orange",
+  "license": "MIT",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

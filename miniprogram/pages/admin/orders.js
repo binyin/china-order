@@ -1,6 +1,6 @@
 // pages/admin/orders.js
 const app = getApp()
-const { getTodayOrders, getTodayMenu, getMenuByDate, getRecentOrders, updateOrderStatus, getDateStr, getBJDateStr, deleteOrder } = require('../../utils/db')
+const { getAdminTodayOrders, getTodayMenu, getMenuByDate, getAdminOrderHistory, updateOrderStatus, getDateStr, getBJDateStr, deleteOrder } = require('../../utils/db')
 
 Page({
   data: {
@@ -257,7 +257,7 @@ Page({
     try {
       const [menuRes, orderRes] = await Promise.all([
         getMenuByDate(targetDate),
-        getTodayOrders(targetDate)
+        getAdminTodayOrders(targetDate)
       ])
 
       const menuItems = menuRes.data || []
@@ -460,7 +460,7 @@ Page({
   // ========== 历史订单 ==========
 
   loadDailyList(queryType = 'week', days = 7) {
-    getRecentOrders(days).then(res => {
+    getAdminOrderHistory(days).then(res => {
       const orders = (res.data || []).sort((a, b) => (b.create_time || 0) - (a.create_time || 0))
       const dateMap = {}
       orders.forEach(o => {

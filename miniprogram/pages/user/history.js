@@ -1,5 +1,5 @@
 // pages/user/history.js
-const { getMyOrders, hideOrder } = require('../../utils/db')
+const { getUserOrderHistory, hideOrder } = require('../../utils/db')
 
 Page({
   data: {
@@ -26,7 +26,7 @@ Page({
 
   loadOrders() {
     this.setData({ loading: true })
-    getMyOrders().then(orders => {
+    getUserOrderHistory().then(orders => {
       const validOrders = (orders || []).filter(o => o.status !== 'cancelled')
       // 按日期聚合
       const dateMap = {}
