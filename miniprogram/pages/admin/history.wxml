@@ -1,0 +1,106 @@
+<!--pages/admin/history.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="header-back" wx:if="{{showDetail}}" bindtap="backToList">← 返回</view>
+    <view class="header-title">{{showDetail ? detailTitle : '历史订单'}}</view>
+  </view>
+
+  <view wx:if="{{loading}}" class="empty-tip">加载中...</view>
+
+  <view wx:elif="{{showDetail}}">
+    <view wx:if="{{detailOrders.length === 0}}" class="empty-tip">暂无订单</view>
+    <view class="order-list">
+      <view class="order-card card {{item.status === 'cancelled' ? 'cancelled' : ''}}"
+            wx:for="{{detailOrders}}" wx:key="_id">
+        <view class="order-header">
+          <text class="order-status tag-{{item.status}}">{{statusText[item.status]}}</text>
+          <text class="order-time" wx:if="{{item.create_time_str}}">{{item.create_time_str}}</text>
+        </view>
+        <view class="order-items">
+          <text wx:for="{{item.items}}" wx:for-item="prod" wx:key="name" class="order-item-tag">{{prod.name}}×{{prod.num}}</text>
+        </view>
+        <view class="order-footer">
+          <text class="order-price">¥{{item.total_price}}</text>
+          <text class="order-customer">{{item.customer_nickname || item.customer_name}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else>
+    <view class="filter-bar">
+      <view class="view-mode-tabs">
+        <view class="tab {{viewMode === 'day' ? 'active' : ''}}" bindtap="switchViewMode" data-mode="day">按日</view>
+        <view class="tab {{viewMode === 'week' ? 'active' : ''}}" bindtap="switchViewMode" data-mode="week">按周</view>
+        <view class="tab {{viewMode === 'month' ? 'active' : ''}}" bindtap="switchViewMode" data-mode="month">按月</view>
+        <view class="tab {{viewMode === 'customer' ? 'active' : ''}}" bindtap="switchViewMode" data-mode="customer">按用户</view>
+      </view>
+      <view class="query-days-tabs">
+        <view class="tab {{queryDays === 7 ? 'active' : ''}}" bindtap="onQueryChange" data-days="7">近7天</view>
+        <view class="tab {{queryDays === 30 ? 'active' : ''}}" bindtap="onQueryChange" data-days="30">近30天</view>
+        <view class="tab {{queryDays === 90 ? 'active' : ''}}" bindtap="onQueryChange" data-days="90">近90天</view>
+        <view class="tab {{queryDays === 0 ? 'active' : ''}}" bindtap="showCustomDatePicker">自定义</view>
+      </view>
+    </view>
+
+    <view wx:if="{{viewMode === 'customer'}}">
+      <view wx:if="{{customerList.length === 0}}" class="empty-tip">暂无订单记录</view>
+      <view class="customer-list">
+        <view class="customer-card card" wx:for="{{customerList}}" wx:key="customerId" bindtap="openDetail" data-index="{{index}}">
+          <view class="customer-header">
+            <text class="customer-name">{{item.customerName}}</text>
+            <text class="customer-revenue">¥{{item.totalRevenue}}</text>
+          </view>
+          <view class="customer-info">
+            <text class="info-text">订单: {{item.orderCount}}单</text>
+            <text class="info-text">{{item.firstOrderDate}} ~ {{item.lastOrderDate}}</text>
+          </view>
+          <view class="customer-stats">
+            <text class="stat-badge completed">{{item.completedCount}} 已取</text>
+            <text wx:if="{{item.pendingCount > 0}}" class="stat-badge pending">{{item.pendingCount}} 待取</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else>
+      <view wx:if="{{dailyList.length === 0}}" class="empty-tip">暂无订单记录</view>
+      <view class="daily-list">
+        <view class="daily-card card" wx:for="{{dailyList}}" wx:key="date" bindtap="openDetail" data-index="{{index}}">
+          <view class="daily-header">
+            <view class="daily-date">{{item.label || item.date}}</view>
+            <view class="daily-revenue">¥{{item.totalRevenue}}</view>
+          </view>
+          <view class="daily-products">{{item.productNames}}</view>
+          <view class="daily-stats">
+            <text class="stat-badge completed">{{item.completedCount}} 已取</text>
+            <text wx:if="{{item.pendingCount > 0}}" class="stat-badge pending">{{item.pendingCount}} 待取</text>
+            <text class="stat-badge order-count">{{item.orderCount}}单</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{showDatePicker}}" class="date-picker-modal" bindtap="hideDatePicker">
+    <view class="date-picker-content" catchtap>
+      <view class="date-picker-title">选择日期范围</view>
+      <view class="date-picker-row">
+        <text class="date-picker-label">开始日期</text>
+        <picker mode="date" value="{{customDateStart}}" bindchange="onDateStartChange">
+          <view class="date-picker-value">{{customDateStart || '请选择'}}</view>
+        </picker>
+      </view>
+      <view class="date-picker-row">
+        <text class="date-picker-label">结束日期</text>
+        <picker mode="date" value="{{customDateEnd}}" bindchange="onDateEndChange">
+          <view class="date-picker-value">{{customDateEnd || '请选择'}}</view>
+        </picker>
+      </view>
+      <view class="date-picker-btns">
+        <button class="date-picker-cancel" bindtap="hideDatePicker">取消</button>
+        <button class="date-picker-confirm" bindtap="applyCustomDate">确定</button>
+      </view>
+    </view>
+  </view>
+</view>

@@ -91,10 +91,10 @@ async function getOrdersByDate(date) {
 /**
  * 获取最近 N 天的订单
  */
-async function getRecentOrders(days = 7) {
+async function getRecentOrders(days = 7, startDate, endDate) {
   return wx.cloud.callFunction({
     name: 'getRecentOrders',
-    data: { days: days }
+    data: { days: days, startDate: startDate, endDate: endDate }
   }).then(res => {
     if (res.result && res.result.success) {
       return { data: res.result.data || [] }

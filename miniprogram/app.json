@@ -6,7 +6,8 @@
     "pages/admin/login",
     "pages/admin/products",
     "pages/admin/menu",
-    "pages/admin/orders"
+    "pages/admin/orders",
+    "pages/admin/history"
   ],
   "window": {
     "backgroundTextStyle": "light",

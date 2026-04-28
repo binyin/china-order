@@ -1,0 +1,244 @@
+/* pages/admin/history.wxss */
+.container {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding-bottom: 40rpx;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.header-back {
+  font-size: 32rpx;
+  color: #ff6b35;
+  margin-right: 16rpx;
+  padding: 8rpx 16rpx;
+}
+.header-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #222;
+}
+
+.filter-bar {
+  background: #fff;
+  padding: 16rpx 24rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.view-mode-tabs, .query-days-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+.view-mode-tabs .tab, .query-days-tabs .tab {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  border-radius: 8rpx;
+  background: #f5f5f5;
+}
+.view-mode-tabs .tab.active, .query-days-tabs .tab.active {
+  background: #ff6b35;
+  color: #fff;
+  font-weight: bold;
+}
+
+.daily-list, .customer-list {
+  padding: 8rpx 0;
+}
+.daily-card.card, .customer-card.card {
+  margin: 12rpx 24rpx;
+  padding: 24rpx 28rpx;
+}
+.daily-header, .customer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+.daily-date, .customer-name {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #222;
+}
+.daily-revenue, .customer-revenue {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ff6b35;
+}
+.daily-products {
+  font-size: 26rpx;
+  color: #888;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.customer-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 26rpx;
+  color: #888;
+  margin-bottom: 12rpx;
+}
+.info-text {
+  font-size: 26rpx;
+  color: #888;
+}
+.daily-stats, .customer-stats {
+  display: flex;
+  gap: 12rpx;
+}
+.stat-badge {
+  font-size: 22rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 16rpx;
+}
+.stat-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+.stat-badge.completed {
+  background: #d4edda;
+  color: #155724;
+}
+.stat-badge.order-count {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.order-list {
+  padding: 8rpx 0;
+}
+.order-card.card {
+  margin: 12rpx 24rpx;
+  padding: 20rpx 24rpx;
+  transition: opacity 0.3s;
+}
+.order-card.cancelled {
+  opacity: 0.5;
+}
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+.order-time {
+  font-size: 24rpx;
+  color: #aaa;
+}
+.order-items {
+  margin-bottom: 12rpx;
+  line-height: 1.8;
+}
+.order-item-tag {
+  display: inline-block;
+  background: #f5f5f5;
+  color: #555;
+  font-size: 26rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+  margin: 4rpx 6rpx 4rpx 0;
+}
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.order-price {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #ff6b35;
+}
+.order-customer {
+  font-size: 26rpx;
+  color: #888;
+}
+
+.tag-pending { background: #fff3cd; color: #856404; padding: 4rpx 16rpx; border-radius: 20rpx; font-size: 24rpx; }
+.tag-completed { background: #d4edda; color: #155724; padding: 4rpx 16rpx; border-radius: 20rpx; font-size: 24rpx; }
+.tag-cancelled { background: #f8d7da; color: #721c24; padding: 4rpx 16rpx; border-radius: 20rpx; font-size: 24rpx; }
+
+.empty-tip {
+  text-align: center;
+  color: #999;
+  font-size: 30rpx;
+  padding: 80rpx 0;
+}
+
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.date-picker-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.date-picker-content {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  width: 80%;
+  max-width: 600rpx;
+}
+.date-picker-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 32rpx;
+}
+.date-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.date-picker-label {
+  font-size: 28rpx;
+  color: #666;
+}
+.date-picker-value {
+  font-size: 28rpx;
+  color: #333;
+  padding: 8rpx 16rpx;
+  background: #f5f5f5;
+  border-radius: 8rpx;
+}
+.date-picker-btns {
+  display: flex;
+  gap: 24rpx;
+  margin-top: 32rpx;
+}
+.date-picker-cancel, .date-picker-confirm {
+  flex: 1;
+  font-size: 30rpx;
+  padding: 20rpx 0;
+  border-radius: 8rpx;
+}
+.date-picker-cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+.date-picker-confirm {
+  background: #ff6b35;
+  color: #fff;
+}

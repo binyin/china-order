@@ -147,7 +147,7 @@ Page({
 
   goHistory() {
     this.setData({ showSettings: false })
-    wx.navigateTo({ url: '/pages/user/history' })
+    wx.navigateTo({ url: '/pages/admin/history' })
   },
 
   goMenu() {
