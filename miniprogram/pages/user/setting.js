@@ -82,6 +82,7 @@ Page({
   },
 
   goHistory() {
+    console.log('[user:setting] goHistory click')
     wx.navigateTo({ url: '/pages/user/history' })
   }
 })

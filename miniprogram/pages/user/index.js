@@ -1,5 +1,5 @@
 // pages/user/index.js
-const { getMenuByDate, getMyOrders, hideOrder } = require('../../utils/db')
+const { getMenuByDate, getUserTodayOrder, hideOrder } = require('../../utils/db')
 const logger = require('../../utils/logger')
 
 const TAG = 'user:index'
@@ -276,11 +276,11 @@ this.loadMenu()
     const selectedDate = this.data.selectedDate || this.getTodayStr()
     console.log('[user:index:loadMyOrders] start, date:', selectedDate)
     
-    getMyOrders(selectedDate).then(orders => {
+    getUserTodayOrder(selectedDate).then(orders => {
       const orderCount = orders?.length || 0
       this.setData({ submittedOrders: orders || [] })
       this.loadingOrders = false
-      console.log('[user:index:loadMyOrders] success, count:', orderCount, 'date:', selectedDate)
+      console.log('[user:index:loadMyOrders] success, count:', orderCount, 'date:', selectedDate, 'orders:', orders ? orders.map(o => ({id: o._id, status: o.status, items: o.items?.length})) : 'empty')
     }).catch((err) => {
       this.loadingOrders = false
       console.log('[user:index:loadMyOrders] error:', err.message || String(err))
