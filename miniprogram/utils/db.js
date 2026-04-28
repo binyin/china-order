@@ -4,8 +4,7 @@ const _ = db.command
 
 function getTodayBJDateStr() {
   const d = new Date()
-  const bjTime = new Date(d.getTime() + 8 * 3600 * 1000)
-  return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 function getDateStr(date) {
@@ -15,8 +14,7 @@ function getDateStr(date) {
 
 function getBJDateStr(date) {
   const d = date ? new Date(date) : new Date()
-  const bjTime = new Date(d.getTime() + 8 * 3600 * 1000)
-  return `${bjTime.getFullYear()}-${String(bjTime.getMonth() + 1).padStart(2, '0')}-${String(bjTime.getDate()).padStart(2, '0')}`
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 function getMenuByDate(date) {

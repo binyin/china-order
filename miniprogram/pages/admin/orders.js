@@ -1,6 +1,6 @@
 // pages/admin/orders.js
 const app = getApp()
-const { getAdminTodayOrders, getTodayMenu, getMenuByDate, getAdminOrderHistory, updateOrderStatus, getDateStr, getBJDateStr, deleteOrder } = require('../../utils/db')
+const { getAdminTodayOrders, getTodayMenu, getMenuByDate, getAdminOrderHistory, updateOrderStatus, getDateStr, getBJDateStr, getTodayBJDateStr, deleteOrder } = require('../../utils/db')
 
 Page({
   data: {
@@ -87,13 +87,12 @@ Page({
   },
 
   initDateList() {
-    const today = new Date()
-    const bjTime = new Date(today.getTime() + 8 * 3600 * 1000)
     const list = []
-    const weekdays = ['周日', '周一', '周二', '周 三', '周四', '周五', '周六']
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
     
     for (let i = 0; i < 14; i++) {
-      const d = new Date(bjTime.getTime() + i * 24 * 60 * 60 * 1000)
+      const d = new Date()
+      d.setDate(d.getDate() + i)
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
       list.push({
         date: dateStr,
