@@ -303,12 +303,13 @@ Page({
         .filter(item => item.total > 0)
         .sort((a, b) => b.pending - a.pending)
 
-      // 营收统计
-      let totalRev = 0, actualRev = 0
-      orders.forEach(o => {
-        if (o.status === 'pending') totalRev += o.total_price || 0
-        if (o.status === 'completed') { totalRev += o.total_price || 0; actualRev += o.total_price || 0 }
-      })
+       let totalRev = 0, actualRev = 0
+       let totalOrderCount = 0, completedOrderCount = 0
+       orders.forEach(o => {
+         if (o.status === 'pending') { totalRev += o.total_price || 0; totalOrderCount++ }
+         if (o.status === 'completed') { totalRev += o.total_price || 0; actualRev += o.total_price || 0; totalOrderCount++; completedOrderCount++ }
+         if (o.status === 'cancelled') { totalOrderCount++ }
+       })
 
       // 区域2：客户清单
       const pendingOrders = orders
@@ -318,14 +319,16 @@ Page({
         .filter(o => o.status !== 'pending')
         .sort((a, b) => (b.create_time || 0) - (a.create_time || 0))
 
-      this.setData({
-        menuStats,
-        totalRevenue: totalRev.toFixed(2),
-        actualRevenue: actualRev.toFixed(2),
-        pendingOrders,
-        historyOrders,
-        newOrderFlag: false
-      })
+       this.setData({
+         menuStats,
+         totalRevenue: totalRev.toFixed(2),
+         actualRevenue: actualRev.toFixed(2),
+         totalOrderCount,
+         completedOrderCount,
+         pendingOrders,
+         historyOrders,
+         newOrderFlag: false
+       })
     } catch (err) {
       console.error('加载核销数据失败', err)
     }
