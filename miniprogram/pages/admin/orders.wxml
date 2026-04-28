@@ -6,7 +6,6 @@
       <text class="date-trigger-text">{{currentDateLabel}}</text>
       <text class="date-trigger-icon {{showDatePicker ? 'expanded' : ''}}">›</text>
     </view>
-    <switch class="mode-switch" checked="{{orderMode === 'order'}}" bindchange="toggleOrderMode" />
     <view class="settings-btn" bindtap="showMenu">
       <view class="settings-circle">
         <text class="settings-icon">⚙</text>

@@ -5,6 +5,7 @@ const { getAdminOrderHistory } = require('../../utils/db')
 Page({
   data: {
     loading: true,
+    orderMode: 'order',
     // 视图模式：day=按日, week=按周, month=按月, customer=按用户
     viewMode: 'week',
     // 日期范围
@@ -31,12 +32,35 @@ Page({
 
   onLoad() {
     this.checkLogin()
+    this.loadOrderMode()
   },
 
   onShow() {
     if (app.globalData.adminInfo) {
       this.loadData()
     }
+  },
+
+  loadOrderMode() {
+    wx.cloud.callFunction({
+      name: 'getSystemConfig',
+      data: { key: 'order_mode' }
+    }).then(res => {
+      this.setData({ orderMode: res.result?.value || 'order' })
+    }).catch(() => {
+      this.setData({ orderMode: 'order' })
+    })
+  },
+
+  toggleOrderMode() {
+    const newMode = this.data.orderMode === 'order' ? 'browse' : 'order'
+    this.setData({ orderMode: newMode })
+    wx.cloud.callFunction({
+      name: 'setSystemConfig',
+      data: { key: 'order_mode', value: newMode }
+    }).then(() => {
+      wx.showToast({ title: newMode === 'order' ? '预定模式' : '浏览模式', icon: 'success' })
+    })
   },
 
   checkLogin() {

@@ -3,6 +3,7 @@
   <view class="header">
     <view class="header-back" wx:if="{{showDetail}}" bindtap="backToList">← 返回</view>
     <view class="header-title">{{showDetail ? detailTitle : '历史订单'}}</view>
+    <switch class="mode-switch" wx:if="{{!showDetail}}" checked="{{orderMode === 'order'}}" bindchange="toggleOrderMode" />
   </view>
 
   <view wx:if="{{loading}}" class="empty-tip">加载中...</view>
