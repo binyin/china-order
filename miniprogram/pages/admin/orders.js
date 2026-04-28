@@ -287,10 +287,9 @@ Page({
           }
           statsMap[item.name].total += item.num
           if (o.status === 'pending') statsMap[item.name].pending += item.num
-          // 记录每个预定人
           if (o.status === 'pending') {
             statsMap[item.name].customers.push({
-              name: o.customer_name,
+              name: o.customer_nickname || o.customer_name,
               num: item.num,
               orderId: o._id,
               time: o.create_time_str || ''
