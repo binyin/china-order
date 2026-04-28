@@ -514,19 +514,12 @@ page {
   gap: 8rpx;
 }
 
-.badge-total, .badge-pending {
+.badge-pending {
   font-size: 22rpx;
   padding: 4rpx 12rpx;
   border-radius: 8rpx;
   font-weight: 500;
-}
-
-.badge-total {
-  background: #e5e5ea;
-  color: #6e6e73;
-}
-
-.badge-pending {
+  font-family: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
   background: #FFF3CD;
   color: #B8860B;
 }

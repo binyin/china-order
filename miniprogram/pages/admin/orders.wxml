@@ -47,8 +47,7 @@
       <view class="stat-header">
         <text class="stat-name">{{item.name}}</text>
         <view class="stat-badges">
-          <text class="badge-total">{{item.total}}</text>
-          <text class="badge-pending" wx:if="{{item.pending > 0}}">待{{item.pending}}</text>
+          <text class="badge-pending" wx:if="{{item.pending > 0}}">{{item.pending}} 件待取</text>
         </view>
       </view>
       <view wx:if="{{item.customers.length > 0}}" class="stat-customers">
