@@ -1,9 +1,0 @@
-{
-  "name": "hideOrder",
-  "version": "1.0.0",
-  "description": "Hide order from user view",
-  "main": "index.js",
-  "dependencies": {
-    "wx-server-sdk": "^2.6.3"
-  }
-}

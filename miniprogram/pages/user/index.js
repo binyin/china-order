@@ -1,5 +1,5 @@
 // pages/user/index.js
-const { getMenuByDate, getUserTodayOrder, hideOrder } = require('../../utils/db')
+const { getMenuByDate, getUserTodayOrder, deleteOrder } = require('../../utils/db')
 const logger = require('../../utils/logger')
 
 const TAG = 'user:index'
@@ -427,7 +427,7 @@ this.loadMenu()
     })
   },
 
-  hideOrder(e) {
+  deleteOrder(e) {
     const id = e.currentTarget.dataset.id
     
     wx.showModal({
@@ -438,7 +438,7 @@ this.loadMenu()
         if (res.confirm) {
           wx.showLoading({ title: '处理中', mask: true })
           
-          hideOrder(id).then(() => {
+          deleteOrder(id).then(() => {
             wx.hideLoading()
             wx.showToast({ title: '已删除', icon: 'success' })
             this.loadMyOrders()

@@ -139,10 +139,6 @@ function cancelOrder(id) {
   return db.collection('orders').doc(id).update({ data: { status: 'cancelled' } })
 }
 
-function hideOrder(orderId) {
-  return db.collection('orders').doc(orderId).update({ data: { status: 'hidden' } })
-}
-
 function deleteOrder(orderId) {
   return db.collection('orders').doc(orderId).remove()
 }
@@ -174,7 +170,6 @@ module.exports = {
   getOrdersByDate,
   updateOrderStatus,
   cancelOrder,
-  hideOrder,
   deleteOrder,
   getDateStr,
   getBJDateStr,

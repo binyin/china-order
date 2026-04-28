@@ -1,5 +1,5 @@
 // pages/user/history.js
-const { getUserOrderHistory, hideOrder } = require('../../utils/db')
+const { getUserOrderHistory, deleteOrder } = require('../../utils/db')
 
 Page({
   data: {
@@ -97,7 +97,7 @@ Page({
         if (res.confirm) {
           wx.showLoading({ title: '处理中', mask: true })
           
-          hideOrder(id).then(() => {
+          deleteOrder(id).then(() => {
             wx.hideLoading()
             console.log('[user:history:deleteOrder] success, orderId:', id)
             wx.showToast({ title: '已删除', icon: 'success' })
