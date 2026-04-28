@@ -87,6 +87,7 @@ Page({
 
   deleteOrder(e) {
     const id = e.currentTarget.dataset.id
+    const detailOrders = this.data.detailOrders
     console.log('[user:history:deleteOrder] orderId:', id)
     
     wx.showModal({
@@ -97,6 +98,10 @@ Page({
         if (res.confirm) {
           wx.showLoading({ title: '处理中', mask: true })
           
+          // 先从本地列表移除
+          const newDetailOrders = detailOrders.filter(o => o._id !== id)
+          this.setData({ detailOrders: newDetailOrders })
+          
           deleteOrder(id).then(() => {
             wx.hideLoading()
             console.log('[user:history:deleteOrder] success, orderId:', id)
@@ -106,6 +111,7 @@ Page({
             wx.hideLoading()
             console.log('[user:history:deleteOrder] failed, orderId:', id)
             wx.showToast({ title: '删除失败', icon: 'error' })
+            this.loadOrders()
           })
         }
       }
