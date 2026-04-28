@@ -36,7 +36,7 @@
     </view>
     <view class="revenue-divider"></view>
     <view class="revenue-item">
-      <view class="revenue-num">{{completedOrderCount}}</view>
+      <view class="revenue-num">{{pendingOrderCount}}</view>
       <view class="revenue-label">订单</view>
     </view>
   </view>
