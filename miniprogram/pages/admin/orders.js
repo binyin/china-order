@@ -68,6 +68,7 @@ Page({
 
   onShow() {
     this.checkLogin()
+    console.log('[Admin:Orders] onShow - currentDate:', this.data.currentDate)
     this.loadVerifyData()
     this.startWatch()
   },
@@ -101,6 +102,7 @@ Page({
       })
     }
     
+    console.log('[Admin:Orders] initDateList - list[0].date:', list[0].date)
     this.setData({
       dateList: list,
       currentDate: list[0].date,
@@ -253,6 +255,7 @@ Page({
 
   async loadVerifyData() {
     const targetDate = this.data.currentDate || getBJDateStr()
+    console.log('[Admin:Orders] loadVerifyData - currentDate:', this.data.currentDate, 'targetDate:', targetDate)
     try {
       const [menuRes, orderRes] = await Promise.all([
         getMenuByDate(targetDate),
