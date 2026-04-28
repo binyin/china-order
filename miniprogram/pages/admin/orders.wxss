@@ -215,15 +215,12 @@ page {
 .revenue-divider { width: 2rpx; height: 60rpx; background: #eee; }
 
 /* 品类统计 */
-.stats-list { padding: 0 24rpx; }
-.stat-card { background: #fff; border-radius: 16rpx; padding: 20rpx; margin-bottom: 16rpx; }
-.stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12rpx; }
+.stats-list { padding: 16rpx 24rpx; background: #F2F2F7; border-radius: 20rpx; margin: 0 24rpx; }
+.stat-card { background: #fff; border-radius: 20rpx; padding: 24rpx; margin-bottom: 20rpx; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04); }
+.stat-card:last-child { margin-bottom: 0; }
+.stat-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
 .stat-name { font-size: 32rpx; font-weight: 600; color: #222; }
 .stat-badges { display: flex; gap: 8rpx; }
-.badge-total, .badge-pending { font-size: 22rpx; padding: 4rpx 12rpx; border-radius: 8rpx; }
-.badge-total { background: #f5f5f5; color: #666; }
-.badge-pending { background: #FFF3CD; color: #B8860B; }
-.stat-customers { display: flex; flex-wrap: wrap; align-items: center; line-height: 1.8; margin-top: 8rpx; }
 .customer-item { font-size: 28rpx; color: #333; }
 .at-symbol { color: #007AFF; font-weight: 500; }
 .separator { color: #ccc; margin: 0 2rpx; }
@@ -488,15 +485,7 @@ page {
 }
 .revenue-divider { width: 2rpx; height: 40rpx; background: #e5e5ea; }
 
-/* 品类统计 - 直接显示卡片 */
-.stats-list { margin-top: 8rpx; }
-
-.stat-card {
-  background: #F5F5F7;
-  border-radius: 16rpx;
-  padding: 20rpx;
-  margin-bottom: 12rpx;
-}
+ /* 品类统计 - 直接显示卡片 */
 
 .stat-header {
   display: flex;
@@ -518,27 +507,12 @@ page {
 
 .badge-pending {
   font-size: 22rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 8rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 12rpx;
   font-weight: 500;
   font-family: ui-monospace, "SF Mono", "Menlo", "Consolas", monospace;
-  background: #FFF3CD;
-  color: #B8860B;
-}
-
-.stat-customers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8rpx;
-}
-
-.customer-tag {
-  font-size: 24rpx;
-  color: #555;
-  background: #fff;
-  padding: 6rpx 14rpx;
-  border-radius: 20rpx;
-  border: 1rpx solid #e5e5ea;
+  background: #007AFF;
+  color: #fff;
 }
 
 .stat-empty {
@@ -547,8 +521,6 @@ page {
   text-align: center;
   padding: 8rpx 0;
 }
-
-.stats-empty { text-align: center; color: #bbb; font-size: 28rpx; padding: 24rpx 0; }
 
 /* ==================== 区域2：客户清单 ==================== */
 .customer-section { margin-top: 16rpx; }
