@@ -64,9 +64,14 @@
     <view class="section-title">待处理 <text class="count-badge">{{pendingOrders.length}}</text></view>
     <view class="order-list">
       <view class="order-card" wx:for="{{pendingOrders}}" wx:key="_id">
-        <view class="order-id">#{{item._id}}</view>
         <view class="order-top">
-          <text class="order-name">{{item.customer_nickname || item.customer_name}}</text>
+          <view class="order-user">
+            <image wx:if="{{item.customer_avatar}}" class="order-avatar" src="{{item.customer_avatar}}" mode="aspectFill"></image>
+            <view wx:else class="order-avatar-placeholder">{{item.customer_initial}}</view>
+            <view class="order-user-info">
+              <text class="order-name">{{item.customer_nickname || item.customer_name}}</text>
+            </view>
+          </view>
           <text class="order-time">{{item.create_time_str}}</text>
         </view>
         <view class="order-items">
@@ -88,9 +93,14 @@
     <view class="section-title done">已处理 <text class="count-badge done">{{historyOrders.length}}</text></view>
     <view class="order-list">
       <view class="order-card done" wx:for="{{historyOrders}}" wx:key="_id">
-        <view class="order-id">#{{item._id}}</view>
         <view class="order-top">
-          <text class="order-name dimmed">{{item.customer_name}}</text>
+          <view class="order-user">
+            <image wx:if="{{item.customer_avatar}}" class="order-avatar" src="{{item.customer_avatar}}" mode="aspectFill"></image>
+            <view wx:else class="order-avatar-placeholder">{{item.customer_initial}}</view>
+            <view class="order-user-info">
+              <text class="order-name dimmed">{{item.customer_name}}</text>
+            </view>
+          </view>
           <text class="tag-{{item.status}}">{{statusText[item.status]}}</text>
         </view>
         <view class="order-items dimmed">
