@@ -286,7 +286,6 @@ page {
 .submitted-section {
   padding: 20rpx 30rpx;
 }
-.order-id { font-size: 22rpx; color: #999; font-family: monospace; margin-bottom: 8rpx; }
 
 .section-title {
   font-size: 38rpx;
@@ -308,9 +307,10 @@ page {
   margin-bottom: 20rpx;
 }
 
-.order-user {
-  font-weight: 600;
-  font-size: 30rpx;
+.order-name { 
+  font-size: 32rpx; 
+  font-weight: 600; 
+  color: #222; 
 }
 
 .status-tag {

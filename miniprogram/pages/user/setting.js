@@ -40,9 +40,40 @@ Page({
   onChooseAvatar(e) {
     const { avatarUrl } = e.detail
     console.log('[setting] onChooseAvatar:', { avatarUrl: avatarUrl ? 'has_value' : 'empty' })
-    this.setData({ 
-      'userProfile.avatarUrl': avatarUrl 
-    })
+    
+    const isTemp = avatarUrl && (avatarUrl.indexOf('127.0.0.1') > -1 || avatarUrl.indexOf('wxfile://tmp_') > -1)
+    
+    if (isTemp) {
+      wx.showLoading({ title: '上传头像...', mask: true })
+      const timestamp = Date.now()
+      const ext = avatarUrl.split('.').pop().split('?')[0] || 'jpg'
+      const cloudPath = `avatars/${timestamp}.${ext}`
+      
+      wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: avatarUrl
+      }).then(res => {
+        wx.hideLoading()
+        if (res.fileID) {
+          console.log('[setting] avatar uploaded to cloud:', res.fileID)
+          this.setData({ 
+            'userProfile.avatarUrl': res.fileID 
+          })
+        } else {
+          console.error('[setting] upload failed, keep temp path')
+        }
+      }).catch(err => {
+        wx.hideLoading()
+        console.error('[setting] upload avatar error:', err)
+        this.setData({ 
+          'userProfile.avatarUrl': avatarUrl 
+        })
+      })
+    } else {
+      this.setData({ 
+        'userProfile.avatarUrl': avatarUrl 
+      })
+    }
   },
 
   onNicknameInput(e) {
@@ -68,19 +99,51 @@ Page({
       return
     }
 
+    const isTempPath = avatarUrl && (avatarUrl.indexOf('127.0.0.1') > -1 || avatarUrl.indexOf('wxfile://tmp_') > -1)
+    
+    if (isTempPath) {
+      wx.showLoading({ title: '上传头像...', mask: true })
+      const timestamp = Date.now()
+      const ext = avatarUrl.split('.').pop().split('?')[0] || 'jpg'
+      const cloudPath = `avatars/${timestamp}.${ext}`
+      
+      wx.cloud.uploadFile({
+        cloudPath: cloudPath,
+        filePath: avatarUrl
+      }).then(res => {
+        wx.hideLoading()
+        if (res.fileID) {
+          console.log('[setting] avatar uploaded in saveProfile:', res.fileID)
+          this.setData({ 'userProfile.avatarUrl': res.fileID })
+          this.doSaveUser(nickname.trim(), res.fileID, phone)
+        } else {
+          wx.hideLoading()
+          wx.showToast({ title: '头像上传失败', icon: 'none' })
+        }
+      }).catch(err => {
+        wx.hideLoading()
+        console.error('[setting] upload avatar error in saveProfile:', err)
+        wx.showToast({ title: '头像上传失败', icon: 'none' })
+      })
+    } else {
+      this.doSaveUser(nickname.trim(), avatarUrl, phone)
+    }
+  },
+
+  doSaveUser(nickname, avatarUrl, phone) {
     wx.setStorageSync('userProfile', { 
-      nickname: nickname.trim(),
+      nickname: nickname,
       avatarUrl: avatarUrl,
       phone: phone
     })
     
-    console.log('[setting] calling saveUser cloud function:', { nickname: nickname.trim(), avatarUrl: avatarUrl ? 'has_value' : 'empty' })
+    console.log('[setting] calling saveUser cloud function:', { nickname, avatarUrl: avatarUrl ? 'has_value' : 'empty' })
 
     wx.showLoading({ title: '保存中...', mask: true })
     
     wx.cloud.callFunction({
       name: 'saveUser',
-      data: { nickname: nickname.trim(), avatarUrl, phone: phone || null }
+      data: { nickname: nickname, avatarUrl, phone: phone || null }
     }).then(r => {
       wx.hideLoading()
       console.log('[setting] saveUser result:', JSON.stringify(r))

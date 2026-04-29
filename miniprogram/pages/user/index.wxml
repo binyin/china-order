@@ -47,7 +47,7 @@
         <view class="item-left">
           <text class="item-name">{{item.name}}</text>
           <view class="item-tags" wx:if="{{item.tags && item.tags.length > 0}}">
-            <text class="tag-pill" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="{{tag}}">{{tag}}</text>
+            <text class="tag-pill" wx:for="{{item.tags}}" wx:for-item="tag" wx:key="*this">{{tag}}</text>
           </view>
           <text class="item-price" wx:if="{{orderMode === 'order'}}">¥{{item.price}}</text>
         </view>
@@ -65,9 +65,8 @@
     <view wx:if="{{submittedOrders.length > 0 && orderMode === 'order'}}" class="submitted-section">
       <view class="section-title">我的预定</view>
       <view class="order-card {{item.status === 'cancelled' ? 'cancelled' : ''}}" wx:for="{{submittedOrders}}" wx:key="_id">
-        <view class="order-id">#{{item._id}}</view>
         <view class="order-header">
-          <text class="order-user">{{item.customer_name}}</text>
+          <text class="order-name">{{item.customer_nickname || item.customer_name}}</text>
           <text class="status-tag tag-{{item.status}}">{{statusText[item.status]}}</text>
         </view>
         <view class="order-content">
