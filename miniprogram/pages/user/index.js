@@ -281,10 +281,21 @@ this.loadMenu()
       const orderCount = orders.length
       this.setData({ submittedOrders: orders })
       this.loadingOrders = false
-      console.log('[user:index:loadMyOrders] success, count:', orderCount, 'date:', selectedDate, 'orders:', orders.length > 0 ? orders.map(o => ({id: o._id, status: o.status, items: o.items?.length})) : 'empty')
+      logger.info(TAG + ':loadMyOrders] success', {
+        count: orderCount,
+        date: selectedDate,
+        orders: orders.length > 0 ? orders.map(o => ({
+          id: o._id,
+          status: o.status,
+          customer_nickname: o.customer_nickname || '(empty)',
+          customer_name: o.customer_name || '(empty)',
+          customer_id: o.customer_id ? o.customer_id.slice(-8) + '...' : '(empty)',
+          items: o.items?.length
+        })) : 'empty'
+      })
     }).catch((err) => {
       this.loadingOrders = false
-      console.log('[user:index:loadMyOrders] error:', err.message || String(err))
+      logger.error(TAG + ':loadMyOrders] error', { message: err.message || String(err) })
     })
   },
 

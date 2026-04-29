@@ -25,13 +25,18 @@ exports.main = async (event, context) => {
     
     let orders = (orderRes.data || []).filter(o => o.status !== 'hidden')
     
+    console.log('[getUserTodayOrder] 原始订单数:', orders.length, 'OPENID:', OPENID)
+    
     if (orders.length > 0) {
       const openids = [...new Set(orders.map(o => o.customer_id).filter(Boolean))]
+      console.log('[getUserTodayOrder] 需要查询的用户ID:', openids.length)
       
       if (openids.length > 0) {
         const userRes = await db.collection('users')
           .where({ _id: _.in(openids) })
           .get()
+        
+        console.log('[getUserTodayOrder] 找到用户记录:', userRes.data.length)
         
         const userMap = {}
         userRes.data.forEach(u => {
@@ -42,6 +47,7 @@ exports.main = async (event, context) => {
           if (userMap[o.customer_id]) {
             if (!o.customer_nickname) {
               o.customer_nickname = userMap[o.customer_id].nickname || ''
+              console.log('[getUserTodayOrder] 补全昵称:', o._id, o.customer_nickname)
             }
             if (!o.customer_avatar) {
               o.customer_avatar = userMap[o.customer_id].avatarUrl || ''
@@ -52,7 +58,11 @@ exports.main = async (event, context) => {
       }
     }
     
-    console.log('[getUserTodayOrder] 找到订单:', orders.length)
+    console.log('[getUserTodayOrder] 最终订单数:', orders.length, '示例订单:', orders.length > 0 ? {
+      id: orders[0]._id,
+      customer_nickname: orders[0].customer_nickname || '(空)',
+      customer_name: orders[0].customer_name || '(空)'
+    } : '无')
     return { success: true, data: orders }
   } catch (err) {
     console.error('[getUserTodayOrder] error:', err)
