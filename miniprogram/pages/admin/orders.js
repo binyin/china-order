@@ -308,6 +308,11 @@ Page({
         })
       })
 
+      orders.forEach(o => {
+        const name = o.customer_nickname || o.customer_name || ''
+        o.customer_initial = name.charAt(0) || '?'
+      })
+
       // 按待取数量降序排列，过滤掉总订量为0的品类
       const menuStats = Object.values(statsMap)
         .filter(item => item.total > 0)
@@ -338,16 +343,17 @@ Page({
         pendingList: pendingOrders.map(o => ({id: o._id, status: o.status, nickname: o.customer_nickname || '(empty)'}))
       })
 
-      this.setData({
-         menuStats,
-         totalRevenue: totalRev.toFixed(2),
-         actualRevenue: actualRev.toFixed(2),
-         totalOrderCount,
-         completedOrderCount,
-         pendingOrders,
-         historyOrders,
-         newOrderFlag: false
-       })
+this.setData({
+          pendingOrderCount: pendingOrders.length,
+          menuStats,
+          totalRevenue: totalRev.toFixed(2),
+          actualRevenue: actualRev.toFixed(2),
+          totalOrderCount,
+          completedOrderCount,
+          pendingOrders,
+          historyOrders,
+          newOrderFlag: false
+        })
     } catch (err) {
       console.error('加载核销数据失败', err)
     }
