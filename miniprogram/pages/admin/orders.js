@@ -264,6 +264,16 @@ Page({
 
       const menuItems = menuRes.data || []
       const orders = orderRes.data || []
+      
+      console.log('[Admin:Orders] loadVerifyData - menuItems:', menuItems.length, 'orders:', orders.length)
+      if (orders.length > 0) {
+        console.log('[Admin:Orders] 示例订单:', {
+          id: orders[0]._id,
+          status: orders[0].status,
+          customer_nickname: orders[0].customer_nickname || '(empty)',
+          customer_name: orders[0].customer_name || '(empty)'
+        })
+      }
 
       // 区域1：按品类统计 + 预定人明细
       const statsMap = {}
