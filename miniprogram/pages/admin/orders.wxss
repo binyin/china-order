@@ -394,27 +394,14 @@ page {
 }
 
 .btn-take { 
-  flex: 2;
   background: #007AFF; 
   color: #fff; 
   border: none; 
   border-radius: 16rpx; 
-  font-size: 30rpx; 
-  padding: 20rpx 32rpx; 
-  font-weight: 600; 
-  min-height: 60rpx;
-  line-height: 1.4;
-}
-
-.btn-cancel { 
-  flex: 1;
-  background: #fff; 
-  color: #FF3B30; 
-  border: 2rpx solid #FF3B30; 
-  border-radius: 16rpx; 
   font-size: 28rpx; 
-  padding: 20rpx 32rpx; 
-  min-height: 60rpx;
+  padding: 16rpx 32rpx; 
+  font-weight: 600; 
+  min-height: 56rpx;
   line-height: 1.4;
 }
 
