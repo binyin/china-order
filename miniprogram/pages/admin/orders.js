@@ -321,7 +321,7 @@ Page({
          if (o.status === 'cancelled') { totalOrderCount++ }
        })
 
-      // 区域2：客户清单
+// 区域2：客户清单
       const pendingOrders = orders
         .filter(o => o.status === 'pending')
         .sort((a, b) => (b.create_time || 0) - (a.create_time || 0))
@@ -329,7 +329,16 @@ Page({
         .filter(o => o.status !== 'pending')
         .sort((a, b) => (b.create_time || 0) - (a.create_time || 0))
 
-       this.setData({
+      console.log('[Admin:Orders] 订单统计:', {
+        totalOrders: orders.length,
+        pendingOrders: pendingOrders.length,
+        historyOrders: historyOrders.length,
+        totalOrderCount,
+        totalRev,
+        pendingList: pendingOrders.map(o => ({id: o._id, status: o.status, nickname: o.customer_nickname || '(empty)'}))
+      })
+
+      this.setData({
          menuStats,
          totalRevenue: totalRev.toFixed(2),
          actualRevenue: actualRev.toFixed(2),
