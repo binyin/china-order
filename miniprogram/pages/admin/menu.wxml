@@ -67,7 +67,7 @@
           <text class="empty-text">所有产品已上架</text>
         </view>
         <view class="item-list">
-          <view class="item-card pool" wx:for="{{unlistedProducts}}" wx:key="_id" bindtap="addToMenu" data-index="{{index}}">
+          <view class="item-card pool {{item.isSelected ? 'selected' : ''}}" wx:for="{{unlistedProducts}}" wx:key="_id" bindtap="addToMenu" data-index="{{index}}">
             <view class="item-main">
               <text class="item-name">{{item.name}}</text>
               <text class="item-price">¥{{item.price}}</text>
@@ -80,7 +80,7 @@
                        catchtap placeholder="50" />
               </view>
               <view class="btn-add">
-                <text class="btn-icon">+</text>
+                <text class="btn-icon">{{item.isSelected ? '✓' : '+'}}</text>
               </view>
             </view>
           </view>

@@ -94,19 +94,39 @@ Page({
         getAllProducts()
       ])
       
-      const todayMenu = menuRes.data || []
+      const dbMenu = menuRes.data || []
       const allProducts = prodRes.data || []
 
-      console.group('[Admin:Menu] 数据刷新')
-      console.log('日期:', this.data.selectedDate)
-      console.log('已发布数量:', todayMenu.length)
-      console.log('产品池总数:', allProducts.length)
-      console.groupEnd()
+      const localSelectedIds = new Set(
+        this.data.todayMenu
+          .filter(m => !m._id || !dbMenu.find(d => d._id === m._id))
+          .map(m => m.product_id || m._id)
+      )
 
-      const todayIds = new Set(todayMenu.map(m => m.product_id))
+      const dbMenuIds = new Set(dbMenu.map(m => m.product_id || m._id))
+      const todayMenu = [
+        ...dbMenu,
+        ...this.data.todayMenu.filter(m => {
+          const id = m.product_id || m._id
+          return localSelectedIds.has(id) && !dbMenuIds.has(id)
+        })
+      ]
+
+      const todayIds = new Set(todayMenu.map(m => m.product_id || m._id))
       const unlistedProducts = allProducts
         .filter(p => !todayIds.has(p._id))
-        .map(p => ({ ...p, product_id: p._id }))
+        .map(p => {
+          const localId = p._id
+          const isSelected = localSelectedIds.has(localId)
+          return { ...p, product_id: p._id, isSelected }
+        })
+
+      console.log('[Admin:Menu] 数据刷新', {
+        date: this.data.selectedDate,
+        db发布: dbMenu.length,
+        本地选择: localSelectedIds.size,
+        合并后: todayMenu.length
+      })
 
       this.setData({ todayMenu, unlistedProducts, loading: false })
     } catch (err) {
@@ -120,20 +140,29 @@ Page({
     const index = e.currentTarget.dataset.index
     const product = this.data.unlistedProducts[index]
     
-    this.setData({
-      todayMenu: [...this.data.todayMenu, { ...product, qty: 0 }],
-      unlistedProducts: this.data.unlistedProducts.filter((_, i) => i !== index)
-    })
+    if (product.isSelected) {
+      const targetId = product.product_id || product._id
+      this.setData({
+        todayMenu: this.data.todayMenu.filter(m => (m.product_id || m._id) !== targetId),
+        unlistedProducts: this.data.unlistedProducts.filter((_, i) => i !== index)
+      })
+    } else {
+      this.setData({
+        todayMenu: [...this.data.todayMenu, { ...product, qty: 0 }],
+        unlistedProducts: this.data.unlistedProducts.filter((_, i) => i !== index)
+      })
+    }
   },
 
   removeFromMenu(e) {
     const index = e.currentTarget.dataset.index
     if (index === undefined) return
     const product = this.data.todayMenu[index]
+    const productToAdd = { ...product, isSelected: false }
     
     this.setData({
       todayMenu: this.data.todayMenu.filter((_, i) => i !== index),
-      unlistedProducts: [...this.data.unlistedProducts, product]
+      unlistedProducts: [...this.data.unlistedProducts, productToAdd].sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans'))
     })
   },
 
