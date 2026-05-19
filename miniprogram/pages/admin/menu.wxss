@@ -412,6 +412,22 @@
   margin-bottom: 16rpx;
 }
 
+.history-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.expand-icon {
+  font-size: 24rpx;
+  color: #aeaeb2;
+  transition: transform 0.2s;
+}
+
+.expand-icon.expanded {
+  transform: rotate(180deg);
+}
+
 .history-info {
   display: flex;
   align-items: center;

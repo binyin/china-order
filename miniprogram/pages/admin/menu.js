@@ -234,11 +234,29 @@ Page({
   },
 
   loadHistory() {
+    this.setData({ loading: true })
     getRecentMenuDates().then(res => {
-      this.setData({ historyDates: res.data || [] })
+      const dateList = res.data || []
+      const historyPromises = dateList.map(date => getMenuByDate(date))
+      return Promise.all(historyPromises)
+    }).then(menuResults => {
+      const historyDates = (dateList || []).map((date, i) => ({
+        date,
+        items: (menuResults[i]?.data || []).map(m => ({ name: m.name, price: m.price })),
+        expanded: false
+      }))
+      this.setData({ historyDates, loading: false })
     }).catch(err => {
       console.error('[Admin:Menu] 历史加载失败:', err)
+      this.setData({ loading: false })
     })
+  },
+
+  toggleExpand(e) {
+    const index = e.currentTarget.dataset.index
+    const historyDates = [...this.data.historyDates]
+    historyDates[index].expanded = !historyDates[index].expanded
+    this.setData({ historyDates })
   },
 
   reuseMenu(e) {

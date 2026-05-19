@@ -104,18 +104,21 @@
         </view>
         <view class="history-list" wx:else>
           <view class="history-card" wx:for="{{historyDates}}" wx:key="date">
-            <view class="history-header">
+            <view class="history-header" bindtap="toggleExpand" data-index="{{index}}">
               <view class="history-info">
                 <text class="history-date">{{item.date}}</text>
                 <text class="history-count">{{item.items.length}}种</text>
               </view>
-              <view class="btn-reuse" bindtap="reuseMenu" data-date="{{item.date}}">
-                <text>复用</text>
+              <view class="history-actions">
+                <text class="expand-icon {{item.expanded ? 'expanded' : ''}}">▼</text>
+                <view class="btn-reuse" catchtap="reuseMenu" data-date="{{item.date}}">
+                  <text>复用</text>
+                </view>
               </view>
             </view>
-            <view class="history-tags">
+            <view class="history-tags" wx:if="{{item.expanded}}">
               <text class="history-tag" wx:for="{{item.items}}" wx:for-item="prod" wx:key="name">
-                {{prod.name}}
+                {{prod.name}} ¥{{prod.price}}
               </text>
             </view>
           </view>
