@@ -23,8 +23,8 @@ Page({
     contactPhone: '13126984550',
     dateList: [],
     selectedDate: '',
-    dateIndex: 3,
-    swiperCurrent: 3,
+    dateIndex: 7,
+    swiperCurrent: 7,
     showMorePopup: false,
     showDatePicker: false,
     formatDate: '',
@@ -74,7 +74,7 @@ Page({
     const dates = []
     const today = new Date()
     const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
-    for (let i = -3; i <= 3; i++) {
+    for (let i = -7; i <= 7; i++) {
       const d = new Date(today.getTime() + i * 24 * 3600 * 1000)
       const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
       const weekday = weekDays[d.getDay()]
@@ -92,9 +92,10 @@ Page({
       } else {
         label = weekday
       }
-      dates.push({ date: dateStr, label, day: d.getDate(), weekday, className })
+      const isPast = i < 0
+      dates.push({ date: dateStr, label, day: d.getDate(), weekday, className, isPast })
     }
-    const centerIndex = 3
+    const centerIndex = 7
     this.setData({
       dateList: dates,
       selectedDate: dates[centerIndex].date,
@@ -117,27 +118,18 @@ this.loadMenu()
     const targetDate = this.data.selectedDate || todayStr
     return getMenuByDate(targetDate).then(res => {
       const defaultTags = ['手工', '现蒸', '招牌', '推荐']
+      const isPast = targetDate < todayStr
       const list = (res.data || []).map((item, index) => ({ 
         ...item, 
         qty: 0,
-        disabled: false,
+        disabled: isPast,
         tags: item.tags && item.tags.length > 0 
           ? item.tags 
           : [defaultTags[index % defaultTags.length]]
       }))
-      logger.info(TAG + ':loadMenu', { count: list.length, date: res.menuInfo?.date, selected: targetDate })
-      
-      if (list.length > 0) {
-        const isExpired = targetDate < todayStr
-        const processedList = list.map(item => ({
-          ...item,
-          disabled: isExpired
-        }))
-        this.setData({ menuList: processedList })
-        this.calcTotal()
-      } else {
-        this.setData({ menuList: [] })
-      }
+      logger.info(TAG + ':loadMenu', { count: list.length, date: res.menuInfo?.date, selected: targetDate, isPast })
+      this.setData({ menuList: list })
+      this.calcTotal()
     }).catch((err) => {
       this.setData({ menuList: [] })
       logger.error(TAG + ':loadMenu', { error: err.message || String(err) })
