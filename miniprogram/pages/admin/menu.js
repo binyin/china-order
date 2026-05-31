@@ -238,8 +238,8 @@ Page({
     getRecentMenuDates().then(res => {
       const dateList = res.data || []
       const historyPromises = dateList.map(date => getMenuByDate(date))
-      return Promise.all(historyPromises)
-    }).then(menuResults => {
+      return Promise.all(historyPromises).then(menuResults => ({ dateList, menuResults }))
+    }).then(({ dateList, menuResults }) => {
       const historyDates = (dateList || []).map((date, i) => ({
         date,
         items: (menuResults[i]?.data || []).map(m => ({ name: m.name, price: m.price })),
